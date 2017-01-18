@@ -3,8 +3,8 @@ local multiliner = request('if_block.multiline')
 
 local variants =
   {
-    {handle = multiliner, is_multiline = true},
-    {handle = oneliner},
+    {multiliner, is_multiline = true},
+    oneliner,
   }
 
 return

@@ -1,3 +1,10 @@
+--[[
+  Splits a string of N lines to string with (N - 1) lines and
+  string with N'th line.
+
+  Naive implementation via regexps was about 8 times slower.
+]]
+
 return
   function(s)
     local base, last_line

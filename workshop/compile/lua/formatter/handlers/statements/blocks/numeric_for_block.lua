@@ -16,7 +16,7 @@ local multiliner =
 
 local variants =
   {
-    {handle = multiliner, is_multiline = true},
+    {multiliner, is_multiline = true},
   }
 
 return

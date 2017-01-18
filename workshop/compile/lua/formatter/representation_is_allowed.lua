@@ -5,7 +5,7 @@ local max_right_margin = 100
 -- local max_text_width = 70
 
 return
-  function(self, text)
+  function(text)
     local metrics = get_metrics(text)
 
     local result

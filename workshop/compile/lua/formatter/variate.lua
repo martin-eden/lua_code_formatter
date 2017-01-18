@@ -9,6 +9,27 @@
   Another problem is that we should return result even it is not
   valid in terms of <multiline_allowed> and representation_is_allowed().
   This is for case when we have no other choice.
+  --
+  Current architecture easily becomes a performance black hole.
+  Consider we are formatting a statement "a = {z = {}}". It parsed
+  to something like
+
+    <assignment>("a", <table>( ("z", <table>() ) ) )
+
+  Both <assignment> and <table> have one-line and multiline versions.
+  So we iterate from multiline to oneline as
+
+    <assignment-m> <table-m> <table-m>
+                             <table-1>
+                   <table-1> <table-1>
+    <assignment-1> <table-1> <table-1>
+
+  The problem is that internal nodes called many times for same
+  values, differed only by parent function who called it and usually
+  by indentation in "printer" device abstraction.
+
+  Also for a table with many values we anyway call one-line version
+  which will fail in representation_is_allowed() function.
 ]]
 
 local states = {}
@@ -107,20 +128,20 @@ local get_most_suitable_handler =
   end
 
 return
-  function(self, representers, ...)
+  function(self, representers, node)
     local init_state = self.printer:get_state()
     local init_text = self.printer:get_text()
     local init_text_base, init_last_line = split_last_line(init_text)
 
     local represent =
-      function(self, handler, handler_is_multiline, ...)
+      function(self, handler, handler_is_multiline, node)
         self.printer:set_state(init_state)
         self.printer.text:init()
         self.printer.text:add(init_last_line)
-        add(handler_is_multiline)
 
+        add(handler_is_multiline)
         self.printer.has_failed_to_represent = nil
-        handler(self, ...)
+        handler(self, node)
         local has_failed
         if is_nil(self.printer.has_failed_to_represent) then
           has_failed = false
@@ -128,32 +149,45 @@ return
           has_failed = self.printer.has_failed_to_represent
         end
         self.printer.has_failed_to_represent = nil
-
         remove()
+
         local state = self.printer:get_state()
         local text = self.printer:get_text()
 
+        -- print(('[%s]'):format(text))
         return state, text, has_failed
       end
 
     local good_state, good_text
     local failsafe_state, failsafe_text
-    -- [[
-    for i = 1, #representers do
-      local handler, handler_is_multiline = get_handler(representers[i])
-      if
-        is_multiline_allowed() or
-        (not is_multiline_allowed() and not handler_is_multiline)
-      then
-        local state, text, has_failed = represent(self, handler, handler_is_multiline, ...)
-        if not has_failed and self:representation_is_allowed(text) then
-          good_state, good_text = state, text
-        elseif not failsafe_state then
-          failsafe_state, failsafe_text = state, text
+    --[[
+    if self.representation_is_allowed(init_last_line) then
+      for i = 1, #representers do
+        local handler, handler_is_multiline = get_handler(representers[i])
+        if
+          is_multiline_allowed() or
+          (not is_multiline_allowed() and not handler_is_multiline)
+        then
+          -- print('optimal_search')
+          local state, text, has_failed = represent(self, handler, handler_is_multiline, node)
+          if not has_failed and self.representation_is_allowed(text) then
+            good_state, good_text = state, text
+            -- print(('good_text: [%s]'):format(text))
+          elseif not failsafe_state then
+            failsafe_state, failsafe_text = state, text
+          end
         end
       end
     end
     --]]
+
+    if not good_state and not failsafe_state then
+      local handler, handler_is_multiline =
+        get_most_suitable_handler(representers, is_multiline_allowed())
+      -- print('failsafe')
+      failsafe_state, failsafe_text =
+        represent(self, handler, handler_is_multiline, node)
+    end
 
     self.printer.text:init()
     self.printer.text:add(init_text_base)
@@ -162,12 +196,6 @@ return
       self.printer.text:add(good_text)
       self.printer.has_failed_to_represent = false
     else
-      if not failsafe_state then
-        local handler, handler_is_multiline =
-          get_most_suitable_handler(representers, is_multiline_allowed())
-        failsafe_state, failsafe_text =
-          represent(self, handler, handler_is_multiline, ...)
-      end
       self.printer:set_state(failsafe_state)
       self.printer.text:add(failsafe_text)
       self.printer.has_failed_to_represent = true

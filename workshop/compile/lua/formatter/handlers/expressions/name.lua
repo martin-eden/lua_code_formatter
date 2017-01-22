@@ -1,4 +1,4 @@
 return
   function(self, node)
-    self.printer:emit(node.value)
+    self.printer:add_text(node.value)
   end

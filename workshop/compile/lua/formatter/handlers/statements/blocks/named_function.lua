@@ -1,22 +1,12 @@
-local multiliner =
+return
   function(self, node)
-    self.printer:request_clean_line()
-    self.printer:emit_nl()
-    self.printer:emit('function ')
+    self.printer:request_empty_line()
+    self.printer:add_text('function ')
     self:process_node(node.dotted_name)
     if node.colon_name then
       self:process_node(node.colon_name)
     end
     self:process_node(node.params)
-    self:process_block_multiline(nil, 'end', node.body)
-  end
-
-local variants =
-  {
-    {multiliner, is_multiline = true},
-  }
-
-return
-  function(self, node)
-    self:variate(variants, node)
+    self:process_block_multiline(nil, node.body, 'end')
+    self.printer:request_empty_line()
   end

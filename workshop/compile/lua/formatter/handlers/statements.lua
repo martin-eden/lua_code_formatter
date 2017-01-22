@@ -1,14 +1,10 @@
-local multiliner =
-  function(self, node)
-    self:process_list(node, self.printer.emit_nl)
+local place_delimiter =
+  function(self)
+    self.printer:add_to_prev_text(';')
+    self.printer:request_clean_line()
   end
-
-local variants =
-  {
-    {multiliner, is_multiline = true},
-  }
 
 return
   function(self, node)
-    self:variate(variants, node)
+    self:process_list(node, place_delimiter, true)
   end

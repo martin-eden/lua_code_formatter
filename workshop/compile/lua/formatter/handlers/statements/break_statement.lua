@@ -1,4 +1,4 @@
 return
   function(self, node)
-    self.printer:emit('break')
+    self.printer:add_text('break')
   end

@@ -11,25 +11,16 @@
 ]]
 
 return
-  function(self, prefix, postfix, node)
+  function(self, prefix, node, postfix)
     local printer = self.printer
 
-    prefix = prefix or ''
-    local prefix_need_space = not prefix:match('[%p]$')
-    postfix = postfix or ''
-    local postfix_need_space = not postfix:match('^[%p]')
-
-    printer:emit(prefix)
-
-    if prefix_need_space then
-      printer:emit(' ')
+    if prefix then
+      printer:add_text(prefix)
     end
-    printer:inc_indent()
+
     self:process_node(node)
-    printer:dec_indent()
-    if postfix_need_space then
-      printer:emit(' ')
-    end
 
-    printer:emit(postfix)
+    if postfix then
+      printer:add_text(postfix)
+    end
   end

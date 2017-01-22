@@ -1,16 +1,15 @@
-local bs = [[\]]
 local one_char_seq_subst =
   {
-    [bs .. 'a'] = '\007',
-    [bs .. 'b'] = '\008',
-    [bs .. 'f'] = '\x0c',
-    [bs .. 'n'] = '\x0a',
-    [bs .. 'r'] = '\x0d',
-    [bs .. 't'] = '\x09',
-    [bs .. 'v'] = '\x0b',
-    [bs .. '"'] = '"',
-    [bs .. "'"] = "'",
-    [bs .. '\n'] = '\n',
+    [ [[\a]] ] = '\007',
+    [ [[\b]] ] = '\008',
+    [ [[\f]] ] = '\x0c',
+    [ [[\n]] ] = '\x0a',
+    [ [[\r]] ] = '\x0d',
+    [ [[\t]] ] = '\x09',
+    [ [[\v]] ] = '\x0b',
+    [ [[\"]] ] = '"',
+    [ [[\']] ] = "'",
+    [ [[\]] .. '\n'] = '\n',
   }
 
 local space_char = '[\x00-\x20]'
@@ -57,16 +56,28 @@ local decode_utf_code =
     return result
   end
 
-return
+local split = request('^.^.^.string.split')
+
+local unescape =
   function(s)
-    s = s:gsub(bs .. '.', one_char_seq_subst)
-
+    s = s:gsub([[\.]], one_char_seq_subst)
     s = s:gsub(space_chars_seq, '')
-
     s = s:gsub(dec_code_seq, decode_dec_code)
     s = s:gsub(hex_code_seq, decode_hex_code)
     s = s:gsub(utf_code_seq, decode_utf_code)
+    return s
+  end
 
-    s = s:gsub([[\\]], bs)
+return
+  function(s)
+    if s:find([[\\]]) then
+      local parts = split(s, [[\\]])
+      for i = 1, #parts do
+        parts[i] = unescape(parts[i])
+      end
+      s = table.concat(parts, [[\]])
+    else
+      s = unescape(s)
+    end
     return s
   end

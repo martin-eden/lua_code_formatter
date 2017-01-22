@@ -1,6 +1,6 @@
 return
   function(self, node)
-    self.printer:emit('::')
+    self.printer:add_text('::')
     self:process_node(node.label)
-    self.printer:emit('::')
+    self.printer:add_text('::')
   end

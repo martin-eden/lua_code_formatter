@@ -2,5 +2,5 @@ local quote = request('^.^.^.^.quote_string')
 
 return
   function(self, node)
-    self.printer:emit(quote(node.value))
+    self.printer:add_text(quote(node.value))
   end

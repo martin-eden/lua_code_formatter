@@ -2,9 +2,9 @@ local apply_delimiter =
   function(self, delimiter)
     if delimiter then
       if is_function(delimiter) then
-        delimiter(self.printer)
+        delimiter(self)
       else
-        self.printer:emit(delimiter)
+        self.printer:add_text(delimiter)
       end
     end
   end

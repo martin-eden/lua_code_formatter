@@ -1,7 +1,7 @@
 return
   {
     handlers = request('handlers.interface'),
-    printer = request('printer.interface'),
+    printer = new(request('^.^.^.string.text_block.interface')),
 
     init = request('init'),
     process_list = request('process_list'),
@@ -10,7 +10,9 @@ return
     process_block_multiline = request('process_block_multiline'),
 
     variate = request('variate'),
-    process_block_someline = request('process_block_someline'),
 
+    right_margin = 0,
+    inc_right_margin = request('inc_right_margin'),
+    dec_right_margin = request('dec_right_margin'),
     representation_is_allowed = request('representation_is_allowed'),
   }

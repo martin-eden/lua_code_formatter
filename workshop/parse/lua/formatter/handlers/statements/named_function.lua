@@ -13,7 +13,7 @@ return
       idx_params = 2
     end
 
-    local params = self:process_node(node[idx_params])
+    local params = self:process_list(node[idx_params])
 
     result.dotted_name = self:process_list(dotted_list)
     if colon_name then

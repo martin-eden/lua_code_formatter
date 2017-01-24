@@ -1,65 +1,40 @@
-local file_exists = request('^.file.exists')
-
-local get_module_names =
-  function()
-    local result = {}
-    for k in pairs(package.loaded) do
-      result[#result + 1] = k
-    end
-    return result
+local get_cmd_copy =
+  function(src_name, dest_name)
+    return ('cp %s %s'):format(src_name, dest_name)
   end
 
-local paths_pattern = '(.-)%;'
-local get_paths =
-  function()
-    local result = {}
-    for path in (package.path .. ';'):gmatch(paths_pattern) do
-      result[#result + 1] = path
-    end
-    return result
-  end
+local directories_created
 
-local get_deploy_list =
-  function()
-    local result = {}
-    local paths = get_paths()
-    local modules = get_module_names()
-    for i = 1, #modules do
-      local aligned_module_name = modules[i]:gsub('%.', '/')
-      for j = 1, #paths do
-        local possible_script_name = paths[j]:gsub('%?', aligned_module_name)
-        if file_exists(possible_script_name) then
-          result[#result + 1] = possible_script_name
-        end
+local get_cmd_mkdir =
+  function(dir_name)
+    if not directories_created[dir_name] then
+      local parent_path = ''
+      for parent_dir in dir_name:gmatch('(.-)/') do
+        parent_path = parent_path .. parent_dir
+        directories_created[parent_path] = true
+        parent_path = parent_path .. '/'
       end
+      directories_created[dir_name] = true
+      return ('mkdir -p %s'):format(dir_name)
     end
-    return result
   end
 
-local get_directory_part =
-  function(script_name)
-    return script_name:match('(.+)/')
-  end
+local get_loaded_module_files = request('^.handy_mechs.get_loaded_module_files')
 
-local macro_pattern = '(<.->)'
 local get_deploy_script =
-  function(dest_dir)
-    dest_dir = (dest_dir or 'deploy') .. '/'
+  function(deploy_dir)
+    deploy_dir = (deploy_dir or 'deploy/')
+
+    directories_created = {}
     local result = {}
-    local files = get_deploy_list()
-    local meta_command = 'mkdir -p <directory>; cp <source> <dest>'
+    local files = get_loaded_module_files()
+    table.sort(files)
     for i = 1, #files do
       local source = files[i]
-      local dest = dest_dir .. files[i]:gsub('%.%./', '')
-      local directory = get_directory_part(dest)
-      local t =
-        {
-          ['<source>'] = source,
-          ['<dest>'] = dest,
-          ['<directory>'] = directory,
-        }
-      local command = meta_command:gsub(macro_pattern, t)
-      result[#result + 1] = command
+      local dest = deploy_dir .. files[i]:gsub('%.%./', '')
+      local directory = dest:match('(.+)/')
+      result[#result + 1] = get_cmd_mkdir(directory)
+      result[#result + 1] = get_cmd_copy(source, dest)
     end
     result[#result + 1] = ''
     result = table.concat(result, '\n')
@@ -67,14 +42,14 @@ local get_deploy_script =
   end
 
 local save_deploy_script =
-  function(script_name, dest_dir)
+  function(script_name, deploy_dir)
     script_name = script_name or 'deploy.sh'
     local f, err_msg = io.open(script_name, 'w+')
     if not f then
       error(err_msg)
     end
     f:write('#!/bin/bash', '\n')
-    f:write(get_deploy_script(dest_dir))
+    f:write(get_deploy_script(deploy_dir))
     f:close()
   end
 

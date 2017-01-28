@@ -1,15 +1,23 @@
 return
   function(self, node)
     self.printer:add_text('for ')
-    self:process_node(node.index)
+    if not self:process_node(node.index) then
+      return
+    end
     self.printer:add_text(' = ')
-    self:process_node(node.start_val)
+    if not self:process_node(node.start_val) then
+      return
+    end
     self.printer:add_text(', ')
-    self:process_node(node.end_val)
+    if not self:process_node(node.end_val) then
+      return
+    end
     if node.increment then
       self.printer:add_text(', ')
-      self:process_node(node.increment)
+      if not self:process_node(node.increment) then
+        return
+      end
     end
     self.printer:add_text(' ')
-    self:process_block_multiline('do', node.body, 'end')
+    return self:process_block_multiline('do', node.body, 'end')
   end

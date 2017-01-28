@@ -4,7 +4,7 @@ return
   function(s)
     assert_string(s)
 
-    local used_quote_lengths --lazy initialisation
+    local used_quote_lengths --lazy initialization
     for capture in s:gmatch(long_quote_pattern) do
       used_quote_lengths = used_quote_lengths or {}
       used_quote_lengths[#capture] = true

@@ -5,13 +5,13 @@ is 70th character in line). Efforts are made to represent code in more
 easy to understand form, not the shortest one.
 
 Requirements
+
   Sole requirement is lua5.3. Earlier versions will not work.
 
 Usage
-  `lua5.3 lua.reformat.lua <fIn> <fOut>`
 
-Try
-  `lua lua.reformat.lua lua.reformat.lua lua.reformat.lua.formatted`
+  lua.reformat <fIn> <fOut>
+
 ---
 * Built on my own general strings parser,
   which uses my own lua syntax representation,
@@ -24,15 +24,10 @@ Try
 * Currently comments are stripped from code. I'll add support
   for them someday.
 
-* Also debugging/historical modules supplied:
-    `lua.get_formatter_tree.lua`
-    `lua.get_parse_tree.lua`
-    `lua.split_comments.lua`
-
 * It uses local copy of my "workshop" code hive.
   Current version: https://github.com/martin-eden/workshop
 
-* See also [https://github.com/martin-eden/contents]()
+* See also https://github.com/martin-eden/contents
 ---
 2016-08-16
 2017-01-03

@@ -6,7 +6,7 @@ local serialize_func_params =
     serializer =
       {
         always_index_keys = false,
-        token_giver = request('^.workshop.compile.lua.token_givers').readable,
+        token_giver = request('^.workshop.compile.lua.token_givers.readable'),
         -- quote_string = request('^.workshop.compile.lua.quote_string.intact'),
       },
   }

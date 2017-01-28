@@ -20,10 +20,13 @@
 
 return
   {
-    init = request('init'),
+    lines = nil,
+    next_line_indent = nil,
+    line_indents = nil,
+    indent_chunk = nil,
+    indents_obj = nil,
 
-    lines = {},
-    line_indents = {},
+    init = request('init'),
 
     close_line = request('close_line'),
     add_text = request('add_text'),
@@ -33,10 +36,6 @@ return
     request_clean_line = request('request_clean_line'),
     request_empty_line = request('request_empty_line'),
 
-    next_line_indent = 0,
-    line_indents = {},
-    indent_chunk = '  ',
-    indents_obj = nil,
     inc_indent = request('inc_indent'),
     dec_indent = request('dec_indent'),
     update_indent = request('update_indent'),

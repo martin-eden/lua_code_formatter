@@ -28,7 +28,7 @@
     2016-06-16
 ]]
 
--- local table_to_str = request('^.^.save_to.lua.serialize_table.lua_table')
+-- local table_to_str = request('^.^.save_to.lua_simple_table')
 
 local noname_children_have_same_mode =
   function(struc, mode)

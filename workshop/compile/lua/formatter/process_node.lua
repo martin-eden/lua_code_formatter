@@ -4,9 +4,11 @@ return
       local node_type = node.type or '?nil'
       local handler = self.handlers[node_type]
       if is_function(handler) then
-        handler(self, node)
+        return handler(self, node)
       else
         self.printer:add_text('<' .. node_type .. '>')
+        return
       end
     end
+    return true
   end

@@ -1,15 +1,3 @@
---[[
-  Process indent block with multi-line style.
-
-  multiline samples:
-    do
-      <>
-    end
-
-    return
-      <>
-]]
-
 return
   function(self, prefix, node, postfix, alternate_handler)
     local printer = self.printer
@@ -19,16 +7,12 @@ return
     end
 
     printer:request_clean_line()
-    printer:inc_indent()
-    if alternate_handler then
-      alternate_handler(self, node)
-    else
-      self.process_node(self, node)
-    end
-    printer:dec_indent()
-    printer:request_clean_line()
+    local result = self:process_block(node, alternate_handler)
 
     if postfix then
+      printer:request_clean_line()
       printer:add_text(postfix)
     end
+
+    return result
   end

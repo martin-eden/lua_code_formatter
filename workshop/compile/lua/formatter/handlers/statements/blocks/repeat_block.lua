@@ -1,6 +1,8 @@
 return
   function(self, node)
-    self:process_block_multiline('repeat', node.body, 'until')
+    if not self:process_block_multiline('repeat', node.body, 'until') then
+      return
+    end
     self.printer:add_text(' ')
-    self:process_node(node.condition)
+    return self:process_node(node.condition)
   end

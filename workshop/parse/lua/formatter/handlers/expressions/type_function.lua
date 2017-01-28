@@ -1,7 +1,9 @@
 return
   function(self, node)
     local result = {}
-    result.params = self:process_list(node[1])
+
+    result.params = self:process_node(node[1])
+
     if node[2] then
       result.body = self:process_node(node[2])
     end

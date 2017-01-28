@@ -8,50 +8,59 @@ local oneliner =
       end
       local key, value = node[i].key, node[i].value
       if key then
-        self:process_node(key)
+        if not self:process_node(key) then
+          return
+        end
         printer:add_text(' = ')
       end
-      self:process_node(value)
+      if not self:process_node(value) then
+        return
+      end
     end
     printer:add_text('}')
-  end
-
-local multiliner_process_table =
-  function(self, node)
-    local printer = self.printer
-    for i = 1, #node do
-      printer:request_clean_line()
-      local key, value = node[i].key, node[i].value
-      if key then
-        self:process_node(key)
-        printer:add_text(' = ')
-        printer:inc_indent()
-        self:process_node(value)
-        printer:dec_indent()
-        printer:add_to_prev_text(';')
-      else
-        self:process_node(value)
-        printer:add_to_prev_text(';')
-      end
-    end
+    return true
   end
 
 local multiliner =
   function(self, node)
-    self:process_block_multiline('{', node, '}', multiliner_process_table)
-  end
+    local printer = self.printer
 
-local variants =
-  {
-    {multiliner, is_multiline = true},
-    oneliner,
-  }
+    printer:request_clean_line()
+    printer:add_text('{')
+
+    printer:inc_indent()
+    for i = 1, #node do
+      printer:request_clean_line()
+      local key, value = node[i].key, node[i].value
+      if key then
+        if not self:process_node(key) then
+          return
+        end
+        printer:add_text(' = ')
+        if not self:process_block(value) then
+          return
+        end
+        printer:add_to_prev_text(';')
+      else
+        if not self:process_node(value) then
+          return
+        end
+        printer:add_to_prev_text(';')
+      end
+    end
+    printer:dec_indent()
+
+    printer:request_clean_line()
+    printer:add_text('}')
+    return true
+  end
 
 return
   function(self, node)
     if (#node == 0) then
       self.printer:add_text('{}')
+      return true
     else
-      self:variate(variants, node)
+      return self:variate(node, oneliner, multiliner)
     end
   end

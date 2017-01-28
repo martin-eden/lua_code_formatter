@@ -1,8 +1,9 @@
 package = 'lcf'
-version = 'scm-1'
+version = '5.1-0'
 
 source = {
   url = 'git://github.com/martin-eden/lua_code_formatter.git',
+  tag = '5.1-0',
 }
 
 description = {
@@ -18,7 +19,7 @@ easy to understand form, not the shortest one.
 }
 
 dependencies = {
-  'lua ~> 5.3',
+  'lua == 5.1',
 }
 
 build = {
@@ -113,7 +114,6 @@ build = {
     ['lcf.workshop.file.as_string'] = 'workshop/file/as_string.lua',
     ['lcf.workshop.file.exists'] = 'workshop/file/exists.lua',
     ['lcf.workshop.file.get_size'] = 'workshop/file/get_size.lua',
-    ['lcf.workshop.file.get_unique_name'] = 'workshop/file/get_unique_name.lua',
     ['lcf.workshop.file.safe_open'] = 'workshop/file/safe_open.lua',
     ['lcf.workshop.file.text_file_as_string'] = 'workshop/file/text_file_as_string.lua',
     ['lcf.workshop.graph.assembly_order'] = 'workshop/graph/assembly_order.lua',
@@ -126,8 +126,7 @@ build = {
     ['lcf.workshop.handy_mechs.new'] = 'workshop/handy_mechs/new.lua',
     ['lcf.workshop.handy_mechs.number_representer'] = 'workshop/handy_mechs/number_representer.lua',
     ['lcf.workshop.handy_mechs.override_params'] = 'workshop/handy_mechs/override_params.lua',
-    ['lcf.workshop.handy_mechs.string_adders.any'] = 'workshop/handy_mechs/string_adders/any.lua',
-    ['lcf.workshop.handy_mechs.string_adders.file'] = 'workshop/handy_mechs/string_adders/file.lua',
+    ['lcf.workshop.handy_mechs.string_adders.array'] = 'workshop/handy_mechs/string_adders/array.lua',
     ['lcf.workshop.load_from.generic_loader'] = 'workshop/load_from/generic_loader.lua',
     ['lcf.workshop.load_from.lua'] = 'workshop/load_from/lua.lua',
     ['lcf.workshop.load_from.lua.serialize_table.lua_code'] = 'workshop/load_from/lua/serialize_table/lua_code.lua',

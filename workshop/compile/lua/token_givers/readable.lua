@@ -14,7 +14,7 @@ return
         if is_empty_table then
           return '}'
         else
-          return '\n' .. self.indents_table.indents[deep // 2] .. '}'
+          return '\n' .. self.indents_table.indents[math.floor(deep / 2)] .. '}'
         end
       end,
     records_delimiter =
@@ -28,9 +28,9 @@ return
     key_indent =
       function(self, deep, is_first)
         if is_first then
-          return '\n' .. self.indents_table.indents[(deep + 1) // 2]
+          return '\n' .. self.indents_table.indents[math.floor((deep + 1) / 2)]
         else
-          return self.indents_table.indents[(deep + 1) // 2]
+          return self.indents_table.indents[math.floor((deep + 1) / 2)]
         end
       end,
     key_prefix = '[',

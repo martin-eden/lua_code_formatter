@@ -5,7 +5,8 @@ local init =
       {
         __index =
           function(t, key)
-            if is_integer(key) then
+            if is_number(key) then
+              key = math.floor(key)
               local value = self.indent_chunk:rep(key)
               t[key] = value
               return value

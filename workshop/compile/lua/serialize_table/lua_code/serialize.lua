@@ -34,7 +34,7 @@ local may_print_inline =
 ]]
 
 return
-  function(self, root, a_params)
+  function(self, root)
     local assembly_order
     local dfs_params =
       {

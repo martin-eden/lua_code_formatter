@@ -1,10 +1,11 @@
 return
   {
-    right_margin = nil,
-    max_text_width = nil,
-    indent_chunk = nil,
-    printer = new(request('^.^.^.string.text_block.interface')),
-    state_keeper = new(request('state_keeper.interface')),
+    right_margin = 80,
+    max_text_width = 65,
+    indent_chunk = '  ',
+    printer = request('^.^.^.string.text_block.interface'),
+    state_keeper = request('state_keeper.interface'),
+
     init = request('init'),
 
     handlers = request('handlers.interface'),
@@ -22,3 +23,11 @@ return
 
     representation_is_allowed = request('representation_is_allowed'),
   }
+
+--[[
+  <max_text_width> limits length of line without indent, i.e.
+    length of text in line. Setting it makes sense for windowed
+    viewing in editor.
+  <right_margin> limits length of line with indent. Setting it
+    makes sense for printring.
+]]

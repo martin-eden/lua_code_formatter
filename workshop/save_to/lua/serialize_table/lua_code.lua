@@ -1,13 +1,13 @@
 -- Dumps table to lua code which recreates table.
 
-local override_params = request('^.^.^.handy_mechs.override_params')
-local default_params = request('^.^.^.compile.lua.serialize_table.lua_code.interface')
+local table_serializer_class =
+  request('^.^.^.compile.lua.serialize_table.lua_code.interface')
 
 return
-  function(value, a_params)
-    assert_table(value)
-    local object = override_params(default_params, a_params)
-    object:init()
-    object:serialize(value)
-    return object.serializer.string_adder:get_result()
+  function(t, options)
+    assert_table(t)
+    local table_serializer = new(table_serializer_class, options)
+    table_serializer:init()
+    table_serializer:serialize(t)
+    return table_serializer:get_result()
   end

@@ -1,5 +1,6 @@
 return
   function(self, node, deep, parent_type)
+    deep = deep or self.initial_deep
     local string_adder = self.string_adder
     local token = self.token_giver
     local quote_string = self.quote_string

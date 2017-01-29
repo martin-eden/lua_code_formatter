@@ -1,7 +1,7 @@
-local default_loader = request('^.workshop.load_from.lua.serialize_table.lua_code')
+local default_loader = request('^.workshop.load_from.lua_table')
 
-local serialize_func = request('^.workshop.save_to.lua.serialize_table.lua_code')
-local serialize_func_params =
+local table_to_str = request('^.workshop.save_to.lua_table')
+local table_to_str_params =
   {
     serializer =
       {
@@ -13,7 +13,7 @@ local serialize_func_params =
 local default_saver =
   function(t)
     if is_table(t) then
-      return serialize_func(t, serialize_func_params)
+      return table_to_str(t, table_to_str_params)
     else
       return t
     end

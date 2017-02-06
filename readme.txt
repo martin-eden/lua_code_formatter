@@ -72,13 +72,22 @@ Usage
   trying all possible variants to fit code in 70-symbol lines
   and maintain indentation.
 
-* Currently comments are stripped from code. I'll add support
-  for them someday (or will not and explain why).
-
 * It uses local copy of my "workshop" code hive.
   Current version: https://github.com/martin-eden/workshop
 
 * See also https://github.com/martin-eden/contents
+
+* Why comments is stripped?
+
+  Silly license texts in every source file, largely self-advertising
+  comments, documentation embedded in code, ascii-lines and boxes -
+  all this is junk to me. There are also good, well-written comments
+  which is valuable. But this code can not judge comment quality.
+
+  Will of this code is to reduce entropy. My will when running this
+  code is reduce entropy. If I see that code has good comments,
+  almost always it has good formatting too. So no need to use
+  this tool for it.
 
 --
 2016-08-16

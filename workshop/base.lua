@@ -14,7 +14,10 @@ do
       'userdata',
     }
   for k, type_name in ipairs(data_types) do
-    _G['is_' .. type_name] = function(a) return (type(a) == type_name) end
+    _G['is_' .. type_name] =
+      function(a)
+        return (type(a) == type_name)
+      end
     _G['assert_' .. type_name] =
       function(a, responsibility_level)
         local responsibility_level = (responsibility_level or 1)
@@ -26,7 +29,10 @@ do
         end
       end
   end
-  _G.is_integer = function(n) return (math.type(n) == 'integer') end
+  _G.is_integer =
+    function(n)
+      return (math.type(n) == 'integer')
+    end
   _G.assert_integer =
     function(a, responsibility_level)
       local responsibility_level = (responsibility_level or 1)
@@ -39,7 +45,12 @@ end
 -- Make sure we have table.pack and table.unpack:
 do
   _G.table.pack = _G.table.pack or _G.pack
-  _G.table.unpack = _G.table.unpack or _G.unpack
+  _G.table.unpack =
+    _G.table.unpack or
+    _G.unpack or
+    function(...)
+      return {n = select('#', ...), ...}
+    end
 end
 
 -- Export request function:
@@ -116,11 +127,19 @@ local add_dependency =
     dependencies[src_name][dest_name] = true
   end
 
+local base_prefix = split_name((...))
+
 local request =
   function(qualified_name)
+    local is_absolute_name = (qualified_name:sub(1, 2) == '!.')
+    if is_absolute_name then
+      qualified_name = qualified_name:sub(3)
+    end
     local prefix, name = split_name(qualified_name)
     local src_name = get_caller_name()
-    prefix = unite_prefixes(get_caller_prefix(), prefix)
+    local caller_prefix =
+      is_absolute_name and base_prefix or get_caller_prefix()
+    prefix = unite_prefixes(caller_prefix, prefix)
     push(prefix, name)
     local dest_name = get_caller_name()
     add_dependency(src_name, dest_name)
@@ -135,5 +154,4 @@ if not _G.request then
   _G.dependencies = dependencies
 end
 
-local prefix = split_name((...))
-_G.new = request(prefix .. 'handy_mechs.new')
+_G.new = request(base_prefix .. 'table.new')

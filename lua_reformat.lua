@@ -1,5 +1,5 @@
-local load_lua = request('workshop.load_from.lua')
-local pretty_lua = request('workshop.save_to.lua')
+local load_lua = request('workshop.formats.lua.load')
+local pretty_lua = request('workshop.formats.lua.save')
 
 local pretty_lua_options =
   {
@@ -8,21 +8,33 @@ local pretty_lua_options =
     max_text_width = 65,
   }
 
-local convert = request('#mechs.generic_file_converter')
+local c_converter = request('workshop.mechs.generic_file_converter.interface')
 return
   function(f_in_name, f_out_name)
-    convert(
-      {
-        f_in_name = f_in_name,
-        f_out_name = f_out_name,
-        load =
-          function(str)
-            return load_lua(str)
-          end,
-        save =
-          function(t)
-            return pretty_lua(t, pretty_lua_options)
-          end,
-      }
-    )
+    if
+      not f_in_name or (f_in_name == '') or
+      not f_out_name or (f_out_name == '')
+    then
+      print('Usage: <f_in> <f_out>')
+      return
+    end
+
+    local converter =
+      new(
+        c_converter,
+        {
+          f_in_name = f_in_name,
+          f_out_name = f_out_name,
+          load_func =
+            function(str)
+              return load_lua(str)
+            end,
+          save_func =
+            function(t)
+              return pretty_lua(t, pretty_lua_options)
+            end,
+        }
+      )
+    converter:init()
+    converter:run()
   end

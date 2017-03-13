@@ -1,3 +1,12 @@
+--[[
+  This code is used in postprocessing lua code data from [parser].
+  So strings should be correct by grammar design.
+  So no checks for correctness needed.
+
+  We transform values in quoted strings to raw values by
+  unescaping and removing quotes.
+]]
+
 local unquote_linear = request('unquote_string.linear')
 
 local long_quote_start = '^%[=*%['
@@ -15,28 +24,24 @@ local get_long_quote_len =
 
 return
   function(s)
-    assert_string(s)
-
-    local not_quoted_msg = ('String (%s) is not quoted.'):format(s)
-    assert(#s >= 2, not_quoted_msg)
-
     local result
-    local border_chars = s:sub(1, 1) .. s:sub(-1, -1)
 
-    if (border_chars == "''") then
+    local first_char = s:sub(1, 1)
+    if (first_char == "'") or (first_char == '"') then
       result = s:sub(2, -2)
       result = unquote_linear(result)
-    elseif (border_chars == '""') then
-      result = s:sub(2, -2)
-      result = unquote_linear(result)
-    elseif (border_chars == '[]') then
+    elseif (first_char == '[') then
       local quote_len = get_long_quote_len(s)
       if not quote_len then
         error(('String "%s" has bad long quotes?'):format(s), 2)
       end
-      result = s:sub(quote_len + 1, -quote_len - 1)
-    else
-      error(not_quoted_msg, 2)
+      result = s:sub(quote_len + 1, -(quote_len + 1))
+      -- Special case with long quotes. Heading newline is dropped.
+      if (result:sub(1, 2) == '\x0d\x0a') then
+        result = result:sub(3)
+      elseif (result:sub(1, 1) == '\x0a') then
+        result = result:sub(2)
+      end
     end
 
     return result

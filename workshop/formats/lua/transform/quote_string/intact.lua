@@ -1,27 +1,33 @@
-local long_quote_pattern = request('^.^.long_quote_pattern').start
-
 return
   function(s)
     assert_string(s)
 
-    local used_quote_lengths --lazy initialization
-    for capture in s:gmatch(long_quote_pattern) do
-      used_quote_lengths = used_quote_lengths or {}
-      used_quote_lengths[#capture] = true
-    end
-    if (s:sub(-1, -1) == ']') then
+    local min_needed_quotes = 0
+
+    if (s:sub(-1) == ']') then
       -- case "abc]". We do not want "[[abc]]]"
-      used_quote_lengths = used_quote_lengths or {}
-      used_quote_lengths[0] = true
+      min_needed_quotes = 1
     end
 
-    local min_needed_quote = 0
-    if used_quote_lengths then
-      while used_quote_lengths[min_needed_quote] do
-        min_needed_quote = min_needed_quote + 1
+    local postfix, eq_chunk
+    while true do
+      eq_chunk = ('='):rep(min_needed_quotes)
+      postfix = ']' .. eq_chunk .. ']'
+      if not s:find(postfix, 1, true) then
+        break
       end
+      min_needed_quotes = min_needed_quotes + 1
     end
 
-    local quote_chunk = ('='):rep(min_needed_quote)
-    return ('[%s[%s]%s]'):format(quote_chunk, s, quote_chunk)
+    local prefix = '[' .. eq_chunk .. '['
+
+    -- Handling special case: heading newline dropped in long strings.
+    if
+      (s:sub(1, 2) == '\x0d\x0a') or
+      (s:sub(1, 1) == '\x0a')
+    then
+      prefix = prefix .. '\n'
+    end
+
+    return prefix .. s .. postfix
   end

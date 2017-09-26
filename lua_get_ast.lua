@@ -1,3 +1,3 @@
 require('lcf.workshop.base')
-local run = request('lcf.get_ast')
-run(arg[1], arg[2])
+local f = request('lcf.get_ast')
+f(_G.arg)

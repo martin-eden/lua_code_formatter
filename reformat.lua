@@ -1,29 +1,23 @@
-local pretty_lua_options =
-  {
-    indent_chunk = '  ',
-    right_margin = 100,
-    max_text_width = 65,
-    keep_comments = true,
-  }
-
-local serialize_ast = request('!.formats.lua.save')
-local pretty_lua =
-  function(struc)
-    return serialize_ast(struc, pretty_lua_options)
-  end
-
+local get_params = request('reformat.get_params')
 local get_ast = request('!.lua.code.get_ast')
+local serialize_ast = request('!.formats.lua.save')
 local convert = request('!.file.convert')
 
 return
-  function(f_in_name, f_out_name)
+  function(args)
+    local f_in_name, f_out_name, formatter_options = get_params(args)
+    if not f_in_name then
+      return
+    end
     convert(
       {
         f_in_name = f_in_name,
         f_out_name = f_out_name,
-        description = 'Reformat Lua 5.3 code.',
         parse = get_ast,
-        compile = pretty_lua,
+        compile =
+          function(struc)
+            return serialize_ast(struc, formatter_options)
+          end,
       }
     )
   end

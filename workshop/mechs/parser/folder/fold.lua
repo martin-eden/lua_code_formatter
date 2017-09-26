@@ -47,7 +47,7 @@ return
     end
     --[[
       In practice fold() is called at end of processing. So
-      no additiona data is going to be add to <struc>. Also
+      no additional data is going to be add to <struc>. Also
       often data is grouped to one root record. We'll unfold
       it here, breaking possibility to add additional data
       to <struc> but freeing dependent code of undolding it

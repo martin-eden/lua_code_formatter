@@ -18,10 +18,16 @@ local has_double_quotes =
     return s:find([[%"]]) and true
   end
 
+local is_nonascii =
+  function(s)
+    return s:find('[^%w%s_%p]')
+  end
+
 return
   {
     has_control_chars = has_control_chars,
     has_backslashes = has_backslashes,
     has_single_quotes = has_single_quotes,
     has_double_quotes = has_double_quotes,
+    is_nonascii = is_nonascii,
   }

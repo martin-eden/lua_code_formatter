@@ -1,4 +1,4 @@
-local run_formatter = request('compile.formatter')
+local run_formatter = request('save.formatter')
 
 return
   function(data_struc, options)

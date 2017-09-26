@@ -1,4 +1,4 @@
-local representer = request('representer.interface')
+local representer = request('!.mechs.number.representer.interface')
 
 representer =
   new(

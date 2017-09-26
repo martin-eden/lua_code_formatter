@@ -13,8 +13,6 @@ local comparable_types =
 
 return
   function(a, b)
-    local result
-
     local a_key = a.key
     local a_key_type = type(a_key)
     local rank_a = val_rank[a_key_type] or val_rank.other

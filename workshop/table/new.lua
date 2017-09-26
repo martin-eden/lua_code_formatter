@@ -1,12 +1,19 @@
-local clone = request('^.table.clone')
-local patch = request('^.table.patch')
+--[[
+  Clone table <base_obj>. Optionally override fields in clone with
+  fields from <overriden_params>.
+
+  Returns cloned table.
+]]
+
+local clone = request('clone')
+local patch = request('patch')
 
 return
-  function(default_params, a_params)
-    assert_table(default_params)
-    local result = clone(default_params)
-    if is_table(a_params) then
-      patch(result, a_params)
+  function(base_obj, overriden_params)
+    assert_table(base_obj)
+    local result = clone(base_obj)
+    if is_table(overriden_params) then
+      patch(result, overriden_params)
     end
     return result
   end

@@ -6,7 +6,7 @@ out_file=$2
 lua_call="
 do
   require('lcf.workshop.base')
-  local run = request('lcf.lua_reformat')
+  local run = request('lcf.reformat')
   run('$in_file', '$out_file')
 end
 "

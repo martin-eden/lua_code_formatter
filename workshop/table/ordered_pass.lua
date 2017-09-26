@@ -1,6 +1,5 @@
 local default_comparator = request('ordered_pass.default_comparator')
-local extract_keys = request('extract_keys')
-local to_key_val = request('to_key_val')
+local get_key_vals = request('get_key_vals')
 
 -- Sort <t> and return iterator function to pass that sorted <t>
 return
@@ -9,7 +8,7 @@ return
     comparator = comparator or default_comparator
     assert_function(comparator)
 
-    local key_vals = to_key_val(t)
+    local key_vals = get_key_vals(t)
     table.sort(key_vals, comparator)
 
     local i = 0

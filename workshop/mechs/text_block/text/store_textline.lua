@@ -1,12 +1,10 @@
-local trim_head_spaces = request('^.^.^.string.trim_head_spaces')
-local trim_tail_spaces = request('^.^.^.string.trim_tail_spaces')
+local trim = request('!.string.trim')
 
 return
   function(self)
     local line_with_text = self.line_with_text
 
-    line_with_text.text = trim_head_spaces(line_with_text.text)
-    line_with_text.text = trim_tail_spaces(line_with_text.text)
+    line_with_text.text = trim(line_with_text.text)
 
     self.max_block_width = self:get_block_width()
     self.max_text_width = self:get_text_width()

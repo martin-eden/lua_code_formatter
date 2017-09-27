@@ -22,7 +22,9 @@ Requirements
 
 Installation
 
-  sudo luarocks install lcf
+  sudo luarocks make lcf-scm-1.rockspec
+
+  (also works "sudo luarocks install lcf")
 
 
 Usage
@@ -106,8 +108,5 @@ Usage
 
 --
 2016-08-16
-2017-01-03
-2017-01-18
-2017-01-22
 2017-01-28
 2017-09-26

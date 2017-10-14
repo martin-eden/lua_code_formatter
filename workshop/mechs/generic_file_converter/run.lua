@@ -4,7 +4,7 @@ local represent_size = request('!.number.represent_size')
 return
   function(self)
     self:say(
-      ('Loading from "%s" [%s].'):format(
+      ('Loading "%s" [%s].'):format(
         self.f_in_name,
         represent_size(file_size(self.f_in_name))
       )
@@ -19,7 +19,7 @@ return
         if compile_result then
           assert_string(compile_result)
           self:say(
-            ('Saving to "%s" [%s].'):format(
+            ('Saving "%s" [%s].'):format(
               self.f_out_name,
               represent_size(#compile_result)
             )

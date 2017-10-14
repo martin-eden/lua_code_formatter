@@ -19,10 +19,12 @@ Requirements
   (I've made a backport for Lua v5.1. See "5.1" branch. It is not
   affected by recent changes and probably will be dropped someday.)
 
+  It may or may not work under Windows. I've not tested it there.
+
 
 Installation
 
-  sudo luarocks make lcf-scm-1.rockspec
+  > sudo luarocks make lcf-scm-1.rockspec
 
   (also works "sudo luarocks install lcf")
 
@@ -31,7 +33,10 @@ Usage
 
   From command-line
 
-    lua.reformat <f_in> <f_out>
+    > lua.reformat <f_in>
+
+    You can pass formatter parameters in command line. For
+    syntax call "lua.reformat" without parameters.
 
 
   From Lua interpreter

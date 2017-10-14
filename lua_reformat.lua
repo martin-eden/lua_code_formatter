@@ -1,3 +1,3 @@
 require('lcf.workshop.base')
-local run = request('lcf.reformat')
-run(arg[1], arg[2])
+local f = request('lcf.reformat')
+f(_G.arg)

@@ -16,8 +16,6 @@ Description
 Requirements
 
   Sole requirement is Lua v5.3. Earlier versions will not work.
-  (I've made a backport for Lua v5.1. See "5.1" branch. It is not
-  affected by recent changes and probably will be dropped someday.)
 
   It may or may not work under Windows. I've not tested it there.
 

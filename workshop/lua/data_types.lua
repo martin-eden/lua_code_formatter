@@ -1,0 +1,11 @@
+return
+  {
+    'nil',
+    'boolean',
+    'number',
+    'string',
+    'function',
+    'thread',
+    'userdata',
+    'table',
+  }

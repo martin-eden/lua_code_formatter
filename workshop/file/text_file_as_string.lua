@@ -12,7 +12,7 @@ local file_as_string = request('as_string')
 
 local strip_prefixes =
   {
-    '\xef\xbb\xbf',
+    '\239\187\191', -- EF BB BF
   }
 
 return

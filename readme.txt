@@ -1,47 +1,61 @@
 Description
 
-  Formats any valid lua 5.3 code.
+  Formats any valid Lua 5.3 code.
 
-  Main advantage is that it wraps code lines to maintain readability.
-  Efforts are made to represent code in more easy to understand form,
-  not the shortest one.
+  Lines with code are wrapped to fit inside given margins.
 
-  (
-    This is a backport version for lua 5.1. Potentially it may
-    have more problems and rarely updated. This is done to make
-    tool available to most community who uses 5.1 for LuaJIT.
-  )
+  Installation script deploys three command-line scripts:
+
+    lua.reformat
+    lua.get_ast
+    lua.get_formatter_ast
+
+  Last two for that guys that love tinkering.
+
 
 Requirements
 
-  Sole requirement is lua v5.1.
+  Sole requirement is Lua v5.1.
+
+  (
+    This is a backport for v5.1. This is done to make tool available
+    to community who uses 5.1 and LuaJIT. Potentially it may have more
+    problems and rarely updated.
+  )
+
+  It may or may not work under Windows. I've not tested it there.
 
 
 Installation
 
-  sudo luarocks install lcf
+  > sudo luarocks make lcf-scm-1.rockspec
+
+  (also works "sudo luarocks install lcf")
 
 
 Usage
 
   From command-line
 
-    lua.reformat <fIn> <fOut>
+    > lua.reformat <f_in>
+
+    You can pass formatter parameters in command line. For
+    syntax call "lua.reformat" without parameters.
 
 
-  From lua interpreter
+  From Lua interpreter
 
-    Suppose you have a string with lua code and wish to get another
+    Suppose you have a string with Lua code and wish to get another
     string with formatted code.
 
     do
       local lua_code_str = 'do return end' -- < fill it
 
       require('lcf.workshop.base')
-      local get_formatted_ast = request('lcf.workshop.load_from.lua')
-      local get_formatted_code = request('lcf.workshop.save_to.lua')
+      local get_ast = request('!.lua.code.get_ast')
+      local get_formatted_code = request('!.formats.lua.save')
 
-      return get_formatted_code(get_formatted_ast(lua_code_str))
+      return get_formatted_code(get_ast(lua_code_str))
     end
 
 
@@ -51,33 +65,50 @@ Usage
       new values of changed parameters:
 
       get_formatted_code(
-        get_formatted_ast(lua_code_str),
+        get_ast(lua_code_str),
         {
           indent_chunk = '  ',
           right_margin = 100,
           max_text_width = 65,
+          keep_comments = true,
         }
       )
 
       <indent_chunk> is a string using for building one indent.
         You may try '|..' to see it's effect.
       <right_margin> limits length of line with indent. Setting it
-        makes sense for printring.
+        makes sense for printing.
       <max_text_width> limits length of line without indent, i.e.
         length of text in line. Setting it makes sense for windowed
         viewing in editor.
+      <keep_comments> is a flag to keep comments. Comment text is
+        not changed so kept comments may last beyond right margin.
+
+        ! Comments are "sinked-up" to statements level. So text
+
+          function(a, --parameter "a"
+            b) --parameter "b"
+          end
+
+        is treated as
+
+          --parameter "a"
+          function(a, b)
+            --parameter "b"
+          end
+
+        This is done to keep formatting routines simple.
+
 
 --
-* Built on my own general strings parser,
-  which uses my own lua syntax representation,
+* Based on my own generic stream processing core,
+  which is extended to generic strings parser,
+  which uses my own loseless Lua syntax representation,
   produces AST (annotated syntax tree),
-  which is further structured for code formatter,
-  which gets this structured AST and produce code layout,
-  trying all possible variants to fit code in 70-symbol lines
+  which is further simplified and structured for code formatter,
+  which produces code layout,
+  trying all possible variants to fit code under given margins
   and maintain indentation.
-
-* Currently comments are stripped from code. I'll add support
-  for them someday (or will not and explain why).
 
 * It uses local copy of my "workshop" code hive.
   Current version: https://github.com/martin-eden/workshop
@@ -86,7 +117,6 @@ Usage
 
 --
 2016-08-16
-2017-01-03
-2017-01-18
-2017-01-22
 2017-01-28
+2017-09-26
+2017-11-01

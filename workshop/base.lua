@@ -1,43 +1,22 @@
--- Lua base libraries extensions. Used almost in any piece of my code.
+--[[
+  Lua base libraries extensions. Used almost in any piece of my code.
 
--- Export "is_<type>" and "assert_<type>" functions:
-do
-  local data_types =
-    {
-      'boolean',
-      'function',
-      'nil',
-      'number',
-      'string',
-      'table',
-      'thread',
-      'userdata',
-    }
-  for k, type_name in ipairs(data_types) do
-    _G['is_' .. type_name] = function(a) return (type(a) == type_name) end
-    _G['assert_' .. type_name] =
-      function(a, responsibility_level)
-        local responsibility_level = (responsibility_level or 1)
-        if (type(a) ~= type_name) then
-          error(
-            ('Argument must have a type "%s", not "%s".'):format(type_name, type(a)),
-            responsibility_level + 1
-          )
-        end
-      end
-  end
-end
+  This module installs global function "request" which is based on
+  "require" and makes relative module names possible.
 
--- Make sure we have table.pack and table.unpack:
-do
-  _G.table.pack =
-    _G.table.pack or
-    _G.pack or
-    function(...)
-      return {n = select('#', ...), ...}
-    end
-  _G.table.unpack = _G.table.unpack or _G.unpack
-end
+  Also this function tracks module dependencies. This allows to
+  get dependencies list for any module. Which is used in creating
+  deploys without unused code.
+
+  Price for this is exported global table "dependencies" and function
+  "get_require_name".
+
+  And lastly, global functions are added for convenience. Such
+  functions are families of "is_<type>", "assert_<type>" and "new".
+
+  "new" basically clones given table. But may override fields in
+  clone with fields of second table argument.
+]]
 
 -- Export request function:
 local split_name =
@@ -113,24 +92,63 @@ local add_dependency =
     dependencies[src_name][dest_name] = true
   end
 
+local base_prefix = split_name((...))
+
+local get_require_name =
+  function(qualified_name)
+    local is_absolute_name = (qualified_name:sub(1, 2) == '!.')
+    if is_absolute_name then
+      qualified_name = qualified_name:sub(3)
+    end
+    local prefix, name = split_name(qualified_name)
+    local caller_prefix =
+      is_absolute_name and base_prefix or get_caller_prefix()
+    prefix = unite_prefixes(caller_prefix, prefix)
+    return prefix .. name, prefix, name
+  end
+
+local table_pack =
+  function(...)
+    return {n = select('#', ...), ...}
+  end
+
 local request =
   function(qualified_name)
-    local prefix, name = split_name(qualified_name)
     local src_name = get_caller_name()
-    prefix = unite_prefixes(get_caller_prefix(), prefix)
+
+    local require_name, prefix, name = get_require_name(qualified_name)
+
     push(prefix, name)
     local dest_name = get_caller_name()
     add_dependency(src_name, dest_name)
-    local require_name = prefix .. name
-    local results = table.pack(require(require_name))
+    local results = table_pack(require(require_name))
     pop()
+
     return table.unpack(results)
+  end
+
+local math_type =
+  function(n)
+    if (type(n) == 'number') then
+      local int, frac = math.modf(n)
+      if (frac == 0) then
+        return 'integer'
+      else
+        return 'float'
+      end
+    end
   end
 
 if not _G.request then
   _G.request = request
   _G.dependencies = dependencies
+  _G.get_require_name = get_require_name
+  _G.table.unpack = _G.unpack
+  _G.table.pack = table_pack
+  _G.math.type = math_type
+  push('', 'base')
+  request('!.system.install_is_functions')
+  request('!.system.install_assert_functions')
+  _G.new = request('!.table.new')
+  pop()
 end
-
-local prefix = split_name((...))
-_G.new = request(prefix .. 'handy_mechs.new')

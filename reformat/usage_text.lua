@@ -12,7 +12,7 @@ lua.reformat   <f_in>   [<f_out>]
   --max-text-width=<int> -- Maximum text length, ignoring indent chars.
   --keep-comments -- Keep comments.
   --~keep-comments -- Remove comments.
-  --indent=<str> -- Use given string as indent chunk
+  --indent=<str> -- Use given string as indent chunk.
 
 Notes
   * In case when only one parameter of (right-margin, max-text-width)

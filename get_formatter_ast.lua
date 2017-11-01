@@ -7,7 +7,7 @@ local parse =
   function(s)
     local result
     result = get_ast(s)
-    result = formatter_preprocess(result)
+    result = formatter_preprocess(result, true) --second parameter is <keep_comments>
     return result
   end
 

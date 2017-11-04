@@ -19,6 +19,8 @@ Requirements
 
   It may or may not work under Windows. I've not tested it there.
 
+  For Lua v5.1 checkout "5.1" branch.
+
 
 Installation
 

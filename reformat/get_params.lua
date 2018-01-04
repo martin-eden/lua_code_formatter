@@ -2,7 +2,6 @@
   Parse given command line and return three values:
 
     <f_in_name> <f_out_name> <formatter_options>
-         str        str             table
 
   Alternatively may print usage help and return nothing.
 ]]

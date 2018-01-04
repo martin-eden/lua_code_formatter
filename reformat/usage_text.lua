@@ -3,9 +3,9 @@ return
 Reformat Lua 5.3 code.
 
 lua.reformat   <f_in>   [<f_out>]
-             ^        ^           ^
-             |        |           |
-             +-- [<options>] -----+
+             ┬        ┬           ┬
+             │        │           │
+             └── [<options>] ─────┘
 
 <options>:
   --right-margin=<int> -- Right margin, indent chars counts.

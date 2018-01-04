@@ -127,7 +127,6 @@ if not _G.request then
   _G.dependencies = dependencies
   _G.get_require_name = get_require_name
   push('', 'base')
-  request('!.system.install_unpack_function')
   request('!.system.install_is_functions')
   request('!.system.install_assert_functions')
   _G.new = request('!.table.new')

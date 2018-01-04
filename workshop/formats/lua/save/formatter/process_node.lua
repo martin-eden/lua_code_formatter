@@ -6,8 +6,16 @@ return
       if is_function(handler) then
         return handler(self, node)
       else
-        self.printer:add_curline('<' .. node_type .. '>')
-        return
+        if is_string(node.value) then
+          self.printer:add_curline(node.value)
+          return true
+        else
+          local msg =
+            ('<no handler for non-trivial "%s" type>'):
+            format(node_type)
+          self.printer:add_curline(msg)
+          return
+        end
       end
     else
       if is_nil(node) then

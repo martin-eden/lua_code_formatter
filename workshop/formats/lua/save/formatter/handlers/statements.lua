@@ -1,12 +1,19 @@
+--[[
+  Handle sequence of statements.
+
+  Each statement starts with new line, except <empty_statement> ";".
+]]
+
 local multiliner =
   function(self, node)
     local printer = self.printer
     for i = 1, #node do
-      self.printer:request_clean_line()
+      if (node[i].type ~= 'empty_statement') then
+        self.printer:request_clean_line()
+      end
       if not self:process_node(node[i]) then
         return
       end
-      -- self.printer:add_textline(';')
     end
     return true
   end

@@ -1,3 +1,17 @@
+--[[
+  Represent global gunction defined like
+
+    function somename.bla.bla:bla(args)
+
+  Layout ("--" means empty line):
+
+    --
+    function <dotted_name><colon_name><params>
+      <body>
+    end
+    --
+]]
+
 return
   function(self, node)
     local printer = self.printer

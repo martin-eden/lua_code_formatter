@@ -1,9 +1,10 @@
 return
   {
-    call_assign = request('call_assign'),
+    assignment = request('assignment'),
     do_block = request('do_block'),
     else_part = request('else_part'),
     elseif_part = request('elseif_part'),
+    function_call = request('function_call'),
     generic_for_block = request('generic_for_block'),
     goto_statement = request('goto_statement'),
     if_block = request('if_block'),

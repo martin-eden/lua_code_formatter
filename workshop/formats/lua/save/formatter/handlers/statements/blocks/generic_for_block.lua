@@ -1,3 +1,8 @@
+--[[
+  Layout:
+
+    for <names> in <expr_list> do
+]]
 local header_oneline =
   function(self, node)
     local printer = self.printer
@@ -13,12 +18,23 @@ local header_oneline =
     return true
   end
 
+--[[
+  Layout:
+
+    [...] in <expr_list>
+]]
 local in_part_oneline =
   function(self, node)
     self.printer:add_curline(' in ')
     return self:process_node(node.expr_list)
   end
 
+--[[
+  Layout:
+
+    [...] in
+      <expr_list>
+]]
 local in_part_multiline =
   function(self, node)
     self.printer:add_textline(' in')
@@ -27,6 +43,13 @@ local in_part_multiline =
     return self:process_block(node.expr_list)
   end
 
+--[[
+  Layout:
+
+    for
+      <names><[in_part_oneline() | in_part_multiline()]>
+    do
+]]
 local header_multiline =
   function(self, node)
     local printer = self.printer
@@ -47,6 +70,13 @@ local header_multiline =
     return true
   end
 
+--[[
+  Layout:
+
+    <[header_oneline() | header_multiline()]>
+      <body>
+    end
+]]
 local multiliner =
   function(self, node)
     local printer = self.printer

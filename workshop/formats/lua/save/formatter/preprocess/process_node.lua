@@ -17,6 +17,7 @@ return
         result.type = node.type
       end
     else
+      -- print(('No handler for type "%s". Using default behavior.'):format(node.type))
       result = {type = node.type, value = node[1]}
     end
 

@@ -3,13 +3,8 @@ return
     expression = request('expression'),
 
     function_call = request('expressions.function_call'),
-    name = request('expressions.name'),
-    var_link = request('expressions.var_link'),
-    vararg = request('expressions.vararg'),
+    var_ref = request('expressions.var_ref'),
 
-    boolean = request('expressions.data_types.boolean'),
-    ['nil'] = request('expressions.data_types.nil'),
-    number = request('expressions.data_types.number'),
     string = request('expressions.data_types.string'),
     table = request('expressions.data_types.table'),
     type_function = request('expressions.data_types.type_function'),

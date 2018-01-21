@@ -3,6 +3,15 @@ Description
   Formats any valid Lua 5.3 code.
 
   Lines with code are wrapped to fit inside given margins.
+  
+  Files with invalid lua syntax will loose the content after the syntax error!
+  
+  Make sure to verify the correctness of the file before running LCF.
+  For example via:
+  
+     luac -p <filename>
+  
+  
 
   Installation script deploys three command-line scripts:
 
@@ -10,7 +19,7 @@ Description
     lua.get_ast
     lua.get_formatter_ast
 
-  Last two for that guys that love tinkering.
+  Last two for people who love tinkering.
 
 
 Requirements
@@ -36,7 +45,7 @@ Usage
     > lua.reformat <f_in>
 
     You can pass formatter parameters in command line. For
-    syntax call "lua.reformat" without parameters.
+    available options call "lua.reformat" without parameters.
 
 
   From Lua interpreter

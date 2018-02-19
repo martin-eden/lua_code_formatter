@@ -34,8 +34,11 @@ return
 
     if (digits_remained > 0) then
       frac_part = math.floor(frac_part * 10 ^ digits_remained)
-      s_frac = ('%0' .. digits_remained .. 'd'):format(frac_part)
-      s_frac = '.' .. (s_frac):sub(1, digits_remained)
+      -- Do not add zero fraction part: ".00".
+      if (frac_part > 0) then
+        s_frac = ('%0' .. digits_remained .. 'd'):format(frac_part)
+        s_frac = '.' .. (s_frac):sub(1, digits_remained)
+      end
     end
 
     local result

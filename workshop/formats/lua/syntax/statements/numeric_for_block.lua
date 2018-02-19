@@ -4,7 +4,6 @@ local opt = handy.opt
 local word = request('^.words.word')
 local syntel = request('^.words.syntel')
 local name = request('^.words.name')
-local statements = request('statements')
 
 return
   {
@@ -20,6 +19,6 @@ return
       '>expression'
     ),
     word('do'),
-    statements,
+    '>statements',
     word('end'),
   }

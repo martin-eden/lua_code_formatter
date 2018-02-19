@@ -1,7 +1,6 @@
 local word = request('^.words.word')
-local name_list = request('^.words.name_list')
-local expr_list = request('^.expressions.expr_list')
-local statements = request('statements')
+local name_list = request('^.wrappers.name_list')
+local expr_list = request('^.wrappers.expr_list')
 
 return
   {
@@ -11,6 +10,6 @@ return
     word('in'),
     expr_list,
     word('do'),
-    statements,
+    '>statements',
     word('end'),
   }

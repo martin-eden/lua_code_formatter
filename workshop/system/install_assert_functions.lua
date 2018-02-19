@@ -1,5 +1,5 @@
 --[[
-  Create "assert_<type>" family of globalk functions.
+  Create "assert_<type>" family of global functions.
 ]]
 
 local data_types = request('!.lua.data_types')

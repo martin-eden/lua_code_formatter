@@ -5,13 +5,12 @@ return
     end
     if (new_position < 1) then
       new_position = 1
-    elseif (new_position > self.position + 1) then
-      new_position = self.position + 1
     end
-    if (new_position < self.position) then
-      for i = new_position + 1, self.position do
-        self.seq[i] = nil
-      end
+    if (new_position > self.position) then
+      new_position = self.position
+    end
+    for i = new_position, self.position do
+      self.seq[i] = nil
     end
     self.position = new_position
   end

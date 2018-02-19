@@ -1,7 +1,6 @@
 local handy = request('!.mechs.processor.handy')
 
 local word = request('^.words.word')
-local statements = request('statements')
 
 return
   {
@@ -9,6 +8,6 @@ return
     word('while'),
     '>expression',
     word('do'),
-    statements,
+    '>statements',
     word('end'),
   }

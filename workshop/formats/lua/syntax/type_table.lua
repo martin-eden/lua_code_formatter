@@ -4,7 +4,7 @@ local cho = handy.cho
 local list = handy.list
 
 local name = request('words.name')
-local bracket_expr = request('expressions.bracket_expr')
+local bracket_expr = request('wrappers.bracket_expr')
 local syntel = request('words.syntel')
 
 local key_val =

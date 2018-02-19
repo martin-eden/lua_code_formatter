@@ -27,8 +27,10 @@ local hex_number =
   }
 
 --[[
-  Hex number must be checked first, or it's "0" from prefix "0x"
-  will be treated as decimal number "0".
+  Order
+
+    <hex_number> must be checked first. Or it's "0" from prefix "0x"
+    will be treated as decimal <dec_number> "0".
 ]]
 
 return

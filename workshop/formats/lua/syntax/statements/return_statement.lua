@@ -2,7 +2,7 @@ local handy = request('!.mechs.processor.handy')
 local opt = handy.opt
 
 local word = request('^.words.word')
-local expr_list = request('^.expressions.expr_list')
+local expr_list = request('^.wrappers.expr_list')
 local empty_statement = request('empty_statement')
 
 return

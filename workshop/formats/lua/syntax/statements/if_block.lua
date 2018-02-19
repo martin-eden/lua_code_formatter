@@ -3,7 +3,6 @@ local opt = handy.opt
 local opt_rep = handy.opt_rep
 
 local word = request('^.words.word')
-local statements = request('statements')
 
 return
   {
@@ -13,7 +12,7 @@ return
       word('if'),
       '>expression',
       word('then'),
-      statements,
+      '>statements',
     },
     opt_rep(
       {
@@ -21,14 +20,14 @@ return
         word('elseif'),
         '>expression',
         word('then'),
-        statements,
+        '>statements',
       }
     ),
     opt(
       {
         name = 'else_part',
         word('else'),
-        statements,
+        '>statements',
       }
     ),
     word('end'),

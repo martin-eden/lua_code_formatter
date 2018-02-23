@@ -3,15 +3,14 @@ Description
   Formats any valid Lua 5.3 code.
 
   Lines with code are wrapped to fit inside given margins.
-  
-  Files with invalid lua syntax will loose the content after the syntax error!
-  
-  Make sure to verify the correctness of the file before running LCF.
+
+  Files with invalid Lua syntax may lose the content after the syntax
+  error! lcf's parser is more permissible than Lua's, so make sure to
+  verify the correctness of the file before running lcf.
   For example via:
-  
-     luac -p <filename>
-  
-  
+
+    $ luac -p <filename>
+
 
   Installation script deploys three command-line scripts:
 
@@ -33,7 +32,7 @@ Requirements
 
 Installation
 
-  > sudo luarocks make lcf-scm-1.rockspec
+  $ sudo luarocks make lcf-scm-1.rockspec
 
   (also works "sudo luarocks install lcf")
 
@@ -42,7 +41,7 @@ Usage
 
   From command-line
 
-    > lua.reformat <f_in>
+    $ lua.reformat <f_in>
 
     You can pass formatter parameters in command line. For
     available options call "lua.reformat" without parameters.
@@ -73,8 +72,9 @@ Usage
         get_ast(lua_code_str),
         {
           indent_chunk = '  ',
-          right_margin = 100,
-          max_text_width = 65,
+          right_margin = 96,
+          max_text_width = math.huge,
+          keep_unparsed_tail = true,
           keep_comments = true,
         }
       )
@@ -86,16 +86,24 @@ Usage
       <max_text_width> limits length of line without indent, i.e.
         length of text in line. Setting it makes sense for windowed
         viewing in editor.
+      <keep_unparsed_tail> is a flag to keep text after point where
+        we failed to parse source.
+
+        Syntactically incorrect code may lose significant parts even
+        with this flag. For example "f() = a" is formatted as "f()".
+        (Because it's parsed as assignment but formatted as function
+        call.) But text like "1; f() = a" will fail to parse and
+        will remain intact.
       <keep_comments> is a flag to keep comments. Comment text is
         not changed so kept comments may last beyond right margin.
 
-        ! Comments are "sinked-up" to statements level. So text
+        Comments are "sinked-up" to statements level. So text
 
           function(a, --parameter "a"
             b) --parameter "b"
           end
 
-        is treated as
+        is formatted as
 
           --parameter "a"
           function(a, b)
@@ -124,3 +132,4 @@ Usage
 2016-08-16
 2017-01-28
 2017-09-26
+2018-02-23

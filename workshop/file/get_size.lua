@@ -1,3 +1,12 @@
+--[[
+  Return file size in bytes.
+
+  Syntax:
+
+    <file_name> -> <file_size>
+       string        integer
+]]
+
 local safe_open = request('safe_open')
 
 return

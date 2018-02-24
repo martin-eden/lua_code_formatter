@@ -29,7 +29,7 @@ local compile =
     add(raw_compile(t, node_handlers))
   end
 
-local is_identifier = request('!.formats.lua.load.is_identifier')
+local is_identifier = request('!.formats.lua.is_identifier')
 local compact_sequences = true
 
 node_handlers.table =

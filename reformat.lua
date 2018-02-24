@@ -1,6 +1,6 @@
 local get_params = request('reformat.get_params')
 local get_ast = request('!.lua.code.get_ast')
-local serialize_ast = request('!.formats.lua.save')
+local serialize_ast = request('!.lua.code.ast_as_code')
 local convert = request('!.file.convert')
 
 return

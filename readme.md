@@ -49,32 +49,35 @@ options call `$ lua.reformat`.
 Suppose you have a string with Lua code and wish to get another string
 with formatted code.
 
-    do
-      local lua_code_str = 'do return end' -- < fill it
+```lua
+do
+  local lua_code_str = 'do return end' -- < fill it
 
-      require('lcf.workshop.base')
-      local get_ast = request('!.lua.code.get_ast')
-      local get_formatted_code = request('!.formats.lua.save')
+  require('lcf.workshop.base')
+  local get_ast = request('!.lua.code.get_ast')
+  local get_formatted_code = request('!.lua.code.ast_as_code')
 
-      return get_formatted_code(get_ast(lua_code_str))
-    end
-
+  return get_formatted_code(get_ast(lua_code_str))
+end
+```
 
 ### Passing formatting parameters
 
 You may override default parameters by passing a table with new values
 of changed parameters:
 
-    get_formatted_code(
-      get_ast(lua_code_str),
-      {
-        indent_chunk = '  ',
-        right_margin = 96,
-        max_text_width = math.huge,
-        keep_unparsed_tail = true,
-        keep_comments = true,
-      }
-    )
+```lua
+get_formatted_code(
+  get_ast(lua_code_str),
+  {
+    indent_chunk = '  ',
+    right_margin = 96,
+    max_text_width = math.huge,
+    keep_unparsed_tail = true,
+    keep_comments = true,
+  }
+)
+```
 
 * `indent_chunk` is a string using for building one indent. You may try
   value `|..` to see it's effect.
@@ -98,16 +101,20 @@ so comments may last beyond right margin.
 
   Comments are "sinked-up" to statements level. So text
 
-      function(a, --parameter "a"
-        b) --parameter "b"
-      end
+  ```lua
+  function(a, --parameter "a"
+    b) --parameter "b"
+  end
+  ```
 
   is formatted as
 
-      --parameter "a"
-      function(a, b)
-        --parameter "b"
-      end
+  ```lua
+  --parameter "a"
+  function(a, b)
+    --parameter "b"
+  end
+  ```
 
   This is done to keep formatting routines simple.
 

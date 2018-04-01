@@ -9,7 +9,7 @@ local un_op =
   {
     name = 'un_op',
     handy.cho(
-      {opt_spc, match_regexp('[%-%#%~]')},
+      {opt_spc, match_regexp('[%-%#]')},
       word('not')
     ),
   }
@@ -19,15 +19,12 @@ local bin_op =
     name = 'bin_op',
     opt_spc,
     handy.cho(
-      '//',
       '==',
       '~=',
-      '<<',
       '<=',
-      '>>',
       '>=',
       '..',
-      match_regexp('[%+%-%*%/%^%%%&%~%|%<%>]'),
+      match_regexp('[%+%-%*%/%^%%%<%>]'),
       word('and'),
       word('or')
     ),

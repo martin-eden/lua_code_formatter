@@ -13,7 +13,6 @@ return
       'end',
       'local',
       'function',
-      'goto',
       'if',
       'then',
       'elseif',

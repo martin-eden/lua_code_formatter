@@ -4,8 +4,6 @@ local call_assign = request('call_assign')
 local named_function = request('named_function')
 
 local empty_statement = request('empty_statement')
-local label_statement = request('label_statement')
-local goto_statement = request('goto_statement')
 local local_statement = request('local_statement')
 local break_statement = request('break_statement')
 
@@ -24,8 +22,6 @@ return
       named_function,
 
       empty_statement,
-      label_statement,
-      goto_statement,
       local_statement,
       break_statement,
 

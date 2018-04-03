@@ -16,8 +16,8 @@ return
 
     local result
 
-    local is_processed, data_struc = parse(input_stream, syntax)
-    if is_processed then
+    local is_parsed, data_struc = parse(input_stream, syntax)
+    if is_parsed then
       result = data_struc
       for i = 1, select('#', ...) do
         local struc_transformer = select(i, ...)
@@ -25,7 +25,14 @@ return
       end
     end
 
+    local unparsed_tail
+    local elems_remained =
+      input_stream:get_length() - input_stream:get_position() + 1
+    if (elems_remained > 0) then
+      unparsed_tail = input_stream:read(elems_remained)
+    end
+
     -- profiler.stop()
 
-    return result
+    return result, unparsed_tail
   end

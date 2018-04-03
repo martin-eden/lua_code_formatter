@@ -8,19 +8,19 @@ lua.reformat   <f_in>   [<f_out>]
              └── [<options>] ─────┘
 
 <options>:
-  --right-margin=<int> -- Right margin, indent chars counts.
-  --max-text-width=<int> -- Maximum text length, ignoring indent chars.
-  --keep-comments -- Keep comments.
-  --~keep-comments -- Remove comments.
-  --indent=<str> -- Use given string as indent chunk.
 
-Notes
-  * In case when only one parameter of (right-margin, max-text-width)
-    is given, another parameter is set to same value. This is done
-    because these parameters have similar effect and in other case
-    you wish to set another parameter to near value manually.
+  --indent=<str>          Use given string as indent chunk.
 
-  * If <f_out> name is not given, it's generated using <f_in> name.
+  --right-margin=<int>    Right margin, including indent part.
+  --max-text-width=<int>  Maximum text length, excluding indent part.
 
--- Martin, 2017-10-14
+  --keep-comments         Keep comments.
+  --~keep-comments        Remove comments.
+
+  --keep-unparsed-tail    Keep unparsed file end.
+  --~keep-unparsed-tail   Remove unparsed file end.
+
+<f_out>:
+
+  If not given, file name is generated using <f_in> prefix.
 ]]

@@ -24,7 +24,7 @@ local un_op =
   {
     name = 'un_op',
     cho(
-      {opt_spc, match_regexp('[%-%#%~]')},
+      {opt_spc, match_regexp('[%-%#]')},
       word('not')
     ),
   }
@@ -36,11 +36,7 @@ local un_op =
 
     <x> <y>
 
-    //   /
-    ~=   ~
-    <<   <
     <=   <
-    >>   >
     >=   >
 ]]
 
@@ -49,15 +45,12 @@ local bin_op =
     name = 'bin_op',
     opt_spc,
     cho(
-      '//',
       '==',
       '~=',
-      '<<',
       '<=',
-      '>>',
       '>=',
       '..',
-      match_regexp('[%+%-%*%/%^%%%&%~%|%<%>]'),
+      match_regexp('[%+%-%*%/%^%%%<%>]'),
       word('and'),
       word('or')
     ),

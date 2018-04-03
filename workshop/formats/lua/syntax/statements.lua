@@ -8,8 +8,6 @@
        +---+- <assign_or_call> ----+---+
            +- <named_function> ----+
            +- <empty_statement> ---+
-           +- <label_statement> ---+
-           +- <goto_statement> ----+
            +- <local_statement> ---+
            +- <break_statement> ---+
            +- <do_block> ----------+
@@ -29,8 +27,6 @@ local assign_or_call = request('statements.assign_or_call')
 local named_function = request('statements.named_function')
 
 local empty_statement = request('statements.empty_statement')
-local label_statement = request('statements.label_statement')
-local goto_statement = request('statements.goto_statement')
 local local_statement = request('statements.local_statement')
 local break_statement = request('statements.break_statement')
 
@@ -54,8 +50,6 @@ return
         named_function,
 
         empty_statement,
-        label_statement,
-        goto_statement,
         local_statement,
         break_statement,
 

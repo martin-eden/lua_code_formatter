@@ -5,9 +5,8 @@ Formats any valid Lua 5.3 code.
 Lines with code are wrapped to fit inside given margins.
 
 Files with invalid Lua syntax may lose the content after the syntax
-error! lcf's parser is more permissible than Lua's, so make sure to
-verify the correctness of the file before running lcf.
-For example via `$ luac -p <filename>`.
+error! If this is a problem - verify the correctness of the file before
+running reformatter. For example via `$ luac -p <filename>`.
 
 Installation script deploys three command-line scripts:
 
@@ -19,12 +18,18 @@ Last two for people who love tinkering.
 
 
 # Requirements
+* [LuaRocks](https://luarocks.org/). For easy installation.
+* [Lua interpreter](https://lua.org). Version 5.3 is preferred. Another options described
+in a following table.
 
-Sole requirement is Lua v5.3. Earlier versions will not work.
+| Branch | Lua version required | Syntax supported | Notes |
+| --- |:---:|:---:| --- |
+| master | 5.3 | 5.3 | may contain experimental features |
+| 5.3 | 5.3 | 5.3 | |
+| 5.1 | 5.1 |  5.3 | for thouse bounded to 5.1 |
+| 5.1-syntax_5.1 | 5.1 | 5.1 | `goto` is not a keyword here |
 
 It may or may not work under Windows. I've not tested it there.
-
-For Lua v5.1 checkout `5.1` branch.
 
 
 # Installation
@@ -33,15 +38,17 @@ For Lua v5.1 checkout `5.1` branch.
 
 (also works `$ sudo luarocks install lcf`)
 
+# Deinstallation
 
+    $ sudo luarocks remove lcf
+    
 # Usage
 
 ## From command-line
 
     $ lua.reformat <f_in>
 
-You can pass formatter parameters in command line. For available
-options call `$ lua.reformat`.
+For available options call without arguments: `$ lua.reformat`.
 
 
 ## From Lua interpreter

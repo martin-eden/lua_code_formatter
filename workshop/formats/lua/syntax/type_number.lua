@@ -22,8 +22,7 @@ local hex_number =
     cho(
       {'.', int_16},
       {int_16, opt('.', opt(int_16))}
-    ),
-    opt(match_regexp('[pP][%+%-]?%d+'))
+    )
   }
 
 --[[

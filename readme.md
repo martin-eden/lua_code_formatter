@@ -6,18 +6,19 @@ Lines with code are wrapped to fit inside given margins.
 
 Files with invalid Lua syntax may lose the content after the syntax
 error! If this is a problem - verify the correctness of the file before
-running reformatter. For example via `$ luac -p <filename>`.
+running reformatter. For example via `$ luac -p <lua_file>`.
 
 Installation script deploys three command-line scripts:
 
-  * lua.reformat
-  * lua.get_ast
-  * lua.get_formatter_ast
+  * `lua.reformat`
+  * `lua.get_ast`
+  * `lua.get_formatter_ast`
 
 Last two for people who love tinkering.
 
 
 # Requirements
+
 * [LuaRocks](https://luarocks.org/). For easy installation.
 * [Lua interpreter](https://lua.org). Version 5.3 is preferred. Another options described
 in a following table.
@@ -34,21 +35,27 @@ It may or may not work under Windows. I've not tested it there.
 
 # Installation
 
-    $ sudo luarocks make lcf-scm-1.rockspec
+* `$ git clone https://github.com/martin-eden/lua_code_formatter`
+* `$ cd ./lua_code_formatter`
+* `$ sudo luarocks make lcf-scm-1.rockspec`
 
-(also works `$ sudo luarocks install lcf`)
+Alternatively, you may just `$ sudo luarocks install lcf` to get
+stable version.
+
 
 # Deinstallation
 
-    $ sudo luarocks remove lcf
-    
+* `$ sudo luarocks remove lcf`
+* Delete `lua_code_formatter` directory.
+
+
 # Usage
 
 ## From command-line
 
-    $ lua.reformat <f_in>
+`$ lua.reformat <lua_file>`
 
-For available options call without arguments: `$ lua.reformat`.
+For available options call it without arguments: `$ lua.reformat`.
 
 
 ## From Lua interpreter
@@ -86,44 +93,28 @@ get_formatted_code(
 )
 ```
 
-* `indent_chunk` is a string using for building one indent. You may try
-  value `|..` to see it's effect.
+| Parameter | Default | Description | Notes |
+| --- |:---:| --- | --- |
+| `indent_chunk` | ` ` ` ` | String used for building one indent. | You may try value `\|..` to see it's effect. |
+| `right_margin` | 96 | Maximum line length with indent. | Setting it makes sense for printing. |
+| `max_text_width` | +inf | Maximum line length without indent. | Setting it makes sense for viewing in editor. |
+| `keep_unparsed_tail` | true | Keep text after point where we failed to parse source. | Syntactically incorrect code may lose significant parts even with this flag. For example `f() = a` is formatted as `f()`. (Because it's parsed as assignment but formatted as function call.) But text like `1; f() = a` will fail to parse and will remain intact. |
+| `keep_comments` | true | Keep comments. | Comment text is not changed so comments may last beyond right margin. |
 
-* `right_margin` limits length of line with indent. Setting it makes
-  sense for printing.
-
-* `max_text_width` limits length of line without indent, i.e. length of
-  text in line. Setting it makes sense for windowed viewing in editor.
-
-* `keep_unparsed_tail` is a flag to keep text after point where we
-  failed to parse source.
-
-  Syntactically incorrect code may lose significant parts even with
-  this flag. For example `f() = a` is formatted as `f()`. (Because
-  it's parsed as assignment but formatted as function call.) But text
-  like `1; f() = a` will fail to parse and will remain intact.
-
-* `keep_comments` is a flag to keep comments. Comment text is not changed
-so comments may last beyond right margin.
-
-  Comments are "sinked-up" to statements level. So text
-
+Comments are "sinked-up" to statements level. So text
   ```lua
   function(a, --parameter "a"
     b) --parameter "b"
   end
   ```
-
-  is formatted as
-
+is formatted as
   ```lua
   --parameter "a"
   function(a, b)
     --parameter "b"
   end
   ```
-
-  This is done to keep formatting routines simple.
+This is done to keep formatting routines simple.
 
 ---
 
@@ -136,9 +127,7 @@ so comments may last beyond right margin.
   trying all possible variants to fit code under given margins
   and maintain indentation.
 
-* It uses local copy of my ["workshop"](https://github.com/martin-eden/workshop) code hive.
-
-* See also [my repositories contents](https://github.com/martin-eden/contents).
+* See also [my other repositories](https://github.com/martin-eden/contents).
 
 ---
 ```

@@ -116,6 +116,27 @@ is formatted as
   ```
 This is done to keep formatting routines simple.
 
+
+# Contributors
+
+* Several people was asking to keep comments. This was done and `--keep-comments` option was added.
+* `Peter Melnichenko` showed me how to write cross-platform `.rockspec` file.
+* `Oliver Jan Krylow` added cautions in `readme.md` that file with invalid syntax
+loses tail. I've mentioned `$ luac -p` workaround and added `--keep-unparsed-tail`
+option to detect and prevent this.
+* `keneanung` adoped formatter to Lua 5.1 syntax and pushed branch `5.1-syntax_5.1`. Which is probably all what LuaJIT guys need.
+
+
+# Further development
+
+I feel this project is done. Original goal - reformat ugly code from
+World of Warcraft addons - accomplished.
+
+* I'll plan to keep it compatible with current PuC-Lua version.
+* Someday it'll add more documentation about inner mechanics.
+* Maybe I'll add more advanced formatting like empty lines before
+  long `for` blocks.
+
 ---
 
 * Based on my own generic stream processing core,

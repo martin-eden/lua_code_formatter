@@ -139,16 +139,7 @@ World of Warcraft addons - accomplished.
 
 ---
 
-* Based on my own generic stream processing core,
-  which is extended to generic strings parser,
-  which uses my own loseless Lua syntax representation,
-  produces AST (annotated syntax tree),
-  which is further simplified and structured for code formatter,
-  which produces code layout,
-  trying all possible variants to fit code under given margins
-  and maintain indentation.
-
-* See also [my other repositories](https://github.com/martin-eden/contents).
+See also [my other repositories](https://github.com/martin-eden/contents).
 
 ---
 ```

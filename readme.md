@@ -25,10 +25,15 @@ in a following table.
 
 | Branch | Lua version required | Syntax supported | Notes |
 | --- |:---:|:---:| --- |
-| master | 5.3 | 5.3 | may contain experimental features |
-| 5.3 | 5.3 | 5.3 | |
-| 5.1 | 5.1 |  5.3 | for thouse bounded to 5.1 |
-| 5.1-syntax_5.1 | 5.1 | 5.1 | `goto` is not a keyword here |
+| [master] | 5.3 | 5.3 | may contain experimental features |
+| [5.3] | 5.3 | 5.3 | |
+| [5.1] | 5.1 |  5.3 | |
+| [5.1-syntax_5.1] | 5.1 | 5.1 | |
+
+[master]: https://github.com/martin-eden/lua_code_formatter/tree/master
+[5.3]: https://github.com/martin-eden/lua_code_formatter/tree/5.3
+[5.1]: https://github.com/martin-eden/lua_code_formatter/tree/5.1
+[5.1-syntax_5.1]: https://github.com/martin-eden/lua_code_formatter/tree/5.1-syntax_5.1
 
 It may or may not work under Windows. I've not tested it there.
 

@@ -5,43 +5,62 @@ Formats any valid Lua 5.3 code.
 Lines with code are wrapped to fit inside given margins.
 
 Files with invalid Lua syntax may lose the content after the syntax
-error! lcf's parser is more permissible than Lua's, so make sure to
-verify the correctness of the file before running lcf.
-For example via `$ luac -p <filename>`.
+error! If this is a problem - verify the correctness of the file before
+running reformatter. For example via `$ luac -p <lua_file>`.
 
 Installation script deploys three command-line scripts:
 
-  * lua.reformat
-  * lua.get_ast
-  * lua.get_formatter_ast
+  * `lua.reformat`
+  * `lua.get_ast`
+  * `lua.get_formatter_ast`
 
 Last two for people who love tinkering.
 
 
 # Requirements
 
-Sole requirement is Lua v5.3. Earlier versions will not work.
+* [LuaRocks](https://luarocks.org/). For easy installation.
+* [Lua interpreter](https://lua.org). Version 5.3 is preferred. Another options described
+in a following table.
+
+| Branch | Lua version required | Syntax supported | Notes |
+| --- |:---:|:---:| --- |
+| [master] | 5.3 | 5.3 | may contain experimental features |
+| [5.3] | 5.3 | 5.3 | |
+| [5.1] | 5.1 |  5.3 | |
+| [5.1-syntax_5.1] | 5.1 | 5.1 | |
+
+[master]: https://github.com/martin-eden/lua_code_formatter/tree/master
+[5.3]: https://github.com/martin-eden/lua_code_formatter/tree/5.3
+[5.1]: https://github.com/martin-eden/lua_code_formatter/tree/5.1
+[5.1-syntax_5.1]: https://github.com/martin-eden/lua_code_formatter/tree/5.1-syntax_5.1
 
 It may or may not work under Windows. I've not tested it there.
-
-For Lua v5.1 checkout `5.1` branch.
 
 
 # Installation
 
-    $ sudo luarocks make lcf-scm-1.rockspec
+* `$ git clone https://github.com/martin-eden/lua_code_formatter`
+* `$ cd ./lua_code_formatter`
+* `$ sudo luarocks make lcf-scm-1.rockspec`
 
-(also works `$ sudo luarocks install lcf`)
+Alternatively, you may just `$ sudo luarocks install lcf` to get
+stable version.
+
+
+# Deinstallation
+
+* `$ sudo luarocks remove lcf`
+* Delete `lua_code_formatter` directory.
 
 
 # Usage
 
 ## From command-line
 
-    $ lua.reformat <f_in>
+`$ lua.reformat <lua_file>`
 
-You can pass formatter parameters in command line. For available
-options call `$ lua.reformat`.
+For available options call it without arguments: `$ lua.reformat`.
 
 
 ## From Lua interpreter
@@ -79,59 +98,53 @@ get_formatted_code(
 )
 ```
 
-* `indent_chunk` is a string using for building one indent. You may try
-  value `|..` to see it's effect.
+| Parameter | Default | Description | Notes |
+| --- |:---:| --- | --- |
+| `indent_chunk` | ` ` ` ` | String used for building one indent. | You may try value `\|..` to see it's effect. |
+| `right_margin` | 96 | Maximum line length with indent. | Setting it makes sense for printing. |
+| `max_text_width` | +inf | Maximum line length without indent. | Setting it makes sense for viewing in editor. |
+| `keep_unparsed_tail` | true | Keep text after point where we failed to parse source. | Syntactically incorrect code may lose significant parts even with this flag. For example `f() = a` is formatted as `f()`. (Because it's parsed as assignment but formatted as function call.) But text like `1; f() = a` will fail to parse and will remain intact. |
+| `keep_comments` | true | Keep comments. | Comment text is not changed so comments may last beyond right margin. |
 
-* `right_margin` limits length of line with indent. Setting it makes
-  sense for printing.
-
-* `max_text_width` limits length of line without indent, i.e. length of
-  text in line. Setting it makes sense for windowed viewing in editor.
-
-* `keep_unparsed_tail` is a flag to keep text after point where we
-  failed to parse source.
-
-  Syntactically incorrect code may lose significant parts even with
-  this flag. For example `f() = a` is formatted as `f()`. (Because
-  it's parsed as assignment but formatted as function call.) But text
-  like `1; f() = a` will fail to parse and will remain intact.
-
-* `keep_comments` is a flag to keep comments. Comment text is not changed
-so comments may last beyond right margin.
-
-  Comments are "sinked-up" to statements level. So text
-
+Comments are "sinked-up" to statements level. So text
   ```lua
   function(a, --parameter "a"
     b) --parameter "b"
   end
   ```
-
-  is formatted as
-
+is formatted as
   ```lua
   --parameter "a"
   function(a, b)
     --parameter "b"
   end
   ```
+This is done to keep formatting routines simple.
 
-  This is done to keep formatting routines simple.
+
+# Contributors
+
+* Several people was asking to keep comments. This was done and `--keep-comments` option was added.
+* `Peter Melnichenko` showed me how to write cross-platform `.rockspec` file.
+* `Oliver Jan Krylow` added cautions in `readme.md` that file with invalid syntax
+loses tail. I've mentioned `$ luac -p` workaround and added `--keep-unparsed-tail`
+option to detect and prevent this.
+* `keneanung` adoped formatter to Lua 5.1 syntax and pushed branch `5.1-syntax_5.1`. Which is probably all what LuaJIT guys need.
+
+
+# Further development
+
+I feel this project is done. Original goal - reformat ugly code from
+World of Warcraft addons - accomplished.
+
+* I'll plan to keep it compatible with current PuC-Lua version.
+* Someday it'll add more documentation about inner mechanics.
+* Maybe I'll add more advanced formatting like empty lines before
+  long `for` blocks.
 
 ---
 
-* Based on my own generic stream processing core,
-  which is extended to generic strings parser,
-  which uses my own loseless Lua syntax representation,
-  produces AST (annotated syntax tree),
-  which is further simplified and structured for code formatter,
-  which produces code layout,
-  trying all possible variants to fit code under given margins
-  and maintain indentation.
-
-* It uses local copy of my ["workshop"](https://github.com/martin-eden/workshop) code hive.
-
-* See also [my repositories contents](https://github.com/martin-eden/contents).
+See also [my other repositories](https://github.com/martin-eden/contents).
 
 ---
 ```

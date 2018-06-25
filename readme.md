@@ -138,7 +138,7 @@ I feel this project is done. Original goal - reformat ugly code from
 World of Warcraft addons - accomplished.
 
 * I'll plan to keep it compatible with current PuC-Lua version.
-* Someday it'll add more documentation about inner mechanics.
+* Someday I'll add more documentation about inner mechanics.
 * Maybe I'll add more advanced formatting like empty lines before
   long `for` blocks.
 

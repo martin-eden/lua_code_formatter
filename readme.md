@@ -16,6 +16,8 @@ Installation deploys three command-line scripts:
 
 Last two for people who love tinkering.
 
+[Archiving note][note]
+
 ---
 
 ### Requirements
@@ -168,7 +170,7 @@ World of Warcraft addons accomplished.
 
 ---
 
-### See also 
+### See also
   * [Command-line builder](https://github.com/martin-eden/lcf_params_gui) for this.
   * [My other repositories](https://github.com/martin-eden/contents).
 
@@ -179,3 +181,5 @@ World of Warcraft addons accomplished.
 2017-09-26
 2018-02-23
 ```
+
+[note]: note.md

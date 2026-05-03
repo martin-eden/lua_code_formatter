@@ -16,7 +16,8 @@ Installation deploys three command-line scripts:
 
 Last two for people who love tinkering.
 
-[Archiving note][note]
+I consider this project is complete. I tried to archive this repo but
+reverted back ([archiving notes][note]). Code is not broken and works in 2026.
 
 ---
 

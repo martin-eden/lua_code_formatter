@@ -184,4 +184,4 @@ World of Warcraft addons accomplished.
 2018-02-23
 ```
 
-[note]: note.md
+[note]: Note.md

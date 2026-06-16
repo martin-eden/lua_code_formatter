@@ -1,4 +1,8 @@
-### Description
+| Created | Updated |  Size   | License |
+|:-------:|:-------:|:-------:|:-------:|
+| 2016    | 2026-06 | < 200 K |   GPL3  |
+
+### What
 
 Formats any valid Lua 5.3 code.
 

@@ -1,9 +1,22 @@
+-- Reformat Lua code
+
+--[[
+  Author: Martin Eden
+  Last mod.: 2026-06-16
+]]
+
+--[[ Develop
+package.path = package.path .. ';../../../?.lua'
+--]]
+require('workshop.base')
+
+-- Imports:
 local get_params = request('reformat.get_params')
 local get_ast = request('!.lua.code.get_ast')
 local serialize_ast = request('!.lua.code.ast_as_code')
 local convert = request('!.file.convert')
 
-return
+local reformat =
   function(args)
     local f_in_name, f_out_name, formatter_options = get_params(args)
     if not f_in_name then
@@ -21,3 +34,13 @@ return
       }
     )
   end
+
+-- Main:
+do
+  reformat(_G.arg)
+end
+
+--[[
+  2017 # #
+  2026-06-16
+]]

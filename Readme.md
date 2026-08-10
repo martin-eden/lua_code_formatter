@@ -21,7 +21,7 @@ Installation deploys three command-line scripts:
 Last two for people who love tinkering.
 
 I consider this project is complete. I tried to archive this repo but
-reverted back ([archiving notes][note]). Code is not broken and works in 2026.
+reverted back ([archiving notes][notes]). Code is not broken and works in 2026.
 Git branch `dev/` is most recent code.
 
 ---
@@ -188,4 +188,4 @@ World of Warcraft addons accomplished.
 2018-02-23
 ```
 
-[note]: Note.md
+[notes]: Notes.md

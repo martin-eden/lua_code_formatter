@@ -45,3 +45,26 @@ writing another pieces of good code for microcontrollers,
 doing designs for CNC and 3D printers and quite happy.
 
 -- Martin
+
+
+### 2026-08-10 Historical note
+
+For now I see two dirty places here:
+
+  * Several branches ( (tool code 5.1, syntax 5.1) (tool code 5.3, syntax 5.1)
+    (tool code 5.3, syntax 5.3) )
+  * LuaRocks artifacts
+
+Core of this project was created in 2016-2017. There my scope was
+Lua 5.3. Unrelated LuaRocks files was added a bit later to make it
+locally installable via `luarocks`.
+
+Today I'm not using LuaRocks. I wrote my own tool for combining source
+code files.
+
+Today I would not create version branches. I would take time to
+design mechanic to switch Lua-version-specific mechanics at runtime.
+
+Still, returning to this project assumes lot of work. I would like to
+do best I can for today again. So quick fixes is undershot.
+I want proper rework.

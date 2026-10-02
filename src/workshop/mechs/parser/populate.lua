@@ -1,56 +1,65 @@
-local subtract_seg = request('!.mechs.geometry.1d.segments.subtract_inner')
-
-local process =
-  function(data_struc, in_stream)
-
-    local get_segment =
-      function(node)
-        return in_stream:get_segment(node.start, node.len)
-      end
-
-    local populate
-    populate =
-      function(node)
-        if not is_table(node) then
-          return
-        end
-        local outer_seg = node
-        local i = 1
-        while (i <= #node) and outer_seg do
-          local l_seg, r_seg = subtract_seg(outer_seg, node[i])
-          local seg_val
-          if l_seg then
-            seg_val = get_segment(l_seg)
-            table.insert(node, i, seg_val)
-            i = i + 1
-          end
-          outer_seg = r_seg
-          i = i + 1
-        end
-        if outer_seg then
-          seg_val = get_segment(outer_seg)
-          table.insert(node, i, seg_val)
-        end
-        for i = 1, #node do
-          populate(node[i])
-        end
-        node.start = nil
-        node.len = nil
-      end
-
-    if next(data_struc) then
-      populate(data_struc)
-    end
-  end
-
-return process
+-- Fill tree leaves with data
 
 --[[
-  * For all records we remove data offsets related to input stream.
+  Author: Martin Eden
+  Last mod.: 2026-10-20
+]]
 
-    This is because
-      * we assume that input stream is no longer accessible in
-        further flow
-      * the intention of parsing is remove more low-level layer,
-        not just annotate it
+--[[
+  For all records we remove data offsets related to input stream
+
+  This is because
+    * we assume that input stream is no longer accessible in
+      further flow
+    * the intention of parsing is remove more low-level layer,
+      not just annotate it
+]]
+
+local subtract_seg = request('!.mechs.geometry.1d.segments.subtract_inner')
+local add_item = request('!.concepts.list.add_item')
+local tbl_insert = table.insert
+
+return
+  function(Node, InputStream)
+    local get_segment =
+      function(Node)
+        return InputStream:get_segment(Node.start, Node.len)
+      end
+
+    local populate_leaves
+    populate_leaves =
+      function(Node)
+        if not is_table(Node) then
+          return
+        end
+
+        if (#Node == 0) then
+          add_item(Node, get_segment(Node))
+        else
+          for i = 1, #Node do
+            populate_leaves(Node[i])
+          end
+        end
+      end
+
+    local strip_segments
+    strip_segments =
+      function(Node)
+        if not is_table(Node) then return end
+        Node.start = nil
+        Node.len = nil
+        for _, Subnode in ipairs(Node) do
+          strip_segments(Subnode)
+        end
+      end
+
+    populate_leaves(Node)
+    strip_segments(Node)
+  end
+
+--[[
+  2016 #
+  2017 # #
+  2018 #
+  2026-10-20
 ]]

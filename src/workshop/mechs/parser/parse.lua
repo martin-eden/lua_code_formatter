@@ -21,6 +21,7 @@ return
     local is_parsed = processor:match(struc)
     local data_struc = out_stream.seq
     data_struc = get_struc(out_stream.seq)
+
     populate(data_struc, in_stream)
 
     return is_parsed, data_struc

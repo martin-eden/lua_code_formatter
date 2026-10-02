@@ -4,7 +4,7 @@ local parse = request('parser.parse')
 local c_stream = request('!.mechs.streams.mergeable.string.interface')
 
 -- local profiler = request('!.system.profiler')
--- local to_str = request('!.formats.lua_table_code.save')
+-- local to_str = request('!.concepts.lua_table_code.save')
 
 return
   function(data, syntax, ...)

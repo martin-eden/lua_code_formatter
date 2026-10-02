@@ -1,19 +1,27 @@
---[[
-  Clone table <base_obj>. Optionally override fields in clone with
-  fields from <overriden_params>.
+-- Copy table and maybe override fields
 
-  Returns cloned table.
+--[[
+  Author: Martin Eden
+  Last mod.: 2026-08-28
 ]]
 
 local clone = request('clone')
 local patch = request('patch')
 
+-- Export:
 return
-  function(base_obj, overriden_params)
-    assert_table(base_obj)
-    local result = clone(base_obj)
-    if is_table(overriden_params) then
-      patch(result, overriden_params)
+  function(Base, Overrides)
+    assert_table(Base)
+
+    local Result = clone(Base)
+
+    if is_table(Overrides) then
+      patch(Result, Overrides)
     end
-    return result
+
+    return Result
   end
+
+--[[
+  2016 #
+]]

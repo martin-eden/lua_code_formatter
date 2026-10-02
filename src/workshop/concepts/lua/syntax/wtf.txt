@@ -1,0 +1,9 @@
+Grammar elements for Lua language.
+
+Named elements and common substructures are represented as
+separate files.
+
+For performance reasons this grammar is less restrictive than Lua's.
+F.e. it allows invalid escape sequences ('\_') and assignments
+to function call (f() = a). Task or code verification is already
+well solved by "luac" tool.

@@ -1,8 +1,10 @@
 --[[
   Subtract inner <small> segment.
 
-  Returs two possible <left> and <right> segments. Which may be nil.
+  Returns two possible <left> and <right> segments. Which may be nil.
 ]]
+
+-- Last mod.: 2024-11-24
 
 return
   function(big, small)
@@ -24,3 +26,7 @@ return
     end
     return left_seg, right_seg
   end
+
+--[[
+  2017-08
+]]

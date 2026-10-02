@@ -1,0 +1,8 @@
+Code to simplify parsed structure produced by Lua grammar parser.
+
+Parser grammars does not written to be easy to use. They are written
+to be simple and easy to read/understand.
+
+Also parser is a one-way beast in sense it cannot make decisions
+based on currently parsed state. (Say when parsing "f(a, b, ...)"
+it cannot embed <expr_list> "(a, b, ...)" into <func_args> parent.)

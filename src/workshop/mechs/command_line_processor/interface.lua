@@ -8,7 +8,7 @@ return
       },
     run = request('run'),
     -- implementation
-    parse_args = request('parse_args'),
+    parse_params = request('parse_params'),
     classify_item = request('classify_item'),
     get_key_name = request('get_key_name'),
     assert_type_is_correct = request('assert_type_is_correct'),

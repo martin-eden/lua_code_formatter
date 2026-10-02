@@ -1,0 +1,10 @@
+Why use this instead of "table"?
+
+This code is mostly wraps "table.insert()" and "table.move()".
+Why not use them directly?
+
+"table" functions are more powerful than we need in most our code.
+They accept more arguments than we provide. In our code we want
+to say "aha, it's using 'list'.." and expect less surprises from code.
+
+-- Martin, 2026-05-04

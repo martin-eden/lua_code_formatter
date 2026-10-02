@@ -1,29 +1,20 @@
+-- Parse string with Lua code to AST table
+
 --[[
-  Get AST for string with Lua code.
-
-  str -> table
-
-  Handles possible "#!" at start of shell files.
+  Author: Martin Eden
+  Last mod.: 2026-10-24
 ]]
 
+local Syntax = request('!.concepts.lua.syntax')
 local parse = request('!.mechs.generic_loader')
-local syntax = request('!.formats.lua.syntax')
-local parse_sh = request('!.formats.sh.load')
 
 return
-  function(s)
-    assert_string(s)
-
-    local sh = parse_sh(s)
-    local shebang_str
-    if sh.tool then
-      shebang_str = '#! ' .. sh.tool
-    end
-
-    local result, unparsed_tail = parse(sh.data, syntax)
-
-    result.shebang_str = shebang_str
-    result.unparsed_tail = unparsed_tail
-
-    return result
+  function(code_str)
+    return ( parse(code_str, Syntax) )
   end
+
+--[[
+  2018 #
+  2026 # # #
+  2026-10-24
+]]

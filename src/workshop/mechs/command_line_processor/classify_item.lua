@@ -1,6 +1,6 @@
 local flag_pattern = '^%-%-(~?)([%w%-]+)$'  -- --~keep-comments
 local key_int_pattern = '^%-%-([%w%-]+)=(%d+)$'  -- --right-margin=40
-local key_str_pattern = '^%-%-([%w%-]+)=(.+)$'  -- --indent-chunk=  |
+local key_str_pattern = '^%-%-([%w%-]+)=(.*)$'  -- --indent-chunk=  |
 
 return
   function(self, item)

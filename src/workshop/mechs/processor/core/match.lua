@@ -1,3 +1,34 @@
+--[[
+  Grammar matching routine.
+
+  It matches current position of <self.input_stream> with <rule> and
+  returns boolean result.
+
+  Behavior depends of <rule> type:
+
+    string - simple string matching
+
+    function - calls that function and pass it <self.input_stream>,
+      <self.output_stream>
+
+    table - sequence of rules plus processing flags:
+      opt <.op> - string - "neg" - negate result, "opt" - optional
+        rule (result is always true but try to match)
+      opt <.f_rep> - bool - flag to repeat processing until fail
+      opt <.mode_choice> - bool - flag to handle sequence as
+        "choice first matching rule". Else sequence is handled as
+        "match following sequence of rules".
+      opt <.name> - string - name of rule. Passed to handler of
+        "match" event.
+
+      In case of positive result and when <.name> is present,
+      <self.on_match> function called with arguments of input stream,
+      output stream, rule name, initial input stream position.
+
+  In case of negative result read positions in input and output
+  streams are restored to what they were at start of this function.
+]]
+
 return
   function(self, rule)
     local rule_type = type(rule)
@@ -50,7 +81,9 @@ return
         input_stream:set_position(round_in_stream_pos)
         output_stream:set_position(round_out_stream_pos)
       elseif rule_name then
-        self.on_match(input_stream, output_stream, rule_name, round_in_stream_pos)
+        self.on_match(
+          input_stream, output_stream, rule_name, round_in_stream_pos
+        )
       end
 
       if f_rep then

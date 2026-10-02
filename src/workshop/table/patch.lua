@@ -1,18 +1,33 @@
-local patch
-patch =
-  function(t_src, t_patch)
-    for k, v in pairs(t_patch) do
-      if (t_src[k] == nil) then
-        local err_msg =
-          ('Destination table dont have key "%s".'):format(tostring(k))
-        error(err_msg, 2)
-      end
-      if is_table(t_src[k]) and is_table(v) then
-        patch(t_src[k], v)
-      else
-        t_src[k] = v
-      end
-    end
+-- Replace values to values from another table
+
+--[[
+  Author: Martin Eden
+  Last mod.: 2026-09-22
+]]
+
+--[[
+  Existing values are overwritten:
+    { a = 'A'}, { a = 'X' } -> { a = 'X' }
+
+  New values are not added:
+    { a = 'A'}, { b = 'B' } -> { a = 'A' }
+]]
+
+local Rules =
+  {
+    { has_a = true, has_b = true, action = 'replace' },
+  }
+
+local apply_table = request('apply_table')
+
+return
+  function(Result, Additions)
+    apply_table(Result, Additions, Rules)
   end
 
-return patch
+--[[
+  2016 #
+  2024 # #
+  2025 #
+  2026 #
+]]

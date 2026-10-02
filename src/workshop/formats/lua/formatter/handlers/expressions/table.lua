@@ -1,7 +1,7 @@
 local oneliner =
   function(self, node)
     local printer = self.printer
-    printer:add_curline('{')
+    printer:add_curline('{ ')
     for i = 1, #node do
       if (i > 1) then
         printer:add_curline(', ')
@@ -17,7 +17,7 @@ local oneliner =
         return
       end
     end
-    printer:add_curline('}')
+    printer:add_curline(' }')
     return true
   end
 
@@ -26,7 +26,7 @@ local multiliner =
     local printer = self.printer
 
     printer:request_clean_line()
-    printer:add_curline('{')
+    printer:add_curline('{ ')
 
     printer:inc_indent()
     for i = 1, #node do
@@ -51,14 +51,14 @@ local multiliner =
     printer:dec_indent()
 
     printer:request_clean_line()
-    printer:add_curline('}')
+    printer:add_curline(' }')
     return true
   end
 
 return
   function(self, node)
     if (#node == 0) then
-      self.printer:add_curline('{}')
+      self.printer:add_curline('{ }')
       return true
     else
       return self:variate(node, oneliner, multiliner)

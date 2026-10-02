@@ -1,0 +1,218 @@
+This is outdated after 2017-02-27.
+
+  Parser changed. opt, rep, neg are now named "flags"
+
+  [handy] shortcuts separated to flag shortcuts and
+  cho(). Also should mention that list(), interleave() are
+  upper-level compositors.
+--
+Parser, How and Why It Works
+
+This was (and probably remains) proof of concept general strings
+parser which accepts grammar in form of lua table, not string
+like common regexp family.
+
+Table has following base fields:
+  {
+    mode -- string value with one of predefined modes
+    [1]
+    [2]  -- terms of current structure
+    ...
+  }
+
+Terms may be a tables in same format, strings or functions.
+
+If term is string, current input compared with this string and
+if matches, returns two values: true and new input position
+(which is always is next character position after matched string).
+
+If term is function it is called with two arguments: input string
+and input position in this string. It expects to behave like
+string matching: if function succeeds, it returns true and new
+input position.
+
+If term is table, we're start handling it same way.
+
+In all fail cases returned false and current input position.
+
+
+Modes
+
+Modes how to handle result of terms handling.
+
+'seq' - sequence. Iteratively match all terms, moving input position.
+If one of them fails, processing of current table fails.
+
+'choice_first' - first choice. Alternatively match terms until one
+of them succeeds. In this case return it's result.
+
+'choice_best' - relatively best choice. Alternatively match all terms
+and return as a result term which moved new input position further.
+(Return first of such terms it they are several.)
+
+'repeat' - repeat until fail. Firstly process terms as in 'seq' mode.
+If it succeeds, then keep repeatedly process them in 'seq' mode until
+fail. Returns last successful pass position.
+
+
+'optional' - optional match. Process terms in 'seq' mode. If it fails
+return true and original position. If succeeds return true and
+new position.
+
+This is generally used to eat some optional chars like spaces.
+
+
+'is_not' - negation. Process terms in 'choice_first' mode. If
+processing succeeds - return false and new position. Else return
+true and new position.
+
+This is generally used to detect some fixed characters like ending
+quotes in strings. As new position if fail case returned,
+is_not(is_not(A)) == A.
+
+
+There was base. Now how to use it easily.
+
+[handy] module exports some handy constructors of these tables.
+For example "handy.opt('abc', '.')" will return table
+"{mode = 'optional', 'abc', '.')}". This makes possible
+often used "opt(rep(cho()))". For this reasons even shortcut
+"handy.opt_rep_cho" is exported.
+
+Also there is often used "list" construction. It describes
+sequences of some terms and some delimiter between them (but not
+after the last term). Technically "list(a, b, c, {d, e})" generates
+"{a, b, c}, opt(rep({d, e}, {a, b, c}))" which implements what I said.
+
+Often there is possible to match pattern via plain regexps.
+For this reasons function "handy.match" created. It receives
+lua regexp pattern and returns function which will match current
+stream position with this pattern and will behave like normal
+term function.
+
+
+Okay, can we parse now?
+
+Not yet. What is described allows just _verification_ of some
+possibly complex grammar. To construct folded table with terms
+data from input string we need to know names of structures and
+their positions.
+
+Structure name stored in "name" field of table.
+
+Positions may be reconstructed if after successful parsing some named
+structure <struc> we store <start_pos> and <end_pos> (previous input
+position and current input position minus one) in some queue. Believe
+it or not but whole tree of named structures and their values may
+be reconstructed from this array. Module [folder] doing this. And
+module [populate] fills bottom nodes with actual string values.
+
+Note that the string values filled only for bottom-level nodes.
+So if you have structure
+
+  name = 'key_value'
+  start_pos = 9
+  end_pos = 20
+  [1]
+    name = 'key'
+    start_pos = 10
+    end_pos = 15
+  [2]
+    name = 'value'
+    start_pos = 17
+    end_pos = 20
+
+in filled structure only 'key' and 'value' will have filled ".value".
+This is done to save memory and generally you do not need string
+segment for parent.
+
+Now we're almost done.
+
+
+Tricky cases
+
+One and the only tricky case is recursion. It is when part of grammar
+links to itself, directly or indirectly. For example
+
+token = cho("null", "true", "false")
+array =
+  "["
+    opt(
+      list(
+        cho(
+          token,
+          array
+        ),
+        ","
+      )
+    )
+  "]"
+return array
+
+So string "[null,[true],[[false,false]]" is legal.
+
+This is the pars where lua tables rocks!
+
+As you know lua table may natively store other tables inside. Even
+self table. But we can't simply write something like
+
+local array
+array = {array}
+
+as "{array}" will be filled with previous value (which is nil).
+
+But
+
+local array = {}
+array[1] = array
+
+Will do the job and "array" will store table with link to itself,
+"{[1] = array}"
+
+To keep things simple
+
+Structure fields "inner_name" contains inner name of structure.
+To link to it use ">" .. (and inner name).
+
+(
+  Yes, so it conflicts with grammars like "{'a', '>b'}" for string
+  "a>b". Represent them as "{'a', '>', 'b'}" or something else.
+)
+
+So our array example may be defined as
+array = {inner_name = 'array', '>array'}
+
+Parser module [link] will do linking before actually parsing.
+
+
+Other notes
+
+
+There is also module [optimize]. It's intention is to simplify given
+(badly-written) grammar to eliminate extreme cases like
+
+"cho('a')" ( == 'a')
+
+or
+
+"seq(seq('a', 'b', 'c'), 'd', 'e')" ( == seq('a', 'b', 'c', 'd', 'e'))
+
+or
+
+"is_not(is_not('a'))" ( == 'a')
+
+It is not complete, not trivial and my measurements for my (well-written)
+grammars shows it makes changes very seldom and changes have
+negligible performance effect. So I'm not developing it at this point.
+
+
+There is also grammars like [==[ ]==] lua "long" quotes that
+cannot be natively parsed at the moment. (In [lua_code_formatter]
+they are matched by specific function which is ok as long as
+text in quotes does not contain another subgrammar to parse.)
+
+I'm planning to implement ability to access currently parsed
+part in functions.
+
+--
+2017-02-07

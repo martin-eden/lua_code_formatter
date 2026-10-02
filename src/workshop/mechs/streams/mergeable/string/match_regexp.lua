@@ -10,9 +10,10 @@
 return
   function(self, pattern)
     -- print(('match_regexp [%d, "%s"]'):format(self:get_position(), pattern))
-    local start, finish = self.s:find(pattern, self:get_position())
+    local start, finish, capture = self.s:find(pattern, self:get_position())
     if start then
       self:set_position(finish + 1)
-      return self.s:sub(start, finish)
+      capture = capture or self.s:sub(start, finish)
+      return capture
     end
   end

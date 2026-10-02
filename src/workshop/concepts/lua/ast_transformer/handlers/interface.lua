@@ -1,0 +1,36 @@
+-- Node transformers
+
+--[[
+  Author: Martin Eden
+  Last mod.: 2026-10-28
+]]
+
+-- Map of node type to function
+
+return
+  {
+    ['attr_name_list'] = request('attr_name_list'),
+    ['assignment'] = request('assignment'),
+    ['else_part'] = request('else_part'),
+    ['elseif_part'] = request('elseif_part'),
+    ['expression'] = request('expression'),
+    ['function_call'] = request('function_call'),
+    ['function_params'] = request('function_params'),
+    ['generic_for_block'] = request('generic_for_block'),
+    ['if_block'] = request('if_block'),
+    ['if_part'] = request('if_part'),
+    ['key_val'] = request('key_val'),
+    ['local_assignment'] = request('local_assignment'),
+    ['local_named_function'] = request('local_named_function'),
+    ['named_function'] = request('named_function'),
+    ['numeric_for_block'] = request('numeric_for_block'),
+    ['repeat_block'] = request('repeat_block'),
+    ['type_function'] = request('type_function'),
+    ['var_ref'] = request('var_ref'),
+    ['while_block'] = request('while_block'),
+  }
+
+--[[
+  2018 #
+  2026-10-28
+]]

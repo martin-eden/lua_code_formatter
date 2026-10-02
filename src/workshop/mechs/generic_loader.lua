@@ -1,38 +1,43 @@
+-- Parse string with given syntax. Optilonally apply transformations
+
+--[[
+  Author: Martin Eden
+  Last mod.: 2026-10-26
+]]
+
+local StringInputStream =
+  request('!.mechs.streams.mergeable.string.interface')
 local parse = request('parser.parse')
 
--- local c_stream = request('!.mechs.streams.mergeable.file.interface')
-local c_stream = request('!.mechs.streams.mergeable.string.interface')
-
--- local profiler = request('!.system.profiler')
--- local to_str = request('!.formats.lua_table_code.save')
-
 return
-  function(data, syntax, ...)
-    -- profiler.start()
-    -- print(to_str(syntax))
+  function(data_str, Syntax, ...)
+    local InputStream = new(StringInputStream)
+    InputStream:init(data_str)
 
-    local input_stream = new(c_stream)
-    input_stream:init(data)
+    local Result
 
-    local result
-
-    local is_parsed, data_struc = parse(input_stream, syntax)
+    local is_parsed, DataStruc = parse(InputStream, Syntax)
     if is_parsed then
-      result = data_struc
+      Result = DataStruc
       for i = 1, select('#', ...) do
         local struc_transformer = select(i, ...)
-        result = struc_transformer(result)
+        Result = struc_transformer(Result)
       end
     end
 
     local unparsed_tail
     local elems_remained =
-      input_stream:get_length() - input_stream:get_position() + 1
+      InputStream:get_length() - InputStream:get_position() + 1
     if (elems_remained > 0) then
-      unparsed_tail = input_stream:read(elems_remained)
+      unparsed_tail = InputStream:read(elems_remained)
     end
 
-    -- profiler.stop()
-
-    return result, unparsed_tail
+    return Result, unparsed_tail
   end
+
+--[[
+  2016 # #
+  2017 # #
+  2018 # #
+  2026-10-26
+]]

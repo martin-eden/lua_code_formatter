@@ -1,9 +1,26 @@
+-- Return list of key-values records for given table
+
+--[[
+  Author: Martin Eden
+  Last mod.: 2026-08-28
+]]
+
+local add_to_list = request('!.concepts.list.add_item')
+
+-- Export:
 return
-  function(t)
-    assert_table(t)
-    local result = {}
-    for k, v in pairs(t) do
-      result[#result + 1] = {key = k, value = v}
+  function(Table)
+    assert_table(Table)
+
+    local KeyVals = { }
+
+    for key, value in pairs(Table) do
+      add_to_list(KeyVals, { key = key, value = value })
     end
-    return result
+
+    return KeyVals
   end
+
+--[[
+  2016 #
+]]

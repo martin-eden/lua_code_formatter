@@ -1,17 +1,62 @@
+-- Function to create "is_<type>" family of global functions
+
 --[[
-  Create "is_<type>" family of global functions.
+  Author: Martin Eden
+  Last mod.: 2026-08-28
 ]]
 
-local data_types = request('!.lua.data_types')
+--[[
+  It spawns "is_nil", "is_boolean", ... for all Lua data types.
+  Also it spawns "is_integer" and "is_float" for number type.
+]]
 
-for _, type_name in ipairs(data_types) do
-  _G['is_' .. type_name] =
-    function(a)
-      return (type(a) == type_name)
+local type_is =
+  function(type_name)
+    return
+      function(val)
+        return (type(val) == type_name)
+      end
+  end
+
+local number_is
+do
+  local math_type = math.type
+
+  number_is =
+    function(type_name)
+      return
+        function(val)
+          --[[
+            math.type() throws error for non-number types.
+            This function returns "false" for non-number types.
+          ]]
+          if not is_number(val) then
+            return false
+          end
+          return (math_type(val) == type_name)
+        end
     end
 end
 
-_G.is_integer =
-  function(n)
-    return (math.type(n) == 'integer')
+local TypeNames = request('!.concepts.lua.TypeNames')
+local NumberTypeNames = request('!.concepts.lua.NumberTypeNames')
+
+-- Export:
+return
+  function()
+    for _, type_name in ipairs(TypeNames) do
+      _G['is_' .. type_name] = type_is(type_name)
+    end
+
+    for _, number_type_name in ipairs(NumberTypeNames) do
+      _G['is_' .. number_type_name] = number_is(number_type_name)
+    end
   end
+
+--[[
+  2018 #
+  2020 #
+  2022 #
+  2024 #
+  2026 #
+]]

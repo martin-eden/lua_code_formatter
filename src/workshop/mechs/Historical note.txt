@@ -1,0 +1,25 @@
+What is here and why?
+
+"mechs/" dir originally was for computational-heavy smart stuff.
+
+Years later "concepts/" directory was created. Originally it was
+renamed from "formats/" directory with file format codecs.
+
+Later I wanted to repurpose "concepts" for data-centric structures.
+But they were growing with utility functions, becoming smarter
+and computational-heavy...
+
+Truth is that there is no natural distinction between data and code.
+Between data, data structures and algorithms.
+
+Currently this directory is historical artifact still containing code
+used by older projects and internal parts.
+
+New code is welcome here too, but expect old code to expose some
+weirdness that should be tolerated.
+
+Its problem is experimental interfaces and lack of documentation.
+Some parts can migrate to "concepts" after analysis and refactoring.
+Some parts may be substituted and removed.
+
+-- Martin, 2026-08-01 (with help of Devin @ deepwiki)

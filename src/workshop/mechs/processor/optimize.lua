@@ -1,15 +1,20 @@
---[[
+-- Grammar optimization
 
+--[[
+  Author: Martin Eden
+  Last mod.: 2026-08-09
+]]
+
+--[[
   We're inlining lone children into parents trying to get
   "saturated" record with following structure:
 
     --+---------+--+---------+--+----------+--
       +-| opt |-+  `-| rep |-'  `-| name |-'
       `-| neg |-'
-
 ]]
 
-local to_str = request('!.formats.lua_table_code.save')
+-- local to_str = request('!.convert.table_to_str')
 local assembly_order = request('!.mechs.graph.assembly_order')
 
 local get_num_refs =
@@ -99,3 +104,8 @@ return
     -- print('Optimized grammar:')
     -- print(to_str(grammar))
   end
+
+--[[
+  2016 ?
+  2017
+]]

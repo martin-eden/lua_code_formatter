@@ -1,0 +1,1472 @@
+#!/usr/local/bin/lua
+
+package.preload['meld'] =
+  function(...)
+    require('workshop.base')
+    local get_modules
+    do
+      local is_lua_file
+      local get_module_name
+      do
+        local lua_extension = '.lua'
+        local str_ends_with = request('!.string.ends_with')
+        is_lua_file =
+          function(file_name)
+            return str_ends_with(file_name, lua_extension)
+          end
+        do
+          local parse_pathname =
+            request('!.concepts.path_name.pathname_from_str')
+          local str_remove_prefix = request('!.string.remove_prefix')
+          local str_remove_postfix = request('!.string.remove_postfix')
+          local rebase_pathname =
+            request('!.concepts.path_name.rebase_to')
+          local module_name_delimiter = '.'
+          local list_to_str = request('!.concepts.list.to_string')
+          get_module_name =
+            function(path_name, base_dir)
+              path_name = str_remove_prefix(path_name, base_dir)
+              path_name = str_remove_postfix(path_name, lua_extension)
+              path_name = rebase_pathname('./', path_name)
+              return
+                list_to_str(
+                  parse_pathname(path_name), module_name_delimiter
+                )
+            end
+        end
+      end
+      local file_to_str = request('!.convert.file_to_str')
+      local add_to_list = request('!.concepts.list.add_item')
+      local get_files_list =
+        request('!.file_system.directory.get_total_files_list')
+      get_modules =
+        function(base_dir)
+          local Files = get_files_list(base_dir)
+          local Result = {}
+          for _, path_name in ipairs(Files) do
+            if not is_lua_file(path_name) then
+              goto next
+            end
+            local module_name = get_module_name(path_name, base_dir)
+            local module_code = file_to_str(path_name)
+            add_to_list(Result, { module_name, module_code })
+            ::next::
+          end
+          return Result
+        end
+    end
+    do
+      local modules_dir = arg[1]
+      local root_module = arg[2]
+      local usage_help =
+        [[
+Merge all .lua files under given directory into one executable
+code block and print it.
+
+Usage
+
+  meld <modules_dir> <root_module_name>
+
+Example
+
+  $ meld test_case/ test > ingots/test.lua
+
+Parameters
+
+  <modules_dir> -- Directory from which we search for .lua files.
+
+  <root_module_name> -- Name of the "main" module which is called
+    in generated code block.
+
+-- Martin, 2026-08
+]]
+      local emit
+      do
+        local newline
+        do
+          local AsciiChars = request('!.concepts.Ascii.Chars')
+          newline = AsciiChars.newline
+        end
+        local string_ends_with = request('!.string.ends_with')
+        emit =
+          function(str)
+            io.write(str)
+            if not string_ends_with(str, newline) then
+              io.write(newline)
+            end
+          end
+      end
+      local meld
+      do
+        local add_module_registration
+        local add_module_call
+        do
+          do
+            local lua_quote_string =
+              request('!.concepts.lua.quote_string')
+            add_module_registration =
+              function(module_name, module_code)
+                local quoted_module_name = lua_quote_string(module_name)
+                emit('-- ( module ' .. module_name)
+                emit('package.preload[' .. quoted_module_name .. '] =')
+                emit('function(...)')
+                emit(module_code)
+                emit('end')
+                emit('-- )')
+                emit('')
+              end
+          end
+          add_module_call =
+            function(module_name)
+              emit("return require('" .. module_name .. "')")
+            end
+        end
+        meld =
+          function(modules_dir, root_module)
+            local Modules = get_modules(modules_dir)
+            for _, Rec in ipairs(Modules) do
+              local module_name = Rec[1]
+              local module_code = Rec[2]
+              add_module_registration(module_name, module_code)
+            end
+            add_module_call(root_module)
+          end
+      end
+      if not (modules_dir and root_module) then
+        emit(usage_help)
+        return
+      end
+      meld(modules_dir, root_module)
+    end
+  end
+package.preload['workshop.base'] =
+  function(...)
+    local str_match = string.match
+    local str_find = string.find
+    local str_sub = string.sub
+    local tbl_pack = table.pack
+    local tbl_unpack = table.unpack
+    local require = require
+    local empty = ''
+    local stack_init
+    local stack_get
+    local stack_add
+    local stack_remove
+    do
+      local Names
+      local depth
+      stack_init =
+        function()
+          Names = {}
+          depth = 1
+        end
+      stack_get =
+        function()
+          return Names[depth]
+        end
+      stack_add =
+        function(prefix, name)
+          depth = depth + 1
+          Names[depth] = { prefix = prefix, name = name }
+        end
+      stack_remove =
+        function()
+          depth = depth - 1
+        end
+    end
+    local get_caller_prefix =
+      function()
+        local NameRec = stack_get()
+        if not NameRec then
+          return empty
+        end
+        return NameRec.prefix
+      end
+    local get_caller_name =
+      function()
+        local NameRec = stack_get()
+        if not NameRec then
+          return empty
+        end
+        return NameRec.prefix .. NameRec.name
+      end
+    local split_name
+    do
+      local prefix_name_capture = '^(.+%.)([^%.]+)$'
+      split_name =
+        function(qualified_name)
+          local prefix, name =
+            str_match(qualified_name, prefix_name_capture)
+          if not prefix then
+            prefix = empty
+            if str_find(qualified_name, '%.') then
+              name = empty
+            else
+              name = qualified_name
+            end
+          end
+          return prefix, name
+        end
+    end
+    local apply_rel_prefix
+    do
+      local uplevel_capture = '(.+%.)[^%.]-%.$'
+      apply_rel_prefix =
+        function(base_prefix, rel_prefix)
+          while (str_sub(rel_prefix, 1, 2) == '^.') do
+            if (base_prefix == empty) then
+              error("Link is outside of caller's prefix.")
+            end
+            base_prefix =
+              str_match(base_prefix, uplevel_capture) or empty
+            rel_prefix = str_sub(rel_prefix, 3)
+          end
+          return base_prefix .. rel_prefix
+        end
+    end
+    local set_base_prefix
+    local get_base_prefix
+    do
+      local base_prefix
+      set_base_prefix =
+        function(arg_base_prefix)
+          base_prefix = arg_base_prefix
+        end
+      get_base_prefix =
+        function()
+          return base_prefix
+        end
+    end
+    local get_require_name =
+      function(qualified_name)
+        local caller_prefix
+        local is_absolute_name = (str_sub(qualified_name, 1, 2) == '!.')
+        if is_absolute_name then
+          qualified_name = str_sub(qualified_name, 3)
+          caller_prefix = get_base_prefix()
+        else
+          caller_prefix = get_caller_prefix()
+        end
+        local prefix, name = split_name(qualified_name)
+        prefix = apply_rel_prefix(caller_prefix, prefix)
+        return prefix .. name
+      end
+    local init_dependencies
+    local get_dependencies
+    local add_dependency
+    do
+      local Dependencies_Map
+      init_dependencies =
+        function()
+          Dependencies_Map = {}
+        end
+      get_dependencies =
+        function()
+          return Dependencies_Map
+        end
+      add_dependency =
+        function(src_name, dest_name)
+          Dependencies_Map[src_name] = Dependencies_Map[src_name] or {}
+          Dependencies_Map[src_name][dest_name] = true
+        end
+    end
+    local request =
+      function(qualified_name)
+        local require_name = get_require_name(qualified_name)
+        local src_name = get_caller_name()
+        stack_add(split_name(require_name))
+        local dest_name = get_caller_name()
+        add_dependency(src_name, dest_name)
+        local Results = tbl_pack(require(require_name))
+        stack_remove()
+        return tbl_unpack(Results)
+      end
+    do
+      if (_G.request == nil) then
+        local our_require_name = (...)
+        set_base_prefix(split_name(our_require_name))
+        init_dependencies()
+        _G.request = request
+        _G.get_require_name = get_require_name
+        _G.get_base_prefix = get_base_prefix
+        _G.get_dependencies = get_dependencies
+        stack_init()
+        stack_add(empty, our_require_name)
+        request('!.system.install_is_functions')()
+        request('!.system.install_assert_functions')()
+        _G.new = request('!.table.new')
+        stack_remove()
+      end
+    end
+  end
+package.preload['workshop.concepts.ShellCommand'] =
+  function(...)
+    local ToString
+    do
+      local quote = request('!.concepts.shell.quote')
+      local add_to_list = request('!.concepts.list.add_item')
+      local glue_words = request('!.concepts.words.to_string')
+      ToString =
+        function(Me)
+          local command = Me[1]
+          local Args = Me[2]
+          local Words = {}
+          add_to_list(Words, quote(command))
+          for _, arg in ipairs(Args) do
+            add_to_list(Words, quote(arg))
+          end
+          return glue_words(Words)
+        end
+    end
+    local Execute
+    do
+      local execute_shell_command = request('!.concepts.shell.execute')
+      Execute =
+        function(Me)
+          return execute_shell_command(Me:ToString())
+        end
+    end
+    local Interface
+    do
+      local create
+      do
+        local create_instance = request('!.table.create_instance')
+        create =
+          function(Core)
+            do
+              assert_table(Core)
+              assert(#Core == 2)
+              local command = Core[1]
+              local Args = Core[2]
+              assert_string(command)
+              assert_table(Args)
+              for _, arg in ipairs(Args) do
+                assert_string(arg)
+              end
+            end
+            return create_instance(Core, Interface)
+          end
+      end
+      Interface =
+        { create = create, ToString = ToString, Execute = Execute }
+    end
+    return Interface
+  end
+package.preload['workshop.concepts.Ascii.Chars'] =
+  function(...)
+    local Chars
+    do
+      local Codes = request('Codes')
+      local str_char = string.char
+      Chars = {}
+      for name, code in pairs(Codes) do
+        Chars[name] = str_char(code)
+      end
+    end
+    return Chars
+  end
+package.preload['workshop.concepts.Ascii.Codes'] =
+  function(...)
+    return
+      {
+        bell = 7,
+        backspace = 8,
+        tab = 9,
+        newline = 10,
+        vertical_tab = 11,
+        form_feed = 12,
+        carriage_return = 13,
+        space = 32,
+        delete = 127,
+        plus = 43,
+        minus = 45,
+        asterisk = 42,
+        slash = 47,
+        less_than = 60,
+        equals = 61,
+        greater_than = 62,
+        dot = 46,
+        comma = 44,
+        colon = 58,
+        semicolon = 59,
+        single_quote = 39,
+        double_quote = 34,
+        backtick = 96,
+        backslash = 92,
+        number_sign = 35,
+        question_mark = 63,
+        bang = 33,
+        percent = 37,
+        ampersand = 38,
+        dollar_sign = 36,
+        at_sign = 64,
+        caret = 94,
+        underscore = 95,
+        pipe = 124,
+        tilde = 126,
+        opening_paren = 40,
+        closing_paren = 41,
+        opening_bracket = 91,
+        closing_bracket = 93,
+        opening_brace = 123,
+        closing_brace = 125,
+      }
+  end
+package.preload['workshop.concepts.Ascii.is_control_code'] =
+  function(...)
+    return
+      function(code)
+        return (code <= 31) or (code == 127)
+      end
+  end
+package.preload['workshop.concepts.list.add_item'] =
+  function(...)
+    local tbl_insert = table.insert
+    return
+      function(OurList, item)
+        tbl_insert(OurList, item)
+      end
+  end
+package.preload['workshop.concepts.list.add_list'] =
+  function(...)
+    local tbl_move = table.move
+    return
+      function(OurList, AnotherList)
+        assert(OurList ~= AnotherList)
+        tbl_move(AnotherList, 1, #AnotherList, #OurList + 1, OurList)
+      end
+  end
+package.preload['workshop.concepts.list.to_string'] =
+  function(...)
+    local tbl_concat = table.concat
+    return
+      function(List, separator_str)
+        assert_table(List)
+        separator_str = separator_str or ''
+        assert_string(separator_str)
+        return tbl_concat(List, separator_str)
+      end
+  end
+package.preload['workshop.concepts.lua.NumberTypeNames'] =
+  function(...)
+    return { 'integer', 'float' }
+  end
+package.preload['workshop.concepts.lua.QuoteChars'] =
+  function(...)
+    local AsciiCodes = request('!.concepts.Ascii.Codes')
+    local AsciiChars = request('!.concepts.Ascii.Chars')
+    return
+      {
+        single_quote_code = AsciiCodes.single_quote,
+        single_quote = AsciiChars.single_quote,
+        double_quote_code = AsciiCodes.double_quote,
+        double_quote = AsciiChars.double_quote,
+        backslash_code = AsciiCodes.backslash,
+        backslash = AsciiChars.backslash,
+      }
+  end
+package.preload['workshop.concepts.lua.TypeNames'] =
+  function(...)
+    return
+      {
+        'nil',
+        'boolean',
+        'number',
+        'string',
+        'function',
+        'thread',
+        'userdata',
+        'table',
+      }
+  end
+package.preload['workshop.concepts.lua.quote_string'] =
+  function(...)
+    local newline_code = request('!.concepts.Ascii.Codes').newline
+    local BinaryEntitiesLengths_Map =
+      { [1] = true, [2] = true, [4] = true, [8] = true }
+    local single_quote_code
+    local double_quote_code
+    local backslash_code
+    local single_quote
+    local double_quote
+    local backslash
+    do
+      local QuoteChars = request('QuoteChars')
+      single_quote_code = QuoteChars.single_quote_code
+      double_quote_code = QuoteChars.double_quote_code
+      backslash_code = QuoteChars.backslash_code
+      single_quote = QuoteChars.single_quote
+      double_quote = QuoteChars.double_quote
+      backslash = QuoteChars.backslash
+    end
+    local has_messy_control_chars
+    do
+      local is_control_code =
+        request('!.concepts.Ascii.is_control_code')
+      has_messy_control_chars =
+        function(UsedChars)
+          for code in pairs(UsedChars) do
+            if is_control_code(code) and (code ~= newline_code) then
+              return true
+            end
+          end
+          return false
+        end
+    end
+    local determine_fixed_quote_char =
+      function(UsedChars)
+        local num_single_quotes = UsedChars[single_quote_code] or 0
+        local num_double_quotes = UsedChars[double_quote_code] or 0
+        if (num_single_quotes <= num_double_quotes) then
+          return single_quote
+        else
+          return double_quote
+        end
+      end
+    local get_chars_count = request('!.string.get_chars_count')
+    local quote_variable = request('quote_string.intact')
+    local quote_char_func = request('quote_string.quote_char')
+    local str_gsub = string.gsub
+    return
+      function(str)
+        local UsedChars_Map = get_chars_count(str)
+        local str_has_messy_control_chars =
+          has_messy_control_chars(UsedChars_Map)
+        local str_has_messy_printable_chars =
+          UsedChars_Map[newline_code] or
+          UsedChars_Map[backslash_code] or
+          (
+            UsedChars_Map[single_quote_code] and
+            UsedChars_Map[double_quote_code]
+          )
+        local use_variable_quotes =
+          str_has_messy_printable_chars and
+          not str_has_messy_control_chars
+        if use_variable_quotes then
+          return quote_variable(str)
+        else
+          local quote_char = determine_fixed_quote_char(UsedChars_Map)
+          local quote_all = false
+          local quote_control = false
+          if str_has_messy_control_chars then
+            if BinaryEntitiesLengths_Map[#str] then
+              quote_all = true
+            else
+              quote_control = true
+            end
+          end
+          if quote_all then
+            str = str_gsub(str, '.', quote_char_func)
+          else
+            str = str_gsub(str, backslash, backslash .. backslash)
+            str = str_gsub(str, quote_char, backslash .. quote_char)
+            if quote_control then
+              str = str_gsub(str, '[%c]', quote_char_func)
+            end
+          end
+          return quote_char .. str .. quote_char
+        end
+      end
+  end
+package.preload['workshop.concepts.lua.quote_string.intact'] =
+  function(...)
+    local opening_bracket
+    local closing_bracket
+    local filler_char
+    local newline_char
+    local return_char
+    do
+      local AsciiChars = request('!.concepts.Ascii.Chars')
+      opening_bracket = AsciiChars.opening_bracket
+      closing_bracket = AsciiChars.closing_bracket
+      filler_char = AsciiChars.equals
+      newline_char = AsciiChars.newline
+      return_char = AsciiChars.carriage_return
+    end
+    local str_find = string.find
+    local str_sub = string.sub
+    return
+      function(str)
+        str = str .. closing_bracket
+        local filler_chunk = ''
+        do
+          while true do
+            local postfix =
+              closing_bracket .. filler_chunk .. closing_bracket
+            if not str_find(str, postfix) then
+              break
+            end
+            filler_chunk = filler_chunk .. filler_char
+          end
+        end
+        local prefix =
+          opening_bracket .. filler_chunk .. opening_bracket
+        local first_char = str_sub(str, 1, 1)
+        local first_char_is_newline =
+          (first_char == newline_char) or (first_char == return_char)
+        if first_char_is_newline then
+          prefix = prefix .. first_char
+        end
+        local has_newlines = not is_nil(str_find(str, newline_char))
+        if has_newlines and not first_char_is_newline then
+          prefix = prefix .. newline_char
+        end
+        return prefix .. str .. filler_chunk .. closing_bracket
+      end
+  end
+package.preload['workshop.concepts.lua.quote_string.quote_char'] =
+  function(...)
+    local quote_char_fmt = [[\%03d]]
+    local str_byte = string.byte
+    local str_format = string.format
+    return
+      function(char)
+        return str_format(quote_char_fmt, str_byte(char))
+      end
+  end
+package.preload['workshop.concepts.path_name.Syntels'] =
+  function(...)
+    return { separator = '/', self_dir = '.', upper_dir = '..' }
+  end
+package.preload['workshop.concepts.path_name.add_separator'] =
+  function(...)
+    local sep = request('Syntels').separator
+    local ends_with = request('!.string.ends_with')
+    return
+      function(str)
+        if ends_with(str, sep) then
+          return str
+        end
+        return str .. sep
+      end
+  end
+package.preload['workshop.concepts.path_name.is_absolute'] =
+  function(...)
+    return
+      function(Pathname)
+        return (Pathname[1] == '')
+      end
+  end
+package.preload['workshop.concepts.path_name.is_directory'] =
+  function(...)
+    local self_dir
+    local upper_dir
+    do
+      local Syntels = request('Syntels')
+      self_dir = Syntels.self_dir
+      upper_dir = Syntels.upper_dir
+    end
+    return
+      function(Pathname)
+        local last_node = Pathname[#Pathname]
+        return
+          (last_node == '') or
+          (last_node == self_dir) or
+          (last_node == upper_dir)
+      end
+  end
+package.preload['workshop.concepts.path_name.normalize'] =
+  function(...)
+    local pathname_from_str = request('pathname_from_str')
+    local pathname_to_str = request('pathname_to_str')
+    return
+      function(path_name)
+        return pathname_to_str(pathname_from_str(path_name))
+      end
+  end
+package.preload['workshop.concepts.path_name.pathname_from_str'] =
+  function(...)
+    local split_string = request('!.string.split')
+    local check_is_absolute = request('is_absolute')
+    local check_is_directory = request('is_directory')
+    local add_to_list = request('!.concepts.list.add_item')
+    local add_list = request('!.concepts.list.add_list')
+    local empty = ''
+    local self_dir
+    local sep
+    do
+      local Syntels = request('Syntels')
+      self_dir = Syntels.self_dir
+      sep = Syntels.separator
+    end
+    return
+      function(path_name)
+        assert_string(path_name)
+        if (path_name == empty) then
+          error('Empty pathname.')
+        end
+        local is_absolute
+        local is_directory
+        local Names = {}
+        do
+          local Segments = split_string(path_name .. sep, sep)
+          is_absolute = check_is_absolute(Segments)
+          is_directory = check_is_directory(Segments)
+          for _, segment in ipairs(Segments) do
+            if (segment ~= empty) and (segment ~= self_dir) then
+              add_to_list(Names, segment)
+            end
+          end
+        end
+        if (#Names == 0) and not is_absolute then
+          add_to_list(Names, self_dir)
+        end
+        do
+          local Result = {}
+          if is_absolute then
+            add_to_list(Result, empty)
+          end
+          add_list(Result, Names)
+          if is_directory then
+            add_to_list(Result, empty)
+          end
+          return Result
+        end
+      end
+  end
+package.preload['workshop.concepts.path_name.pathname_to_str'] =
+  function(...)
+    local sep = request('Syntels').separator
+    local clean_pathname
+    do
+      local clean_name
+      do
+        local ends_with = request('!.string.ends_with')
+        local str_sub = string.sub
+        clean_name =
+          function(name)
+            local sep_len = #sep
+            while ends_with(name, sep) do
+              name = str_sub(name, 1, -(sep_len + 1))
+            end
+            return name
+          end
+      end
+      local add_to_list = request('!.concepts.list.add_item')
+      clean_pathname =
+        function(Pathname)
+          local Result = {}
+          for _, name in ipairs(Pathname) do
+            add_to_list(Result, clean_name(name))
+          end
+          return Result
+        end
+    end
+    local list_to_str = request('!.concepts.list.to_string')
+    return
+      function(Pathname)
+        return list_to_str(clean_pathname(Pathname), sep)
+      end
+  end
+package.preload['workshop.concepts.path_name.rebase_to'] =
+  function(...)
+    local pathname_from_str = request('pathname_from_str')
+    local is_directory = request('is_directory')
+    local is_absolute = request('is_absolute')
+    local tbl_remove = table.remove
+    local upper_dir = request('Syntels').upper_dir
+    local add_list = request('!.concepts.list.add_list')
+    local pathname_to_str = request('pathname_to_str')
+    return
+      function(dest_dir, dir_to_rebase)
+        assert_string(dest_dir)
+        assert_string(dir_to_rebase)
+        local DestNames = pathname_from_str(dest_dir)
+        local MovedNames = pathname_from_str(dir_to_rebase)
+        if is_directory(DestNames) then
+          tbl_remove(DestNames, #DestNames)
+        end
+        if is_absolute(MovedNames) then
+          tbl_remove(MovedNames, 1)
+        end
+        do
+          local index = 1
+          while (index <= #MovedNames) do
+            if (MovedNames[index] == upper_dir) then
+              tbl_remove(MovedNames, index)
+            else
+              index = index + 1
+            end
+          end
+        end
+        local Result = {}
+        add_list(Result, DestNames)
+        add_list(Result, MovedNames)
+        return pathname_to_str(Result)
+      end
+  end
+package.preload['workshop.concepts.shell.execute'] =
+  function(...)
+    local get_is_aborted =
+      function(result_type_code)
+        if (result_type_code == 'signal') then
+          return true
+        elseif (result_type_code == 'exit') then
+          return false
+        else
+          error('Unknown termination status.')
+        end
+      end
+    local os_tmpname = os.tmpname
+    local os_execute = os.execute
+    local file_to_str = request('!.convert.file_to_str')
+    local os_remove = os.remove
+    return
+      function(command)
+        local output_filename = os_tmpname()
+        local error_filename = os_tmpname()
+        local shell_command =
+          command ..
+          ' ' ..
+          '1>' ..
+          output_filename ..
+          ' ' ..
+          '2>' ..
+          error_filename
+        local _, result_type_code, result_code =
+          os_execute(shell_command)
+        local Result =
+          {
+            result_code = result_code,
+            is_aborted = get_is_aborted(result_type_code),
+            output = file_to_str(output_filename),
+            error = file_to_str(error_filename),
+          }
+        os_remove(output_filename)
+        os_remove(error_filename)
+        return (Result.result_code == 0), Result
+      end
+  end
+package.preload['workshop.concepts.shell.quote'] =
+  function(...)
+    local empty = ''
+    local single_quote
+    local backslash
+    do
+      local Ascii = request('!.concepts.Ascii.Chars')
+      single_quote = Ascii.single_quote
+      backslash = Ascii.backslash
+    end
+    local list_to_str = request('!.concepts.list.to_string')
+    local str_find = string.find
+    local needs_quoting
+    do
+      local special_chars_regexp
+      local starts_with_comment_regexp
+      do
+        local quote_regexp = request('!.lua.regexp.quote')
+        do
+          local SpecialChars = request('quote.SpecialChars')
+          local special_chars_str = list_to_str(SpecialChars)
+          special_chars_regexp =
+            '[' .. quote_regexp(special_chars_str) .. ']'
+        end
+        do
+          local SpaceChars = request('quote.SpaceChars')
+          local space_chars_str = list_to_str(SpaceChars)
+          local space_chars_regexp =
+            '[' .. quote_regexp(space_chars_str) .. ']'
+          local comment_char = '#'
+          starts_with_comment_regexp =
+            '^' .. space_chars_regexp .. '+' .. comment_char
+        end
+      end
+      needs_quoting =
+        function(str)
+          return
+            (str == empty) or
+            not is_nil(str_find(str, special_chars_regexp)) or
+            not is_nil(str_find(str, starts_with_comment_regexp))
+        end
+    end
+    local split_string = request('!.string.split')
+    local add_to_list = request('!.concepts.list.add_item')
+    local quote
+    quote =
+      function(str)
+        assert_string(str)
+        if not needs_quoting(str) then
+          return str
+        end
+        if not str_find(str, single_quote) then
+          return single_quote .. str .. single_quote
+        end
+        str = str .. single_quote
+        local RawItems = split_string(str, single_quote)
+        local Items = {}
+        for _, item in ipairs(RawItems) do
+          local quoted_item
+          if (item == empty) then
+            quoted_item = empty
+          else
+            quoted_item = quote(item)
+          end
+          add_to_list(Items, quoted_item)
+        end
+        return list_to_str(Items, backslash .. single_quote)
+      end
+    return quote
+  end
+package.preload['workshop.concepts.shell.quote.SpaceChars'] =
+  function(...)
+    local SpaceChars
+    do
+      local Ascii = request('!.concepts.Ascii.Chars')
+      SpaceChars = { Ascii.tab, Ascii.space, Ascii.newline }
+    end
+    return SpaceChars
+  end
+package.preload['workshop.concepts.shell.quote.SpecialChars'] =
+  function(...)
+    local SpecialChars
+    do
+      local Ascii = request('!.concepts.Ascii.Chars')
+      local SpaceChars = request('SpaceChars')
+      local add_list = request('!.concepts.list.add_list')
+      SpecialChars =
+        {
+          Ascii.single_quote,
+          Ascii.double_quote,
+          Ascii.bang,
+          Ascii.dollar_sign,
+          Ascii.ampersand,
+          Ascii.asterisk,
+          Ascii.semicolon,
+          Ascii.backslash,
+          Ascii.caret,
+          Ascii.backtick,
+          Ascii.pipe,
+          Ascii.less_than,
+          Ascii.greater_than,
+          Ascii.opening_paren,
+          Ascii.closing_paren,
+          Ascii.opening_bracket,
+          Ascii.closing_bracket,
+          Ascii.opening_brace,
+          Ascii.closing_brace,
+        }
+      add_list(SpecialChars, SpaceChars)
+    end
+    return SpecialChars
+  end
+package.preload['workshop.concepts.words.to_string'] =
+  function(...)
+    local list_to_string = request('!.concepts.list.to_string')
+    return
+      function(Words)
+        return list_to_string(Words, ' ')
+      end
+  end
+package.preload['workshop.convert.file_to_str'] =
+  function(...)
+    return request('!.file_system.file.to_string')
+  end
+package.preload['workshop.convert.lines_from_str'] =
+  function(...)
+    local newline = request('!.concepts.Ascii.Chars').newline
+    local split_string = request('!.string.split')
+    return
+      function(str)
+        return split_string(str, newline)
+      end
+  end
+package.preload['workshop.file_system.directory.get_directories_list'] =
+  function(...)
+    local get_cmd_listdirs = request('!.mechs.cmdline.get_cmd_listdirs')
+    local get_command_output_lines =
+      request('!.system.get_command_output_lines')
+    local to_clean_filelist = request('to_clean_filelist')
+    return
+      function(base_dir)
+        return
+          to_clean_filelist(
+            get_command_output_lines(get_cmd_listdirs(base_dir)),
+            base_dir
+          )
+      end
+  end
+package.preload['workshop.file_system.directory.get_files_list'] =
+  function(...)
+    local get_cmd_listfiles =
+      request('!.mechs.cmdline.get_cmd_listfiles')
+    local get_command_output_lines =
+      request('!.system.get_command_output_lines')
+    local to_clean_filelist = request('to_clean_filelist')
+    return
+      function(base_dir)
+        return
+          to_clean_filelist(
+            get_command_output_lines(get_cmd_listfiles(base_dir)),
+            base_dir
+          )
+      end
+  end
+package.preload['workshop.file_system.directory.get_total_files_list'] =
+  function(...)
+    local normalize = request('!.concepts.path_name.normalize')
+    local retrieve
+    do
+      local get_files = request('get_files_list')
+      local get_dirs = request('get_directories_list')
+      local add_separator =
+        request('!.concepts.path_name.add_separator')
+      local add_to_list = request('!.concepts.list.add_item')
+      retrieve =
+        function(base_dir, Result)
+          base_dir = add_separator(base_dir)
+          local Files = get_files(base_dir)
+          for _, file_name in ipairs(Files) do
+            add_to_list(Result, normalize(base_dir .. file_name))
+          end
+          local Dirs = get_dirs(base_dir)
+          for _, dir_name in ipairs(Dirs) do
+            retrieve(normalize(base_dir .. dir_name), Result)
+          end
+        end
+    end
+    return
+      function(base_dir)
+        local Result = {}
+        retrieve(normalize(base_dir), Result)
+        return Result
+      end
+  end
+package.preload['workshop.file_system.directory.to_clean_filelist'] =
+  function(...)
+    local remove_prefix = request('!.string.remove_prefix')
+    local add_to_list = request('!.concepts.list.add_item')
+    local sort = table.sort
+    return
+      function(PathNames, base_dir)
+        local Result = {}
+        for idx, file_name in ipairs(PathNames) do
+          local cleaned_file_name = remove_prefix(file_name, base_dir)
+          if (cleaned_file_name ~= '') then
+            add_to_list(Result, cleaned_file_name)
+          end
+        end
+        sort(Result)
+        return Result
+      end
+  end
+package.preload['workshop.file_system.file.close'] =
+  function(...)
+    local io_type = io.type
+    return
+      function(File)
+        local file_type = io_type(File)
+        if not is_string(file_type) then
+          return
+        end
+        if (file_type == 'closed file') then
+          return
+        end
+        File:close()
+      end
+  end
+package.preload['workshop.file_system.file.open'] =
+  function(...)
+    local normalize_name = request('!.concepts.path_name.normalize')
+    local default_mode = 'rb'
+    local io_open = io.open
+    return
+      function(pathname, mode)
+        assert_string(pathname)
+        assert(is_nil(mode) or is_string(mode))
+        pathname = normalize_name(pathname)
+        mode = mode or default_mode
+        local file, err_msg = io.open(pathname, mode)
+        if not file then
+          error(err_msg, 2)
+        end
+        return file
+      end
+  end
+package.preload['workshop.file_system.file.to_string'] =
+  function(...)
+    local open_file = request('open')
+    local close_file = request('close')
+    return
+      function(pathname)
+        local File = open_file(pathname, 'rb')
+        local result = File:read('a')
+        close_file(File)
+        return result
+      end
+  end
+package.preload['workshop.lua.regexp.magic_char_pattern'] =
+  function(...)
+    local magic_chars = request('magic_chars')
+    local magic_char_patttern =
+      '[' .. magic_chars:gsub('.', '%%%0') .. ']'
+    return magic_char_patttern
+  end
+package.preload['workshop.lua.regexp.magic_chars'] =
+  function(...)
+    return '^$()[]%.?*+-'
+  end
+package.preload['workshop.lua.regexp.quote'] =
+  function(...)
+    local magic_char_pattern = request('magic_char_pattern')
+    return
+      function(s)
+        return s:gsub(magic_char_pattern, '%%%0')
+      end
+  end
+package.preload['workshop.mechs.cmdline.get_cmd_listdirs'] =
+  function(...)
+    local normalize = request('!.concepts.path_name.normalize')
+    local ShellCommand = request('!.concepts.ShellCommand')
+    return
+      function(dir_name)
+        local Command =
+          {
+            'find',
+            {
+              normalize(dir_name),
+              '-type',
+              'd',
+              '-mindepth',
+              '1',
+              '-maxdepth',
+              '1',
+            },
+          }
+        return ShellCommand.create(Command)
+      end
+  end
+package.preload['workshop.mechs.cmdline.get_cmd_listfiles'] =
+  function(...)
+    local normalize = request('!.concepts.path_name.normalize')
+    local ShellCommand = request('!.concepts.ShellCommand')
+    return
+      function(dir_name)
+        local Command =
+          {
+            'find',
+            { normalize(dir_name), '-type', 'f', '-maxdepth', '1' },
+          }
+        return ShellCommand.create(Command)
+      end
+  end
+package.preload['workshop.string.ends_with'] =
+  function(...)
+    local str_sub = string.sub
+    return
+      function(base_str, postfix_str)
+        return (str_sub(base_str, -#postfix_str, -1) == postfix_str)
+      end
+  end
+package.preload['workshop.string.get_chars_count'] =
+  function(...)
+    local str_sub = string.sub
+    local str_byte = string.byte
+    return
+      function(str)
+        local UsedChars_Map = {}
+        for index = 1, #str do
+          local code = str_byte(str_sub(str, index, index))
+          if is_nil(UsedChars_Map[code]) then
+            UsedChars_Map[code] = 0
+          end
+          UsedChars_Map[code] = UsedChars_Map[code] + 1
+        end
+        return UsedChars_Map
+      end
+  end
+package.preload['workshop.string.remove_postfix'] =
+  function(...)
+    local ends_with = request('ends_with')
+    local str_sub = string.sub
+    return
+      function(base_str, postfix_str)
+        if not ends_with(base_str, postfix_str) then
+          return base_str
+        end
+        return str_sub(base_str, 1, -(#postfix_str + 1))
+      end
+  end
+package.preload['workshop.string.remove_prefix'] =
+  function(...)
+    local starts_with = request('starts_with')
+    local str_sub = string.sub
+    return
+      function(base_str, prefix_str)
+        if not starts_with(base_str, prefix_str) then
+          return base_str
+        end
+        return str_sub(base_str, #prefix_str + 1)
+      end
+  end
+package.preload['workshop.string.split'] =
+  function(...)
+    local ends_with = request('!.string.ends_with')
+    local quote_regexp = request('!.lua.regexp.quote')
+    local str_find = string.find
+    local add_to_list = request('!.concepts.list.add_item')
+    return
+      function(str, delimiter)
+        assert_string(str)
+        assert_string(delimiter)
+        if (delimiter == '') then
+          return { str }
+        end
+        if not ends_with(str, delimiter) then
+          str = str .. delimiter
+        end
+        local Result = {}
+        local item_capture = '(.-)' .. quote_regexp(delimiter) .. '()'
+        local start_pos
+        local end_pos
+        local item_str
+        start_pos = 1
+        while true do
+          start_pos, end_pos, item_str =
+            str_find(str, item_capture, start_pos)
+          if not start_pos then
+            break
+          end
+          add_to_list(Result, item_str)
+          start_pos = end_pos + 1
+        end
+        return Result
+      end
+  end
+package.preload['workshop.string.starts_with'] =
+  function(...)
+    local str_sub = string.sub
+    return
+      function(base_str, prefix_str)
+        return (str_sub(base_str, 1, #prefix_str) == prefix_str)
+      end
+  end
+package.preload['workshop.system.get_command_output_lines'] =
+  function(...)
+    local lines_from_str = request('!.convert.lines_from_str')
+    local get_command_output_lines =
+      function(Command)
+        local is_ok, ExecResult = Command:Execute()
+        return lines_from_str(ExecResult.output)
+      end
+    return get_command_output_lines
+  end
+package.preload['workshop.system.install_assert_functions'] =
+  function(...)
+    local spawn_assert_func
+    do
+      local str_format = string.format
+      spawn_assert_func =
+        function(type_name)
+          local checker = _G['is_' .. type_name]
+          assert(checker)
+          return
+            function(val)
+              if not checker(val) then
+                local err_msg =
+                  str_format('assert_%s(%s)', type_name, tostring(val))
+                error(err_msg)
+              end
+            end
+        end
+    end
+    local TypeNames = request('!.concepts.lua.TypeNames')
+    local NumberTypeNames = request('!.concepts.lua.NumberTypeNames')
+    local install_assert_funcs =
+      function()
+        for _, type_name in ipairs(TypeNames) do
+          _G['assert_' .. type_name] = spawn_assert_func(type_name)
+        end
+        for _, number_type_name in ipairs(NumberTypeNames) do
+          _G['assert_' .. number_type_name] =
+            spawn_assert_func(number_type_name)
+        end
+      end
+    return install_assert_funcs
+  end
+package.preload['workshop.system.install_is_functions'] =
+  function(...)
+    local type_is =
+      function(type_name)
+        return
+          function(val)
+            return (type(val) == type_name)
+          end
+      end
+    local number_is
+    do
+      local math_type = math.type
+      number_is =
+        function(type_name)
+          return
+            function(val)
+              if not is_number(val) then
+                return false
+              end
+              return (math_type(val) == type_name)
+            end
+        end
+    end
+    local TypeNames = request('!.concepts.lua.TypeNames')
+    local NumberTypeNames = request('!.concepts.lua.NumberTypeNames')
+    return
+      function()
+        for _, type_name in ipairs(TypeNames) do
+          _G['is_' .. type_name] = type_is(type_name)
+        end
+        for _, number_type_name in ipairs(NumberTypeNames) do
+          _G['is_' .. number_type_name] = number_is(number_type_name)
+        end
+      end
+  end
+package.preload['workshop.table.apply_table'] =
+  function(...)
+    local keep_str = 'keep'
+    local replace_str = 'replace'
+    local remove_str = 'remove'
+    local get_action =
+      function(has_a, has_b, Rules)
+        for _, Rule in ipairs(Rules) do
+          if (Rule.has_a == has_a) and (Rule.has_b == has_b) then
+            return Rule.action
+          end
+        end
+        return keep_str
+      end
+    local apply_table
+    apply_table =
+      function(A, B, Rules)
+        local Keys = {}
+        do
+          for a_key in pairs(A) do
+            Keys[a_key] = true
+          end
+          for b_key in pairs(B) do
+            Keys[b_key] = true
+          end
+        end
+        for key in pairs(Keys) do
+          local a_key = A[key]
+          local b_key = B[key]
+          if is_table(a_key) and is_table(b_key) then
+            apply_table(a_key, b_key, Rules)
+          else
+            local has_a = not is_nil(a_key)
+            local has_b = not is_nil(b_key)
+            local action = get_action(has_a, has_b, Rules)
+            if (action == keep_str) then
+              ;
+            elseif (action == replace_str) then
+              A[key] = B[key]
+            elseif (action == remove_str) then
+              A[key] = nil
+            end
+          end
+        end
+      end
+    local check_rule =
+      function(Rule)
+        local has_a = is_boolean(Rule.has_a)
+        local has_b = is_boolean(Rule.has_b)
+        local action = Rule.action
+        local is_known_action =
+          (action == keep_str) or
+          (action == replace_str) or
+          (action == remove_str)
+        return has_a and has_b and is_known_action
+      end
+    return
+      function(A, B, Rules)
+        assert_table(A)
+        assert_table(B)
+        assert_table(Rules)
+        assert(A ~= B)
+        for index, Rule in ipairs(Rules) do
+          if not check_rule(Rule) then
+            error('Unsupported rule.')
+          end
+        end
+        apply_table(A, B, Rules)
+      end
+  end
+package.preload['workshop.table.attach_methods'] =
+  function(...)
+    return
+      function(Object, Methods)
+        assert_table(Object)
+        assert_table(Methods)
+        local Metatable =
+          {
+            __index = Methods,
+            __newindex =
+              function()
+                error('Table is locked for additions/removals.')
+              end,
+          }
+        setmetatable(Object, Metatable)
+      end
+  end
+package.preload['workshop.table.clone'] =
+  function(...)
+    return
+      function(Node)
+        local clone
+        do
+          local Cloned = {}
+          clone =
+            function(Node)
+              if (type(Node) ~= 'table') then
+                return Node
+              end
+              if Cloned[Node] then
+                return Cloned[Node]
+              end
+              local Result = {}
+              Cloned[Node] = Result
+              for key, value in pairs(Node) do
+                Result[clone(key)] = clone(value)
+              end
+              setmetatable(Result, getmetatable(Node))
+              return Result
+            end
+        end
+        return clone(Node)
+      end
+  end
+package.preload['workshop.table.create_instance'] =
+  function(...)
+    local clone = request('clone')
+    local attach_methods = request('attach_methods')
+    return
+      function(Data, Methods)
+        assert_table(Data)
+        assert_table(Methods)
+        local Result
+        Result = clone(Data)
+        attach_methods(Result, Methods)
+        return Result
+      end
+  end
+package.preload['workshop.table.new'] =
+  function(...)
+    local clone = request('clone')
+    local patch = request('patch')
+    return
+      function(Base, Overrides)
+        assert_table(Base)
+        local Result = clone(Base)
+        if is_table(Overrides) then
+          patch(Result, Overrides)
+        end
+        return Result
+      end
+  end
+package.preload['workshop.table.patch'] =
+  function(...)
+    local Rules = { { has_a = true, has_b = true, action = 'replace' } }
+    local apply_table = request('apply_table')
+    return
+      function(Result, Additions)
+        apply_table(Result, Additions, Rules)
+      end
+  end
+return require('meld')

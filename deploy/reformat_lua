@@ -986,15 +986,11 @@ package.preload[
       {
         ['expression'] = request('expression'),
         ['function_call'] = request('expressions.function_call'),
-        [
-          'var_ref'
-        ] = request('expressions.var_ref'),
+        ['var_ref'] = request('expressions.var_ref'),
         ['string'] = request('expressions.string'),
         ['table'] = request('expressions.table'),
         ['type_function'] = request('expressions.type_function'),
-        [
-          'statements'
-        ] = request('statements'),
+        ['statements'] = request('statements'),
         ['assignment'] = request('statements.assignment'),
         ['break_statement'] =
           request('statements.break_statement'),
@@ -3556,7 +3552,7 @@ package.preload['workshop.mechs.TextBlock'] =
               [1] = Me[1],
               [2] = Me[2],
               [3] = new(Me[3]),
-              [4] = utf8_len(Me[1]),
+              [4] = 0,
               [5] = { },
             }
           setmetatable(AnotherMe, getmetatable(Me))

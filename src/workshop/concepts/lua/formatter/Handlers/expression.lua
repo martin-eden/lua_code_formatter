@@ -41,28 +41,25 @@ local oneliner =
     return true
   end
 
-local line_wrap_ops =
-  {
-    ['and'] = true,
-    ['or'] = true,
-    ['+'] = true,
-    ['-'] = true,
-    ['*'] = true,
-    ['/'] = true,
-    ['//'] = true,
-    ['..'] = true,
-  }
-
-local represent_operand_multiline =
-  function(Me, Node)
-    if not represent_operand_oneline(Me, Node) then
-      return
-    end
-    if line_wrap_ops[Node.bin_op] then
-      Me[2]:RequestCleanLine()
-    end
-    return true
+local represent_operand_multiline
+do
+  local LineWrapOps
+  do
+    local map_values = request('!.table.map_values')
+    LineWrapOps =
+      map_values({ 'and', 'or', '+', '-', '*', '/', '//', '..' })
   end
+  represent_operand_multiline =
+    function(Me, Node)
+      if not represent_operand_oneline(Me, Node) then
+        return
+      end
+      if LineWrapOps[Node.bin_op] then
+        Me[2]:RequestCleanLine()
+      end
+      return true
+    end
+end
 
 local multiliner =
   function(Me, Node)

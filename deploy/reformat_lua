@@ -650,11 +650,11 @@ package.preload['workshop.concepts.lua.TypeNames'] =
   end
 package.preload['workshop.concepts.lua.run_formatter'] =
   function(...)
-    local FormatterClass = request('formatter.interface')
+    local FormatterClass = request('formatter.Interface')
     return
       function(Ast, Options)
         local Formatter = FormatterClass.create(Options)
-        Formatter:process_node(Ast)
+        Formatter:ProcessNode(Ast)
         return Formatter[2]:GetText()
       end
   end
@@ -913,20 +913,21 @@ package.preload[
   'workshop.concepts.lua.ast_transformer.handlers.assignment'
 ] =
   function(...)
+    local add_to_list = request('!.concepts.list.add_item')
     local replace = request('!.table.replace')
     return
-      function(self, node)
-        local dest_list = { type = 'ref_list' }
-        for i = 1, (#node - 1) do
-          dest_list[#dest_list + 1] = node[i]
+      function(Me, Node)
+        local DestList = { type = 'ref_list' }
+        for i = 1, (#Node - 1) do
+          add_to_list(DestList, Node[i])
         end
-        local result =
+        local Result =
           {
             type = 'assignment',
-            dest_list = dest_list,
-            val_list = node[#node],
+            dest_list = DestList,
+            val_list = Node[#Node],
           }
-        replace(node, result)
+        replace(Node, Result)
       end
   end
 package.preload[
@@ -1307,6 +1308,50 @@ package.preload[
         node[2] = nil
       end
   end
+package.preload['workshop.concepts.lua.formatter.Interface'] =
+  function(...)
+    local Interface
+    local create
+    do
+      local default_right_margin = 72
+      local default_indent_chunk = '  '
+      local TextBlock = request('!.mechs.TextBlock')
+      local StateKeeperClass = request('StateKeeper')
+      local attach_methods = request('!.table.attach_methods')
+      create =
+        function(Options)
+          local Options = Options or { }
+          local right_margin =
+            Options.right_margin or default_right_margin
+          local Printer
+          do
+            local indent_chunk =
+              Options.indent_chunk or default_indent_chunk
+            Printer = TextBlock.create(indent_chunk)
+          end
+          local StateKeeper = StateKeeperClass.create()
+          local Me = { right_margin, Printer, StateKeeper }
+          attach_methods(Me, Interface)
+          return Me
+        end
+    end
+    Interface =
+      {
+        create = create,
+        Handlers = request('Handlers.Interface'),
+        ProcessList = request('process_list'),
+        ProcessNode = request('process_node'),
+        ProcessBlock_Oneline = request('process_block_oneline'),
+        ProcessBlock_Multiline =
+          request('process_block_multiline'),
+        ProcessBlock = request('process_block'),
+        Represent = request('represent'),
+        Variate = request('variate'),
+        ProcessList_Variative =
+          request('process_list_variative'),
+      }
+    return Interface
+  end
 package.preload['workshop.concepts.lua.formatter.StateKeeper'] =
   function(...)
     local next_level =
@@ -1346,52 +1391,6 @@ package.preload['workshop.concepts.lua.formatter.StateKeeper'] =
       }
     return Interface
   end
-package.preload['workshop.concepts.lua.formatter.interface'] =
-  function(...)
-    local Interface
-    local create
-    do
-      local default_right_margin = 72
-      local default_indent_chunk = '  '
-      local TextBlock = request('!.mechs.TextBlock')
-      local StateKeeperClass = request('StateKeeper')
-      local attach_methods = request('!.table.attach_methods')
-      create =
-        function(Options)
-          local Options = Options or { }
-          local right_margin =
-            Options.right_margin or default_right_margin
-          local Printer
-          do
-            local indent_chunk =
-              Options.indent_chunk or default_indent_chunk
-            Printer = TextBlock.create(indent_chunk)
-          end
-          local StateKeeper = StateKeeperClass.create()
-          local Me = { right_margin, Printer, StateKeeper }
-          attach_methods(Me, Interface)
-          return Me
-        end
-    end
-    Interface =
-      {
-        create = create,
-        handlers = request('handlers.interface'),
-        process_list = request('process_list'),
-        process_node = request('process_node'),
-        process_block_oneline = request('process_block_oneline'),
-        process_block_multiline =
-          request('process_block_multiline'),
-        process_block = request('process_block'),
-        represent = request('represent'),
-        variate = request('variate'),
-        process_list_variative =
-          request('process_list_variative'),
-        representation_is_allowed =
-          request('representation_is_allowed'),
-      }
-    return Interface
-  end
 package.preload['workshop.concepts.lua.formatter.process_block'] =
   function(...)
     return
@@ -1402,7 +1401,7 @@ package.preload['workshop.concepts.lua.formatter.process_block'] =
         if handler then
           result = handler(Me, Node)
         else
-          result = Me:process_node(Node)
+          result = Me:ProcessNode(Node)
         end
         Printer:DecIndent()
         return result
@@ -1419,7 +1418,7 @@ package.preload[
           Printer:AddToCurline(prefix)
         end
         Printer:RequestCleanLine()
-        local result = Me:process_block(Node, opt_handler)
+        local result = Me:ProcessBlock(Node, opt_handler)
         Printer:RequestCleanLine()
         if postfix then
           Printer:AddToCurline(postfix)
@@ -1437,7 +1436,7 @@ package.preload[
         if prefix then
           Printer:AddToCurline(prefix)
         end
-        local result = Me:process_block(Node, opt_handler)
+        local result = Me:ProcessBlock(Node, opt_handler)
         if postfix then
           Printer:AddToCurline(postfix)
         end
@@ -1460,12 +1459,12 @@ package.preload['workshop.concepts.lua.formatter.process_list'] =
       function(Me, Node, delimiter, apply_tail_delimiter)
         if (#Node > 0) then
           for i = 1, (#Node - 1) do
-            if not Me:process_node(Node[i]) then
+            if not Me:ProcessNode(Node[i]) then
               return
             end
             apply_delimiter(Me, delimiter)
           end
-          if not Me:process_node(Node[#Node]) then
+          if not Me:ProcessNode(Node[#Node]) then
             return
           end
           if apply_tail_delimiter then
@@ -1481,31 +1480,30 @@ package.preload[
   function(...)
     return
       function(
-        self,
-        node,
+        Me,
+        Node,
         oneline_delimiter,
         multiline_delimiter,
         apply_tail_delimiter
       )
-        if (#node > 0) then
-          local oneliner =
-            function(self, node)
-              return
-                self:process_list(
-                  node, oneline_delimiter, apply_tail_delimiter
-                )
-            end
-          local multiliner =
-            function(self, node)
-              return
-                self:process_list(
-                  node,
-                  multiline_delimiter,
-                  apply_tail_delimiter
-                )
-            end
-          return self:variate(node, oneliner, multiliner)
+        if (#Node == 0) then
+          return
         end
+        local oneliner =
+          function(Me, Node)
+            return
+              Me:ProcessList(
+                Node, oneline_delimiter, apply_tail_delimiter
+              )
+          end
+        local multiliner =
+          function(Me, Node)
+            return
+              Me:ProcessList(
+                Node, multiline_delimiter, apply_tail_delimiter
+              )
+          end
+        return Me:Variate(Node, oneliner, multiliner)
       end
   end
 package.preload['workshop.concepts.lua.formatter.process_node'] =
@@ -1515,13 +1513,11 @@ package.preload['workshop.concepts.lua.formatter.process_node'] =
         if not Node then
           return true
         end
-        assert_table(Node)
         local node_type = Node.type
         if not node_type then
-          assert(not Node[1])
           return true
         end
-        local handler = Me.handlers[node_type]
+        local handler = Me.Handlers[node_type]
         if is_function(handler) then
           return handler(Me, Node)
         else
@@ -1534,22 +1530,13 @@ package.preload['workshop.concepts.lua.formatter.process_node'] =
 package.preload['workshop.concepts.lua.formatter.represent'] =
   function(...)
     return
-      function(Me, representer, Node)
+      function(Me, represent, Node)
         local OriginalPrinter = Me[2]
         local TrialPrinter = OriginalPrinter:Seed()
         Me[2] = TrialPrinter
-        local has_failed = not representer(Me, Node)
+        local has_failed = not represent(Me, Node)
         Me[2] = OriginalPrinter
         return TrialPrinter, has_failed
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.formatter.representation_is_allowed'
-] =
-  function(...)
-    return
-      function(Me, Representation)
-        return (Representation:GetWidth() <= Me[1])
       end
   end
 package.preload['workshop.concepts.lua.formatter.variate'] =
@@ -1583,14 +1570,12 @@ package.preload['workshop.concepts.lua.formatter.variate'] =
               }
             )
             local TrialRepresentation, has_failed =
-              Me:represent(representer, Node)
+              Me:Represent(representer, Node)
             if
               representer_is_last_hope or
               (
                 not has_failed and
-                Me:representation_is_allowed(
-                  TrialRepresentation
-                )
+                (TrialRepresentation:GetWidth() <= Me[1])
               )
             then
               return TrialRepresentation
@@ -1615,80 +1600,7 @@ package.preload['workshop.concepts.lua.formatter.variate'] =
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.expression'
-] =
-  function(...)
-    local represent_operand_oneline =
-      function(Me, Node)
-        local Printer = Me[2]
-        if Node.un_ops then
-          local cur_un_op, prev_un_op
-          for _, cur_un_op in ipairs(Node.un_ops) do
-            if (prev_un_op == '-') and (cur_un_op == '-') then
-              Printer:AddToCurline(' -')
-            elseif (cur_un_op == 'not') then
-              Printer:AddToCurline('not ')
-            else
-              Printer:AddToCurline(cur_un_op)
-            end
-            prev_un_op = cur_un_op
-          end
-        end
-        if not Me:process_node(Node.operand) then
-          return
-        end
-        if Node.bin_op then
-          Printer:AddToCurline(' ' .. Node.bin_op .. ' ')
-        end
-        return true
-      end
-    local oneliner =
-      function(Me, Node)
-        for _, Term in ipairs(Node) do
-          if not represent_operand_oneline(Me, Term) then
-            return
-          end
-        end
-        return true
-      end
-    local line_wrap_ops =
-      {
-        ['and'] = true,
-        ['or'] = true,
-        ['+'] = true,
-        ['-'] = true,
-        ['*'] = true,
-        ['/'] = true,
-        ['//'] = true,
-        ['..'] = true,
-      }
-    local represent_operand_multiline =
-      function(Me, Node)
-        if not represent_operand_oneline(Me, Node) then
-          return
-        end
-        if line_wrap_ops[Node.bin_op] then
-          Me[2]:RequestCleanLine()
-        end
-        return true
-      end
-    local multiliner =
-      function(Me, Node)
-        Me[2]:RequestCleanLine()
-        for _, Term in ipairs(Node) do
-          if not represent_operand_multiline(Me, Term) then
-            return
-          end
-        end
-        return true
-      end
-    return
-      function(Me, Node)
-        return Me:variate(Node, oneliner, multiliner)
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.formatter.handlers.interface'
+  'workshop.concepts.lua.formatter.Handlers.Interface'
 ] =
   function(...)
     return
@@ -1751,7 +1663,80 @@ package.preload[
       }
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.statements'
+  'workshop.concepts.lua.formatter.Handlers.expression'
+] =
+  function(...)
+    local represent_operand_oneline =
+      function(Me, Node)
+        local Printer = Me[2]
+        if Node.un_ops then
+          local cur_un_op, prev_un_op
+          for _, cur_un_op in ipairs(Node.un_ops) do
+            if (prev_un_op == '-') and (cur_un_op == '-') then
+              Printer:AddToCurline(' -')
+            elseif (cur_un_op == 'not') then
+              Printer:AddToCurline('not ')
+            else
+              Printer:AddToCurline(cur_un_op)
+            end
+            prev_un_op = cur_un_op
+          end
+        end
+        if not Me:ProcessNode(Node.operand) then
+          return
+        end
+        if Node.bin_op then
+          Printer:AddToCurline(' ' .. Node.bin_op .. ' ')
+        end
+        return true
+      end
+    local oneliner =
+      function(Me, Node)
+        for _, Term in ipairs(Node) do
+          if not represent_operand_oneline(Me, Term) then
+            return
+          end
+        end
+        return true
+      end
+    local line_wrap_ops =
+      {
+        ['and'] = true,
+        ['or'] = true,
+        ['+'] = true,
+        ['-'] = true,
+        ['*'] = true,
+        ['/'] = true,
+        ['//'] = true,
+        ['..'] = true,
+      }
+    local represent_operand_multiline =
+      function(Me, Node)
+        if not represent_operand_oneline(Me, Node) then
+          return
+        end
+        if line_wrap_ops[Node.bin_op] then
+          Me[2]:RequestCleanLine()
+        end
+        return true
+      end
+    local multiliner =
+      function(Me, Node)
+        Me[2]:RequestCleanLine()
+        for _, Term in ipairs(Node) do
+          if not represent_operand_multiline(Me, Term) then
+            return
+          end
+        end
+        return true
+      end
+    return
+      function(Me, Node)
+        return Me:Variate(Node, oneliner, multiliner)
+      end
+  end
+package.preload[
+  'workshop.concepts.lua.formatter.Handlers.statements'
 ] =
   function(...)
     local multiliner =
@@ -1761,7 +1746,7 @@ package.preload[
           if (Subnode.type ~= 'empty_statement') then
             Printer:RequestCleanLine()
           end
-          if not Me:process_node(Subnode) then
+          if not Me:ProcessNode(Subnode) then
             return
           end
         end
@@ -1769,22 +1754,22 @@ package.preload[
       end
     return
       function(Me, Node)
-        return Me:variate(Node, nil, multiliner)
+        return Me:Variate(Node, nil, multiliner)
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.expressions.function_call'
+  'workshop.concepts.lua.formatter.Handlers.expressions.function_call'
 ] =
   function(...)
     return
-      function(self, node)
+      function(Me, Node)
         return
-          self:process_node(node.name_part) and
-          self:process_node(node.args)
+          Me:ProcessNode(Node.name_part) and
+          Me:ProcessNode(Node.args)
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.expressions.string'
+  'workshop.concepts.lua.formatter.Handlers.expressions.string'
 ] =
   function(...)
     local str_sub = string.sub
@@ -1805,7 +1790,7 @@ package.preload[
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.expressions.table'
+  'workshop.concepts.lua.formatter.Handlers.expressions.table'
 ] =
   function(...)
     local oneliner =
@@ -1818,12 +1803,12 @@ package.preload[
           end
           local key = KeyVal.key
           if key then
-            if not Me:process_node(key) then
+            if not Me:ProcessNode(key) then
               return
             end
             Printer:AddToCurline(' = ')
           end
-          if not Me:process_node(KeyVal.value) then
+          if not Me:ProcessNode(KeyVal.value) then
             return
           end
         end
@@ -1840,16 +1825,16 @@ package.preload[
           Printer:RequestCleanLine()
           local key, value = KeyVal.key, KeyVal.value
           if key then
-            if not Me:process_node(key) then
+            if not Me:ProcessNode(key) then
               return
             end
             Printer:AddToCurline(' = ')
-            if not Me:process_block(value) then
+            if not Me:ProcessBlock(value) then
               return
             end
             Printer:AddToTextline(',')
           else
-            if not Me:process_node(value) then
+            if not Me:ProcessNode(value) then
               return
             end
             Printer:AddToTextline(',')
@@ -1866,12 +1851,12 @@ package.preload[
           Me[2]:AddToCurline('{ }')
           return true
         else
-          return Me:variate(Node, oneliner, multiliner)
+          return Me:Variate(Node, oneliner, multiliner)
         end
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.expressions.type_function'
+  'workshop.concepts.lua.formatter.Handlers.expressions.type_function'
 ] =
   function(...)
     local multiliner =
@@ -1879,44 +1864,44 @@ package.preload[
         local Printer = Me[2]
         Printer:RequestCleanLine()
         Printer:AddToCurline('function')
-        if not Me:process_node(Node.params) then
+        if not Me:ProcessNode(Node.params) then
           return
         end
         Printer:RequestCleanLine()
-        return Me:process_block_multiline(nil, Node.body, 'end')
+        return Me:ProcessBlock_Multiline(nil, Node.body, 'end')
       end
     return
       function(Me, Node)
-        return Me:variate(Node, nil, multiliner)
+        return Me:Variate(Node, nil, multiliner)
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.expressions.var_ref'
-] =
-  function(...)
-    return
-      function(self, node)
-        return self:process_node(node.name_part)
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.formatter.handlers.statements.assignment'
+  'workshop.concepts.lua.formatter.Handlers.expressions.var_ref'
 ] =
   function(...)
     return
       function(Me, Node)
-        if not Me:process_node(Node.dest_list) then
+        return Me:ProcessNode(Node.name_part)
+      end
+  end
+package.preload[
+  'workshop.concepts.lua.formatter.Handlers.statements.assignment'
+] =
+  function(...)
+    return
+      function(Me, Node)
+        if not Me:ProcessNode(Node.dest_list) then
           return
         end
         if Node.val_list then
           Me[2]:AddToTextline(' = ')
-          return Me:process_block(Node.val_list)
+          return Me:ProcessBlock(Node.val_list)
         end
         return true
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.statements.break_statement'
+  'workshop.concepts.lua.formatter.Handlers.statements.break_statement'
 ] =
   function(...)
     return
@@ -1926,19 +1911,19 @@ package.preload[
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.statements.global_statement'
+  'workshop.concepts.lua.formatter.Handlers.statements.global_statement'
 ] =
   function(...)
     return
       function(Me, Node)
         local Printer = Me[2]
         Printer:AddToCurline('global ')
-        if not Me:process_block(Node[1]) then
+        if not Me:ProcessBlock(Node[1]) then
           return
         end
         if Node[2] then
           Printer:AddToCurline(' = ')
-          if not Me:process_block(Node[2]) then
+          if not Me:ProcessBlock(Node[2]) then
             return
           end
         end
@@ -1946,24 +1931,24 @@ package.preload[
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.statements.goto_statement'
+  'workshop.concepts.lua.formatter.Handlers.statements.goto_statement'
 ] =
   function(...)
     return
       function(Me, Node)
         Me[2]:AddToCurline('goto ')
-        return Me:process_node(Node[1])
+        return Me:ProcessNode(Node[1])
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.statements.label_statement'
+  'workshop.concepts.lua.formatter.Handlers.statements.label_statement'
 ] =
   function(...)
     return
       function(Me, Node)
         local Printer = Me[2]
         Printer:AddToCurline('::')
-        if not Me:process_node(Node[1]) then
+        if not Me:ProcessNode(Node[1]) then
           return
         end
         Printer:AddToCurline('::')
@@ -1971,35 +1956,35 @@ package.preload[
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.statements.local_assignment'
+  'workshop.concepts.lua.formatter.Handlers.statements.local_assignment'
 ] =
   function(...)
     return
       function(Me, Node)
         local Printer = Me[2]
         Printer:AddToCurline('local ')
-        if not Me:process_block(Node.name_list) then
+        if not Me:ProcessBlock(Node.name_list) then
           return
         end
         if Node.val_list then
           Printer:AddToTextline(' = ')
-          return Me:process_block(Node.val_list)
+          return Me:ProcessBlock(Node.val_list)
         end
         return true
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.statements.return_statement'
+  'workshop.concepts.lua.formatter.Handlers.statements.return_statement'
 ] =
   function(...)
     local oneliner =
       function(Me, Node)
         Me[2]:AddToCurline('return ')
-        return Me:process_node(Node[1])
+        return Me:ProcessNode(Node[1])
       end
     local multiliner =
       function(Me, Node)
-        return Me:process_block_multiline('return', Node[1])
+        return Me:ProcessBlock_Multiline('return', Node[1])
       end
     return
       function(Me, Node)
@@ -2007,33 +1992,33 @@ package.preload[
           Me[2]:AddToCurline('return')
           return true
         else
-          return Me:variate(Node, oneliner, multiliner)
+          return Me:Variate(Node, oneliner, multiliner)
         end
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.statements.blocks.do_block'
+  'workshop.concepts.lua.formatter.Handlers.statements.blocks.do_block'
 ] =
   function(...)
     return
       function(Me, Node)
         Me[2]:RequestCleanLine()
-        return Me:process_block_multiline('do', Node[1], 'end')
+        return Me:ProcessBlock_Multiline('do', Node[1], 'end')
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.statements.blocks.generic_for_block'
+  'workshop.concepts.lua.formatter.Handlers.statements.blocks.generic_for_block'
 ] =
   function(...)
     local header_oneline =
       function(Me, Node)
         local Printer = Me[2]
         Printer:AddToCurline('for ')
-        if not Me:process_node(Node.names) then
+        if not Me:ProcessNode(Node.names) then
           return
         end
         Printer:AddToCurline(' in ')
-        if not Me:process_node(Node.expr_list) then
+        if not Me:ProcessNode(Node.expr_list) then
           return
         end
         Printer:AddToCurline(' do')
@@ -2042,14 +2027,14 @@ package.preload[
     local in_part_oneline =
       function(Me, Node)
         Me[2]:AddToCurline(' in ')
-        return Me:process_node(Node.expr_list)
+        return Me:ProcessNode(Node.expr_list)
       end
     local in_part_multiline =
       function(Me, Node)
         local Printer = Me[2]
         Printer:AddToTextline(' in')
         Printer:RequestCleanLine()
-        return Me:process_block(Node.expr_list)
+        return Me:ProcessBlock(Node.expr_list)
       end
     local header_multiline =
       function(Me, Node)
@@ -2057,11 +2042,11 @@ package.preload[
         Printer:AddToCurline('for')
         Printer:RequestCleanLine()
         Printer:IncIndent()
-        if not Me:process_node(Node.names) then
+        if not Me:ProcessNode(Node.names) then
           return
         end
         if
-          not Me:variate(
+          not Me:Variate(
             Node, in_part_oneline, in_part_multiline
           )
         then
@@ -2077,12 +2062,12 @@ package.preload[
         local Printer = Me[2]
         Printer:RequestCleanLine()
         if
-          not Me:variate(Node, header_oneline, header_multiline)
+          not Me:Variate(Node, header_oneline, header_multiline)
         then
           return
         end
         Printer:RequestCleanLine()
-        if not Me:process_block(Node.body) then
+        if not Me:ProcessBlock(Node.body) then
           return
         end
         Printer:RequestCleanLine()
@@ -2091,51 +2076,49 @@ package.preload[
       end
     return
       function(Me, Node)
-        return Me:variate(Node, nil, multiliner)
+        return Me:Variate(Node, nil, multiliner)
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.statements.blocks.if_block'
+  'workshop.concepts.lua.formatter.Handlers.statements.blocks.if_block'
 ] =
   function(...)
     local oneline_if =
       function(Me, Node)
-        return Me:process_block_oneline('if ', Node, ' then')
+        return Me:ProcessBlock_Oneline('if ', Node, ' then')
       end
     local multiline_if =
       function(Me, Node)
-        return Me:process_block_multiline('if', Node, 'then')
+        return Me:ProcessBlock_Multiline('if', Node, 'then')
       end
     local oneline_elseif =
       function(Me, Node)
-        return
-          Me:process_block_oneline('elseif ', Node, ' then')
+        return Me:ProcessBlock_Oneline('elseif ', Node, ' then')
       end
     local multiline_elseif =
       function(Me, Node)
-        return
-          Me:process_block_multiline('elseif', Node, 'then')
+        return Me:ProcessBlock_Multiline('elseif', Node, 'then')
       end
     return
       function(Me, Node)
         local Printer = Me[2]
         Printer:RequestCleanLine()
         if
-          not Me:variate(
+          not Me:Variate(
             Node.if_part.condition, oneline_if, multiline_if
           )
         then
           return
         end
         Printer:RequestCleanLine()
-        if not Me:process_block(Node.if_part.body) then
+        if not Me:ProcessBlock(Node.if_part.body) then
           return
         end
         if Node.elseif_parts then
           for _, ElseifPart in ipairs(Node.elseif_parts) do
             Printer:RequestCleanLine()
             if
-              not Me:variate(
+              not Me:Variate(
                 ElseifPart.condition,
                 oneline_elseif,
                 multiline_elseif
@@ -2144,7 +2127,7 @@ package.preload[
               return
             end
             Printer:RequestCleanLine()
-            if not Me:process_block(ElseifPart.body) then
+            if not Me:ProcessBlock(ElseifPart.body) then
               return
             end
           end
@@ -2152,7 +2135,7 @@ package.preload[
         if Node.else_part then
           Printer:RequestCleanLine()
           if
-            not Me:process_block_multiline(
+            not Me:ProcessBlock_Multiline(
               'else', Node.else_part.body
             )
           then
@@ -2165,7 +2148,7 @@ package.preload[
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.statements.blocks.local_named_function'
+  'workshop.concepts.lua.formatter.Handlers.statements.blocks.local_named_function'
 ] =
   function(...)
     return
@@ -2173,15 +2156,15 @@ package.preload[
         local Printer = Me[2]
         Printer:RequestCleanLine()
         Printer:AddToCurline('local function ')
-        if not Me:process_node(Node.dotted_name) then
+        if not Me:ProcessNode(Node.dotted_name) then
           return
         end
-        if not Me:process_node(Node.params) then
+        if not Me:ProcessNode(Node.params) then
           return
         end
         Printer:RequestCleanLine()
         if
-          not Me:process_block_multiline(nil, Node.body, 'end')
+          not Me:ProcessBlock_Multiline(nil, Node.body, 'end')
         then
           return
         end
@@ -2190,7 +2173,7 @@ package.preload[
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.statements.blocks.named_function'
+  'workshop.concepts.lua.formatter.Handlers.statements.blocks.named_function'
 ] =
   function(...)
     return
@@ -2198,20 +2181,20 @@ package.preload[
         local Printer = Me[2]
         Printer:RequestCleanLine()
         Printer:AddToCurline('function ')
-        if not Me:process_node(Node.dotted_name) then
+        if not Me:ProcessNode(Node.dotted_name) then
           return
         end
         if Node.colon_name then
-          if not Me:process_node(Node.colon_name) then
+          if not Me:ProcessNode(Node.colon_name) then
             return
           end
         end
-        if not Me:process_node(Node.params) then
+        if not Me:ProcessNode(Node.params) then
           return
         end
         Printer:RequestCleanLine()
         if
-          not Me:process_block_multiline(nil, Node.body, 'end')
+          not Me:ProcessBlock_Multiline(nil, Node.body, 'end')
         then
           return
         end
@@ -2220,58 +2203,57 @@ package.preload[
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.statements.blocks.numeric_for_block'
+  'workshop.concepts.lua.formatter.Handlers.statements.blocks.numeric_for_block'
 ] =
   function(...)
     return
       function(Me, Node)
         local Printer = Me[2]
         Printer:AddToCurline('for ')
-        if not Me:process_node(Node.index) then
+        if not Me:ProcessNode(Node.index) then
           return
         end
         Printer:AddToCurline(' = ')
-        if not Me:process_node(Node.start_val) then
+        if not Me:ProcessNode(Node.start_val) then
           return
         end
         Printer:AddToCurline(', ')
-        if not Me:process_node(Node.end_val) then
+        if not Me:ProcessNode(Node.end_val) then
           return
         end
         if Node.increment then
           Printer:AddToCurline(', ')
-          if not Me:process_node(Node.increment) then
+          if not Me:ProcessNode(Node.increment) then
             return
           end
         end
         Printer:AddToCurline(' ')
-        return
-          Me:process_block_multiline('do', Node.body, 'end')
+        return Me:ProcessBlock_Multiline('do', Node.body, 'end')
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.statements.blocks.repeat_block'
+  'workshop.concepts.lua.formatter.Handlers.statements.blocks.repeat_block'
 ] =
   function(...)
     local oneline_condition =
       function(Me, Node)
-        return Me:process_block_oneline(' ', Node)
+        return Me:ProcessBlock_Oneline(' ', Node)
       end
     local multiline_condition =
       function(Me, Node)
-        return Me:process_block_multiline(nil, Node)
+        return Me:ProcessBlock_Multiline(nil, Node)
       end
     return
       function(Me, Node)
         if
-          not Me:process_block_multiline(
+          not Me:ProcessBlock_Multiline(
             'repeat', Node.body, 'until'
           )
         then
           return
         end
         if
-          not Me:variate(
+          not Me:Variate(
             Node.condition,
             oneline_condition,
             multiline_condition
@@ -2283,35 +2265,35 @@ package.preload[
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.statements.blocks.while_block'
+  'workshop.concepts.lua.formatter.Handlers.statements.blocks.while_block'
 ] =
   function(...)
     return
-      function(self, node)
+      function(Me, Node)
         return
-          self:process_block_oneline(
-            'while ', node.condition, ' do'
+          Me:ProcessBlock_Oneline(
+            'while ', Node.condition, ' do'
           ) and
-          self:process_block_multiline(nil, node.body, 'end')
+          Me:ProcessBlock_Multiline(nil, Node.body, 'end')
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.wrappers.attr_name'
+  'workshop.concepts.lua.formatter.Handlers.wrappers.attr_name'
 ] =
   function(...)
     return
       function(Me, Node)
         local Printer = Me[2]
-        Me:process_node(Node[1])
+        Me:ProcessNode(Node[1])
         if Node[2] then
           Printer:AddToCurline(' ')
-          Me:process_node(Node[2])
+          Me:ProcessNode(Node[2])
         end
         return true
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.wrappers.attr_name_list'
+  'workshop.concepts.lua.formatter.Handlers.wrappers.attr_name_list'
 ] =
   function(...)
     local process_expr_list = request('expr_list')
@@ -2319,34 +2301,34 @@ package.preload[
       function(Me, Node)
         local Printer = Me[2]
         if Node.list_attr then
-          Me:process_node(Node.list_attr)
+          Me:ProcessNode(Node.list_attr)
           Printer:AddToCurline(' ')
         end
         return process_expr_list(Me, Node)
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.wrappers.attribute'
+  'workshop.concepts.lua.formatter.Handlers.wrappers.attribute'
 ] =
   function(...)
     return
       function(Me, Node)
         local Printer = Me[2]
         Printer:AddToCurline('<')
-        Me:process_node(Node[1])
+        Me:ProcessNode(Node[1])
         Printer:AddToCurline('>')
         return true
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.wrappers.bracket_expr'
+  'workshop.concepts.lua.formatter.Handlers.wrappers.bracket_expr'
 ] =
   function(...)
     local oneliner =
       function(Me, Node)
         local Printer = Me[2]
         Printer:AddToCurline('[')
-        if not Me:process_node(Node[1]) then
+        if not Me:ProcessNode(Node[1]) then
           return
         end
         Printer:AddToCurline(']')
@@ -2357,7 +2339,7 @@ package.preload[
         local Printer = Me[2]
         Printer:AddToCurline('[')
         Printer:RequestCleanLine()
-        if not Me:process_block(Node[1]) then
+        if not Me:ProcessBlock(Node[1]) then
           return
         end
         Printer:RequestCleanLine()
@@ -2366,46 +2348,46 @@ package.preload[
       end
     return
       function(Me, Node)
-        return Me:variate(Node, oneliner, multiliner)
+        return Me:Variate(Node, oneliner, multiliner)
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.wrappers.colon_name'
+  'workshop.concepts.lua.formatter.Handlers.wrappers.colon_name'
 ] =
   function(...)
     return
       function(Me, Node)
         Me[2]:AddToCurline(':')
-        return Me:process_node(Node[1])
+        return Me:ProcessNode(Node[1])
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.wrappers.dot_list'
+  'workshop.concepts.lua.formatter.Handlers.wrappers.dot_list'
 ] =
   function(...)
     return
-      function(self, node)
-        return self:process_list(node, '.')
+      function(Me, Node)
+        return Me:ProcessList(Node, '.')
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.wrappers.dot_name'
+  'workshop.concepts.lua.formatter.Handlers.wrappers.dot_name'
 ] =
   function(...)
     return
       function(Me, Node)
         Me[2]:AddToCurline('.')
-        return Me:process_node(Node[1])
+        return Me:ProcessNode(Node[1])
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.wrappers.expr_list'
+  'workshop.concepts.lua.formatter.Handlers.wrappers.expr_list'
 ] =
   function(...)
     local oneline_delimiter = ', '
     local oneliner =
       function(Me, Node)
-        return Me:process_list(Node, oneline_delimiter)
+        return Me:ProcessList(Node, oneline_delimiter)
       end
     local multiline_delimiter =
       function(Me)
@@ -2417,23 +2399,23 @@ package.preload[
       function(Me, Node)
         Me[2]:RequestCleanLine()
         return
-          Me:process_list_variative(
+          Me:ProcessList_Variative(
             Node, oneline_delimiter, multiline_delimiter
           )
       end
     return
       function(Me, Node)
-        return Me:variate(Node, oneliner, multiliner)
+        return Me:Variate(Node, oneliner, multiliner)
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.wrappers.func_args'
+  'workshop.concepts.lua.formatter.Handlers.wrappers.func_args'
 ] =
   function(...)
     return request('function_params')
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.wrappers.function_params'
+  'workshop.concepts.lua.formatter.Handlers.wrappers.function_params'
 ] =
   function(...)
     local oneline_delimiter = ', '
@@ -2441,7 +2423,7 @@ package.preload[
       function(Me, Node)
         local Printer = Me[2]
         Printer:AddToCurline('(')
-        if not Me:process_list(Node, oneline_delimiter) then
+        if not Me:ProcessList(Node, oneline_delimiter) then
           return
         end
         Printer:AddToCurline(')')
@@ -2456,7 +2438,7 @@ package.preload[
     local multiline_block_processor =
       function(Me, Node)
         return
-          Me:process_list_variative(
+          Me:ProcessList_Variative(
             Node, oneline_delimiter, multiline_delimiter
           )
       end
@@ -2466,7 +2448,7 @@ package.preload[
         Me[2]:AddToCurline('(')
         Me[2]:RequestCleanLine()
         if
-          not Me:process_block(Node, multiline_block_processor)
+          not Me:ProcessBlock(Node, multiline_block_processor)
         then
           return
         end
@@ -2480,12 +2462,12 @@ package.preload[
           Me[2]:AddToCurline('()')
           return true
         else
-          return Me:variate(Node, oneliner, multiliner)
+          return Me:Variate(Node, oneliner, multiliner)
         end
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.wrappers.global_all'
+  'workshop.concepts.lua.formatter.Handlers.wrappers.global_all'
 ] =
   function(...)
     return
@@ -2495,7 +2477,7 @@ package.preload[
           Printer:AddToCurline('*')
           return true
         end
-        if not Me:process_node(Node[1]) then
+        if not Me:ProcessNode(Node[1]) then
           return
         end
         Printer:AddToCurline(' *')
@@ -2503,22 +2485,22 @@ package.preload[
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.wrappers.name_list'
+  'workshop.concepts.lua.formatter.Handlers.wrappers.name_list'
 ] =
   function(...)
     return request('expr_list')
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.wrappers.name_parts'
+  'workshop.concepts.lua.formatter.Handlers.wrappers.name_parts'
 ] =
   function(...)
     return
-      function(self, node)
-        return self:process_list(node)
+      function(Me, Node)
+        return Me:ProcessList(Node)
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.wrappers.named_vararg'
+  'workshop.concepts.lua.formatter.Handlers.wrappers.named_vararg'
 ] =
   function(...)
     return
@@ -2526,21 +2508,21 @@ package.preload[
         local Printer = Me[2]
         if Node[1] then
           Printer:AddToCurline('... ')
-          return Me:process_node(Node[1])
+          return Me:ProcessNode(Node[1])
         end
         Printer:AddToCurline(Node.value)
         return true
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.wrappers.par_expr'
+  'workshop.concepts.lua.formatter.Handlers.wrappers.par_expr'
 ] =
   function(...)
     local oneliner =
       function(Me, Node)
         local Printer = Me[2]
         Printer:AddToCurline('(')
-        if not Me:process_node(Node[1]) then
+        if not Me:ProcessNode(Node[1]) then
           return
         end
         Printer:AddToCurline(')')
@@ -2551,7 +2533,7 @@ package.preload[
         local Printer = Me[2]
         Printer:AddToCurline('(')
         Printer:RequestCleanLine()
-        if not Me:process_block(Node[1]) then
+        if not Me:ProcessBlock(Node[1]) then
           return
         end
         Printer:RequestCleanLine()
@@ -2560,11 +2542,11 @@ package.preload[
       end
     return
       function(Me, Node)
-        return Me:variate(Node, oneliner, multiliner)
+        return Me:Variate(Node, oneliner, multiliner)
       end
   end
 package.preload[
-  'workshop.concepts.lua.formatter.handlers.wrappers.ref_list'
+  'workshop.concepts.lua.formatter.Handlers.wrappers.ref_list'
 ] =
   function(...)
     return request('expr_list')

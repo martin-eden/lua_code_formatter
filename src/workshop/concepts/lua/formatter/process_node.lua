@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-10-31
 ]]
 
 return
@@ -34,7 +34,7 @@ return
       return handler(Me, Node)
     else
       local node_value = Node.value
-      Me.printer:AddToCurline(node_value)
+      Me[2]:AddToCurline(node_value)
       return true
     end
   end

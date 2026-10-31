@@ -2,12 +2,12 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-24
+  Last mod.: 2026-10-31
 ]]
 
 return
   function(Me, Node)
-    local Printer = Me.printer
+    local Printer = Me[2]
 
     Printer:AddToCurline('for ')
     if not Me:process_node(Node.index) then

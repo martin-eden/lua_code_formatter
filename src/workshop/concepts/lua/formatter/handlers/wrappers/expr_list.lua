@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-10-31
 ]]
 
 local oneline_delimiter = ', '
@@ -14,13 +14,14 @@ local oneliner =
 
 local multiline_delimiter =
   function(Me)
-    Me.printer:AddToTextline(',')
-    Me.printer:RequestCleanLine()
+    local Printer = Me[2]
+    Printer:AddToTextline(',')
+    Printer:RequestCleanLine()
   end
 
 local multiliner =
   function(Me, Node)
-    Me.printer:RequestCleanLine()
+    Me[2]:RequestCleanLine()
     return Me:process_list_variative(Node, oneline_delimiter, multiline_delimiter)
   end
 

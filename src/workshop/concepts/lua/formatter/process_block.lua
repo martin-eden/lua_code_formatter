@@ -2,19 +2,20 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-10-31
 ]]
 
 return
   function(Me, Node, handler)
+    local Printer = Me[2]
     local result
-    Me.printer:IncIndent()
+    Printer:IncIndent()
     if handler then
       result = handler(Me, Node)
     else
       result = Me:process_node(Node)
     end
-    Me.printer:DecIndent()
+    Printer:DecIndent()
     return result
   end
 

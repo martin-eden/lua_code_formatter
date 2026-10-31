@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-10-31
 ]]
 
 local oneline_if =
@@ -27,7 +27,7 @@ local multiline_elseif =
 
 return
   function(Me, Node)
-    local Printer = Me.printer
+    local Printer = Me[2]
 
     Printer:RequestCleanLine()
     if not Me:variate(Node.if_part.condition, oneline_if, multiline_if) then

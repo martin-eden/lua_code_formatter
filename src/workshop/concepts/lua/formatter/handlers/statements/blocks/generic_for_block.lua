@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-10-31
 ]]
 
 --[[
@@ -12,7 +12,7 @@
 ]]
 local header_oneline =
   function(Me, Node)
-    local Printer = Me.printer
+    local Printer = Me[2]
     Printer:AddToCurline('for ')
     if not Me:process_node(Node.names) then
       return
@@ -32,7 +32,7 @@ local header_oneline =
 ]]
 local in_part_oneline =
   function(Me, Node)
-    Me.printer:AddToCurline(' in ')
+    Me[2]:AddToCurline(' in ')
     return Me:process_node(Node.expr_list)
   end
 
@@ -44,7 +44,7 @@ local in_part_oneline =
 ]]
 local in_part_multiline =
   function(Me, Node)
-    local Printer = Me.printer
+    local Printer = Me[2]
 
     Printer:AddToTextline(' in')
     Printer:RequestCleanLine()
@@ -61,7 +61,7 @@ local in_part_multiline =
 ]]
 local header_multiline =
   function(Me, Node)
-    local Printer = Me.printer
+    local Printer = Me[2]
 
     Printer:AddToCurline('for')
 
@@ -90,7 +90,7 @@ local header_multiline =
 ]]
 local multiliner =
   function(Me, Node)
-    local Printer = Me.printer
+    local Printer = Me[2]
 
     Printer:RequestCleanLine()
     if not Me:variate(Node, header_oneline, header_multiline) then

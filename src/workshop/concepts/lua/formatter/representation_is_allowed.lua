@@ -2,12 +2,12 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-10-31
 ]]
 
 return
   function(Me, Representation)
-    return (Representation:GetWidth() <= Me.right_margin)
+    return (Representation:GetWidth() <= Me[1])
   end
 
 --[[

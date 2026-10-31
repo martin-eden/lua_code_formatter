@@ -2,12 +2,12 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-10-31
 ]]
 
 local oneliner =
   function(Me, Node)
-    local Printer = Me.printer
+    local Printer = Me[2]
     Printer:AddToCurline('{ ')
     for idx, KeyVal in ipairs(Node) do
       if (idx > 1) then
@@ -30,42 +30,42 @@ local oneliner =
 
 local multiliner =
   function(Me, Node)
-    local printer = Me.printer
+    local Printer = Me[2]
 
-    printer:RequestCleanLine()
-    printer:AddToCurline('{')
+    Printer:RequestCleanLine()
+    Printer:AddToCurline('{')
 
-    printer:IncIndent()
+    Printer:IncIndent()
     for _, KeyVal in ipairs(Node) do
-      printer:RequestCleanLine()
+      Printer:RequestCleanLine()
       local key, value = KeyVal.key, KeyVal.value
       if key then
         if not Me:process_node(key) then
           return
         end
-        printer:AddToCurline(' = ')
+        Printer:AddToCurline(' = ')
         if not Me:process_block(value) then
           return
         end
-        printer:AddToTextline(',')
+        Printer:AddToTextline(',')
       else
         if not Me:process_node(value) then
           return
         end
-        printer:AddToTextline(',')
+        Printer:AddToTextline(',')
       end
     end
-    printer:DecIndent()
+    Printer:DecIndent()
 
-    printer:RequestCleanLine()
-    printer:AddToCurline('}')
+    Printer:RequestCleanLine()
+    Printer:AddToCurline('}')
     return true
   end
 
 return
   function(Me, Node)
     if (#Node == 0) then
-      Me.printer:AddToCurline('{ }')
+      Me[2]:AddToCurline('{ }')
       return true
     else
       return Me:variate(Node, oneliner, multiliner)

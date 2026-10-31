@@ -2,27 +2,30 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-10-31
 ]]
 
 local str_sub = string.sub
 
 return
   function(Me, Node)
+    local Printer = Me[2]
+
     --[=[
       Quite ugly handling indexing [[[s]]] case: convert to [ [[s]]].
     ]=]
-    if not Me.printer:OnCleanLine() then
-      local text_line = Me.printer[1]
+    if not Printer:OnCleanLine() then
+      local text_line = Printer[1]
       if
         (str_sub(text_line, -1) == '[') and
         (str_sub(Node.value, 1, 1) == '[')
       then
-        Me.printer:AddToCurline(' ')
+        Printer:AddToCurline(' ')
       end
     end
 
-    Me.printer:AddToCurline(Node.value)
+    Printer:AddToCurline(Node.value)
+
     return true
   end
 

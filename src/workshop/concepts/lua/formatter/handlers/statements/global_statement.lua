@@ -2,12 +2,12 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-28
+  Last mod.: 2026-10-31
 ]]
 
 return
   function(Me, Node)
-    local Printer = Me.printer
+    local Printer = Me[2]
     Printer:AddToCurline('global ')
     if not Me:process_block(Node[1]) then return end
     if Node[2] then

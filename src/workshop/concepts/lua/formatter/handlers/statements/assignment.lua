@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-10-31
 ]]
 
 return
@@ -11,7 +11,7 @@ return
       return
     end
     if Node.val_list then
-      Me.printer:AddToTextline(' = ')
+      Me[2]:AddToTextline(' = ')
       return Me:process_block(Node.val_list)
     end
     return true

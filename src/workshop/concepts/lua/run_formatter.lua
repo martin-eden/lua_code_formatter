@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-24
+  Last mod.: 2026-10-31
 ]]
 
 --[[
@@ -13,14 +13,14 @@
 local FormatterClass = request('formatter.interface')
 
 return
-  function(FormatterAst, Options)
-    local Formatter = new(FormatterClass, Options)
-    Formatter.data_struc = FormatterAst
-    Formatter:init()
-    return Formatter:run()
+  function(Ast, Options)
+    local Formatter = FormatterClass.create(Options)
+    Formatter:process_node(Ast)
+    return Formatter[2]:GetText()
   end
 
 --[[
   2018 #
   2026-10-24
+  2026-10-31
 ]]

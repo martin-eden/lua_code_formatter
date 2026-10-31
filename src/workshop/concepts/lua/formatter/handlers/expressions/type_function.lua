@@ -2,12 +2,12 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-10-31
 ]]
 
 local multiliner =
   function(Me, Node)
-    local Printer = Me.printer
+    local Printer = Me[2]
 
     Printer:RequestCleanLine()
     Printer:AddToCurline('function')

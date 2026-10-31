@@ -2,12 +2,12 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-10-31
 ]]
 
 return
   function(Me, Node)
-    Me.printer:AddToCurline(':')
+    Me[2]:AddToCurline(':')
     return Me:process_node(Node[1])
   end
 

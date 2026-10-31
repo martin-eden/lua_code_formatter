@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-22
+  Last mod.: 2026-10-31
 ]]
 
 --[[
@@ -15,21 +15,20 @@
   it can me merged to higher-level result.
 ]]
 
-local TextBlock = request('!.mechs.TextBlock')
-
 return
   function(Me, representer, Node)
-    local Original = Me.printer
-    local Trial = Original:Seed()
+    local OriginalPrinter = Me[2]
+    local TrialPrinter = OriginalPrinter:Seed()
 
-    Me.printer = Trial
+    Me[2] = TrialPrinter
     local has_failed = not representer(Me, Node)
-    Me.printer = Original
+    Me[2] = OriginalPrinter
 
-    return Trial, has_failed
+    return TrialPrinter, has_failed
   end
 
 --[[
   2017 # #
-  2026-10-22
+  2026 #
+  2026-10-31
 ]]

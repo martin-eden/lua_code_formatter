@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-28
+  Last mod.: 2026-10-31
 ]]
 
 --[[
@@ -35,7 +35,7 @@
 
 return
   function(Me, Node)
-    local Printer = Me.printer
+    local Printer = Me[2]
     if not Node[1] then
       Printer:AddToCurline('*')
       return true

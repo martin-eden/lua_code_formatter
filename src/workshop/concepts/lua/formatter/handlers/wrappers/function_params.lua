@@ -2,25 +2,27 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-10-31
 ]]
 
 local oneline_delimiter = ', '
 
 local oneliner =
   function(Me, Node)
-    Me.printer:AddToCurline('(')
+    local Printer = Me[2]
+    Printer:AddToCurline('(')
     if not Me:process_list(Node, oneline_delimiter) then
       return
     end
-    Me.printer:AddToCurline(')')
+    Printer:AddToCurline(')')
     return true
   end
 
 local multiline_delimiter =
   function(Me)
-    Me.printer:AddToTextline(',')
-    Me.printer:RequestCleanLine()
+    local Printer = Me[2]
+    Printer:AddToTextline(',')
+    Printer:RequestCleanLine()
   end
 
 local multiline_block_processor =
@@ -30,20 +32,21 @@ local multiline_block_processor =
 
 local multiliner =
   function(Me, Node)
-    Me.printer:AddToCurline('(')
-    Me.printer:RequestCleanLine()
+    local Printer = Me[2]
+    Me[2]:AddToCurline('(')
+    Me[2]:RequestCleanLine()
     if not Me:process_block(Node, multiline_block_processor) then
       return
     end
-    Me.printer:RequestCleanLine()
-    Me.printer:AddToCurline(')')
+    Me[2]:RequestCleanLine()
+    Me[2]:AddToCurline(')')
     return true
   end
 
 return
   function(Me, Node)
     if (#Node == 0) then
-      Me.printer:AddToCurline('()')
+      Me[2]:AddToCurline('()')
       return true
     else
       return Me:variate(Node, oneliner, multiliner)

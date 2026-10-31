@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-10-31
 ]]
 
 local apply_delimiter =
@@ -11,7 +11,7 @@ local apply_delimiter =
       if is_function(delimiter) then
         delimiter(Me)
       else
-        Me.printer:AddToCurline(delimiter)
+        Me[2]:AddToCurline(delimiter)
       end
     end
   end

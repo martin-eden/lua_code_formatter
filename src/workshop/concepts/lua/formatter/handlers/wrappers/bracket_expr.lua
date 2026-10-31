@@ -2,30 +2,33 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-10-31
 ]]
 
 local oneliner =
   function(Me, Node)
-    Me.printer:AddToCurline('[')
+    local Printer = Me[2]
+    Printer:AddToCurline('[')
     if not Me:process_node(Node[1]) then
       return
     end
-    Me.printer:AddToCurline(']')
+    Printer:AddToCurline(']')
     return true
   end
 
 local multiliner =
   function(Me, Node)
-    Me.printer:AddToCurline('[')
+    local Printer = Me[2]
 
-    Me.printer:RequestCleanLine()
+    Printer:AddToCurline('[')
+
+    Printer:RequestCleanLine()
     if not Me:process_block(Node[1]) then
       return
     end
 
-    Me.printer:RequestCleanLine()
-    Me.printer:AddToCurline(']')
+    Printer:RequestCleanLine()
+    Printer:AddToCurline(']')
 
     return true
   end

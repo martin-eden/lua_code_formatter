@@ -2,12 +2,12 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-27
+  Last mod.: 2026-10-31
 ]]
 
 return
   function(Me, prefix, Node, postfix, opt_handler)
-    local Printer = Me.printer
+    local Printer = Me[2]
 
     if prefix then
       Printer:AddToCurline(prefix)

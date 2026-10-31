@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-28
+  Last mod.: 2026-10-31
 ]]
 
 --[[
@@ -39,7 +39,7 @@ local process_expr_list = request('expr_list')
 
 return
   function(Me, Node)
-    local Printer = Me.printer
+    local Printer = Me[2]
     if Node.list_attr then
       Me:process_node(Node.list_attr)
       Printer:AddToCurline(' ')

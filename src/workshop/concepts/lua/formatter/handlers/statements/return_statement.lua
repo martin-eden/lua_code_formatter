@@ -2,12 +2,12 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-10-31
 ]]
 
 local oneliner =
   function(Me, Node)
-    Me.printer:AddToCurline('return ')
+    Me[2]:AddToCurline('return ')
     return Me:process_node(Node[1])
   end
 
@@ -19,7 +19,7 @@ local multiliner =
 return
   function(Me, Node)
     if not Node[1] then
-      Me.printer:AddToCurline('return')
+      Me[2]:AddToCurline('return')
       return true
     else
       return Me:variate(Node, oneliner, multiliner)

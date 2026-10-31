@@ -2,22 +2,22 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-10-31
 ]]
 
 local represent_operand_oneline =
   function(Me, Node)
-    local printer = Me.printer
+    local Printer = Me[2]
     if Node.un_ops then
       local cur_un_op, prev_un_op
       for _, cur_un_op in ipairs(Node.un_ops) do
         if (prev_un_op == '-') and (cur_un_op == '-') then
           -- Avoiding "-" "-" clash to comment "--"
-          printer:AddToCurline(' -')
+          Printer:AddToCurline(' -')
         elseif (cur_un_op == 'not') then
-          printer:AddToCurline('not ')
+          Printer:AddToCurline('not ')
         else
-          printer:AddToCurline(cur_un_op)
+          Printer:AddToCurline(cur_un_op)
         end
         prev_un_op = cur_un_op
       end
@@ -26,7 +26,7 @@ local represent_operand_oneline =
       return
     end
     if Node.bin_op then
-      printer:AddToCurline(' ' .. Node.bin_op .. ' ')
+      Printer:AddToCurline(' ' .. Node.bin_op .. ' ')
     end
     return true
   end
@@ -59,14 +59,14 @@ local represent_operand_multiline =
       return
     end
     if line_wrap_ops[Node.bin_op] then
-      Me.printer:RequestCleanLine()
+      Me[2]:RequestCleanLine()
     end
     return true
   end
 
 local multiliner =
   function(Me, Node)
-    Me.printer:RequestCleanLine()
+    Me[2]:RequestCleanLine()
     for _, Term in ipairs(Node) do
       if not represent_operand_multiline(Me, Term) then
         return

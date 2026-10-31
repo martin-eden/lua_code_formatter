@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-28
+  Last mod.: 2026-10-30
 ]]
 
 --[[
@@ -18,6 +18,7 @@
          ├─ label_statement ───┤
          ├─ goto_statement ────┤
          ├─ local_statement ───┤
+         ├─ global_statement ──┤
          ├─ break_statement ───┤
          ├─ do_block ──────────┤
          ├─ if_block ──────────┤

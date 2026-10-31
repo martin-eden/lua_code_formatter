@@ -12,8 +12,8 @@ return
     local Printer = Me[2]
     local StateKeeper = Me[3]
 
-    StateKeeper:enter_level()
-    local OurState = StateKeeper:get_state() or DefaultState
+    StateKeeper:NextLevel()
+    local OurState = StateKeeper:GetState() or DefaultState
     local is_multiline_allowed = OurState.is_multiline_allowed
     local is_last_hope = OurState.is_last_hope
 
@@ -29,7 +29,7 @@ return
         local representer_is_last_hope =
           is_last_hope and (representer == last_hope_handler)
 
-        StateKeeper:set_child_state(
+        StateKeeper:SetNextState(
           {
             is_multiline_allowed = is_multiline,
             is_last_hope = representer_is_last_hope,
@@ -66,7 +66,7 @@ return
       Printer:Graft(FinalRepresentation)
     end
 
-    StateKeeper:leave_level()
+    StateKeeper:PrevLevel()
 
     return not is_nil(FinalRepresentation)
   end

@@ -19,7 +19,7 @@ do
   local default_right_margin = 72
   local default_indent_chunk = '  '
   local TextBlock = request('!.mechs.TextBlock')
-  local StateKeeper = request('state_keeper.interface')
+  local StateKeeperClass = request('StateKeeper')
   local attach_methods = request('!.table.attach_methods')
   create =
     function(Options)
@@ -33,7 +33,7 @@ do
         Printer = TextBlock.create(indent_chunk)
       end
 
-      StateKeeper:init()
+      local StateKeeper = StateKeeperClass.create()
 
       local Me = { right_margin, Printer, StateKeeper }
 

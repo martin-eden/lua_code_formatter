@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-28
+  Last mod.: 2026-10-31
 ]]
 
 require('workshop.base')
@@ -66,17 +66,14 @@ local file_from_str = request('!.convert.file_from_str')
 local str_format = string.format
 local reformat = request('!.lua.code.reformat')
 
-local DefaultOptions =
-  {
-    indent_chunk = '  ',
-    right_margin = 72,
-  }
+local default_indent_chunk = '  '
+local default_right_margin = 72
 
 local Params = get_params()
 local input_file_name = Params.input_file_name
 local output_file_name = Params.output_file_name
-local indent_chunk = Params.indent_chunk or DefaultOptions.indent_chunk
-local right_margin = Params.right_margin or DefaultOptions.right_margin
+local indent_chunk = Params.indent_chunk or default_indent_chunk
+local right_margin = Params.right_margin or default_right_margin
 
 if not (input_file_name and output_file_name) then
   print(usage_text)
@@ -87,6 +84,8 @@ print('( Lua code reformatter')
 local input_code_str = file_to_str(input_file_name)
 print(str_format('  Read code from "%s".', input_file_name))
 
+local Options =
+  { indent_chunk = indent_chunk, right_margin = right_margin }
 file_from_str(output_file_name, reformat(input_code_str, Options))
 print(str_format('  Formatted code to "%s".', output_file_name))
 print(')')
@@ -94,6 +93,6 @@ print(')')
 --[[
   2017 # #
   2018 #
-  2026 # #
-  2026-10-24
+  2026 # # #
+  2026-10-31
 ]]

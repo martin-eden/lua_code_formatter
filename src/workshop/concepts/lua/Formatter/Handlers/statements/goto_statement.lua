@@ -1,0 +1,18 @@
+-- Serialize "goto" statement
+
+--[[
+  Author: Martin Eden
+  Last mod.: 2026-10-31
+]]
+
+return
+  function(Me, Node)
+    Me[2]:AddToCurline('goto ')
+    return Me:ProcessNode(Node[1])
+  end
+
+--[[
+  2016 #
+  2017 #
+  2018 #
+]]

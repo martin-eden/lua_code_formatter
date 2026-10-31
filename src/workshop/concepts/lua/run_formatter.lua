@@ -10,12 +10,12 @@
   formatted code.
 ]]
 
-local FormatterClass = request('formatter.interface')
+local FormatterClass = request('Formatter.Interface')
 
 return
   function(Ast, Options)
     local Formatter = FormatterClass.create(Options)
-    Formatter:process_node(Ast)
+    Formatter:ProcessNode(Ast)
     return Formatter[2]:GetText()
   end
 

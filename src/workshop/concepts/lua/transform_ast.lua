@@ -23,11 +23,18 @@
       ...
 ]]
 
-local Transformer = request('ast_transformer.interface')
+local align_nodes = request('ast_transformer.align_nodes')
+local restruc_nodes = request('ast_transformer.restruc_nodes')
+local Handlers = request('ast_transformer.Handlers.Interface')
 
 return
   function(SyntaxTree)
-    return Transformer:run(SyntaxTree)
+    for subnode_index in ipairs(SyntaxTree) do
+      align_nodes(SyntaxTree, subnode_index)
+    end
+    restruc_nodes(SyntaxTree, Handlers)
+
+    return SyntaxTree
   end
 
 --[[

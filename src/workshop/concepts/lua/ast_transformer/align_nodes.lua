@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-21
+  Last mod.: 2026-10-31
 ]]
 
 --[[
@@ -13,14 +13,15 @@
     * <local_statement> - exact type resolved. Subnode sinks up.
 ]]
 
-return
-  function(Me, Parent, index)
+local align_nodes
+align_nodes =
+  function(Parent, index)
     local Node = Parent[index]
 
     if not is_table(Node) then return end
 
     for subnode_index in ipairs(Node) do
-      Me:align_nodes(Node, subnode_index)
+      align_nodes(Node, subnode_index)
     end
 
     if (#Node == 1) and is_string(Node[1]) then
@@ -52,7 +53,11 @@ return
     Parent[index] = Node
   end
 
+-- Export:
+return align_nodes
+
 --[[
   2018 #
   2026-10-21
+  2026-10-31
 ]]

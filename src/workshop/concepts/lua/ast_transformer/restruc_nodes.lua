@@ -2,22 +2,33 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-25
+  Last mod.: 2026-10-31
 ]]
 
-return
-  function(Me, Node)
+local Handlers
+
+local restruc_nodes
+restruc_nodes =
+  function(Node)
     for _, Subnode in ipairs(Node) do
-      Me:restruc_nodes(Subnode)
+      restruc_nodes(Subnode)
     end
 
-    local handler = Me.handlers[Node.type]
+    local handler = Handlers[Node.type]
     if handler then
-      handler(Me, Node)
+      handler(Node)
     end
+  end
+
+return
+  function(Node, Arg_Handlers)
+    Handlers = Arg_Handlers
+    restruc_nodes(Node)
+    Handlers = nil
   end
 
 --[[
   2018 #
   2026-10-25
+  2026-10-31
 ]]

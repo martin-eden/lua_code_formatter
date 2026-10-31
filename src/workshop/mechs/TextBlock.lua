@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-23
+  Last mod.: 2026-11-01
 ]]
 
 --[[
@@ -116,6 +116,11 @@ do
     It needs quick instance copy, which can be later merged
     to parent instance if considered worthy.
   ]]
+  --[[
+    Setting text width (slot 4) to 0 in seed looks wrong.
+    But in deed it updates after AddToTextline() or AddToCurline().
+    If none happened, that zero will be wiped by max() in graft().
+  ]]
   local utf8_len = utf8.len
   seed =
     function(Me)
@@ -124,7 +129,7 @@ do
           [1] = Me[1],
           [2] = Me[2],
           [3] = new(Me[3]),
-          [4] = utf8_len(Me[1]),
+          [4] = 0,
           [5] = { },
         }
       setmetatable(AnotherMe, getmetatable(Me))
@@ -200,4 +205,5 @@ return Interface
   2024 #
   2026 # #
   2026-10-22
+  2026-11-01
 ]]

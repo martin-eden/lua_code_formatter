@@ -4,7 +4,7 @@
 
 #
 # Author: Martin Eden
-# Last mod.: 2026-10-24
+# Last mod.: 2026-10-31
 #
 
 #
@@ -45,7 +45,7 @@ cd ../builder
 lua ../deploy/reformat_lua.melded.lua \
   ../deploy/reformat_lua.melded.lua \
   ../deploy/reformat_lua.melded.stripped.lua \
-  --right-margin=72
+  --right-margin=64
 rm ../deploy/reformat_lua.melded.lua
 
 # Add shebang

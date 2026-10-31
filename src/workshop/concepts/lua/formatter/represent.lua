@@ -16,12 +16,12 @@
 ]]
 
 return
-  function(Me, representer, Node)
+  function(Me, represent, Node)
     local OriginalPrinter = Me[2]
     local TrialPrinter = OriginalPrinter:Seed()
 
     Me[2] = TrialPrinter
-    local has_failed = not representer(Me, Node)
+    local has_failed = not represent(Me, Node)
     Me[2] = OriginalPrinter
 
     return TrialPrinter, has_failed

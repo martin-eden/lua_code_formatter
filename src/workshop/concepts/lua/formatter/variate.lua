@@ -36,13 +36,13 @@ return
           }
         )
 
-        local TrialRepresentation, has_failed = Me:represent(representer, Node)
+        local TrialRepresentation, has_failed = Me:Represent(representer, Node)
 
         if
           representer_is_last_hope or
           (
             not has_failed and
-            Me:representation_is_allowed(TrialRepresentation)
+            (TrialRepresentation:GetWidth() <= Me[1])
           )
         then
           return TrialRepresentation

@@ -13,7 +13,7 @@ return
     if handler then
       result = handler(Me, Node)
     else
-      result = Me:process_node(Node)
+      result = Me:ProcessNode(Node)
     end
     Printer:DecIndent()
     return result

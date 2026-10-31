@@ -11,7 +11,7 @@ return
     if prefix then
       Printer:AddToCurline(prefix)
     end
-    local result = Me:process_block(Node, opt_handler)
+    local result = Me:ProcessBlock(Node, opt_handler)
     if postfix then
       Printer:AddToCurline(postfix)
     end

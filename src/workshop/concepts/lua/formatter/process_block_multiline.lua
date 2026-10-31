@@ -14,7 +14,7 @@ return
     end
 
     Printer:RequestCleanLine()
-    local result = Me:process_block(Node, opt_handler)
+    local result = Me:ProcessBlock(Node, opt_handler)
 
     Printer:RequestCleanLine()
     if postfix then

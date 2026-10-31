@@ -20,12 +20,12 @@ return
   function(Me, Node, delimiter, apply_tail_delimiter)
     if (#Node > 0) then
       for i = 1, (#Node - 1) do
-        if not Me:process_node(Node[i]) then
+        if not Me:ProcessNode(Node[i]) then
           return
         end
         apply_delimiter(Me, delimiter)
       end
-      if not Me:process_node(Node[#Node]) then
+      if not Me:ProcessNode(Node[#Node]) then
         return
       end
       if apply_tail_delimiter then

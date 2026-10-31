@@ -1,24 +1,37 @@
+-- Transform "assignment" record
+
+--[[
+  Author: Martin Eden
+  Last mod.: 2026-10-31
+]]
+
 --[[
   rep <var_ref>
 
       <expr_list>
 ]]
 
+local add_to_list = request('!.concepts.list.add_item')
 local replace = request('!.table.replace')
 
 return
-  function(self, node)
-    local dest_list = {type = 'ref_list'}
-    for i = 1, (#node - 1) do
-      dest_list[#dest_list + 1] = node[i]
+  function(Me, Node)
+    local DestList = { type = 'ref_list' }
+    for i = 1, (#Node - 1) do
+      add_to_list(DestList, Node[i])
     end
 
-    local result =
+    local Result =
       {
         type = 'assignment',
-        dest_list = dest_list,
-        val_list = node[#node],
+        dest_list = DestList,
+        val_list = Node[#Node],
       }
 
-    replace(node, result)
+    replace(Node, Result)
   end
+
+--[[
+  2018 #
+  2026-10-31
+]]

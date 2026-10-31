@@ -14,8 +14,6 @@ return
     ]]
     if not Node then return true end
 
-    assert_table(Node)
-
     local node_type = Node.type
 
     if not node_type then
@@ -25,11 +23,10 @@ return
 
         It's ok when given node is not sequence.
       ]]
-      assert(not Node[1])
       return true
     end
 
-    local handler = Me.handlers[node_type]
+    local handler = Me.Handlers[node_type]
     if is_function(handler) then
       return handler(Me, Node)
     else
@@ -44,4 +41,5 @@ return
   2017 # #
   2018 # # #
   2026-10-22
+  2026-10-31
 ]]

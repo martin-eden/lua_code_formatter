@@ -1307,6 +1307,45 @@ package.preload[
         node[2] = nil
       end
   end
+package.preload['workshop.concepts.lua.formatter.StateKeeper'] =
+  function(...)
+    local next_level =
+      function(Me)
+        Me[1] = Me[1] + 1
+      end
+    local prev_level =
+      function(Me)
+        Me[1] = Me[1] - 1
+      end
+    local get_state =
+      function(Me)
+        return Me[2][Me[1]]
+      end
+    local set_next_state =
+      function(Me, State)
+        Me[2][Me[1] + 1] = State
+      end
+    local Interface
+    local create
+    do
+      local attach_methods = request('!.table.attach_methods')
+      create =
+        function()
+          local Me = { 0, { } }
+          attach_methods(Me, Interface)
+          return Me
+        end
+    end
+    Interface =
+      {
+        create = create,
+        NextLevel = next_level,
+        PrevLevel = prev_level,
+        GetState = get_state,
+        SetNextState = set_next_state,
+      }
+    return Interface
+  end
 package.preload['workshop.concepts.lua.formatter.interface'] =
   function(...)
     local Interface
@@ -1315,7 +1354,7 @@ package.preload['workshop.concepts.lua.formatter.interface'] =
       local default_right_margin = 72
       local default_indent_chunk = '  '
       local TextBlock = request('!.mechs.TextBlock')
-      local StateKeeper = request('state_keeper.interface')
+      local StateKeeperClass = request('StateKeeper')
       local attach_methods = request('!.table.attach_methods')
       create =
         function(Options)
@@ -1328,7 +1367,7 @@ package.preload['workshop.concepts.lua.formatter.interface'] =
               Options.indent_chunk or default_indent_chunk
             Printer = TextBlock.create(indent_chunk)
           end
-          StateKeeper:init()
+          local StateKeeper = StateKeeperClass.create()
           local Me = { right_margin, Printer, StateKeeper }
           attach_methods(Me, Interface)
           return Me
@@ -1521,8 +1560,8 @@ package.preload['workshop.concepts.lua.formatter.variate'] =
       function(Me, Node, oneliner, multiliner)
         local Printer = Me[2]
         local StateKeeper = Me[3]
-        StateKeeper:enter_level()
-        local OurState = StateKeeper:get_state() or DefaultState
+        StateKeeper:NextLevel()
+        local OurState = StateKeeper:GetState() or DefaultState
         local is_multiline_allowed =
           OurState.is_multiline_allowed
         local is_last_hope = OurState.is_last_hope
@@ -1537,7 +1576,7 @@ package.preload['workshop.concepts.lua.formatter.variate'] =
             local representer_is_last_hope =
               is_last_hope and
               (representer == last_hope_handler)
-            StateKeeper:set_child_state(
+            StateKeeper:SetNextState(
               {
                 is_multiline_allowed = is_multiline,
                 is_last_hope = representer_is_last_hope,
@@ -1571,7 +1610,7 @@ package.preload['workshop.concepts.lua.formatter.variate'] =
         if FinalRepresentation then
           Printer:Graft(FinalRepresentation)
         end
-        StateKeeper:leave_level()
+        StateKeeper:PrevLevel()
         return not is_nil(FinalRepresentation)
       end
   end
@@ -2529,87 +2568,6 @@ package.preload[
 ] =
   function(...)
     return request('expr_list')
-  end
-package.preload[
-  'workshop.concepts.lua.formatter.state_keeper.enter_level'
-] =
-  function(...)
-    return
-      function(self)
-        self.position = self.position + 1
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.formatter.state_keeper.get_child_state'
-] =
-  function(...)
-    return
-      function(self)
-        return self.states[self.position + 1]
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.formatter.state_keeper.get_state'
-] =
-  function(...)
-    return
-      function(self)
-        return self.states[self.position]
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.formatter.state_keeper.init'
-] =
-  function(...)
-    return
-      function(self)
-        self.states = { }
-        self.position = 0
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.formatter.state_keeper.interface'
-] =
-  function(...)
-    return
-      {
-        states = nil,
-        position = nil,
-        init = request('init'),
-        enter_level = request('enter_level'),
-        leave_level = request('leave_level'),
-        get_state = request('get_state'),
-        set_state = request('set_state'),
-        get_child_state = request('get_child_state'),
-        set_child_state = request('set_child_state'),
-      }
-  end
-package.preload[
-  'workshop.concepts.lua.formatter.state_keeper.leave_level'
-] =
-  function(...)
-    return
-      function(self)
-        self.position = self.position - 1
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.formatter.state_keeper.set_child_state'
-] =
-  function(...)
-    return
-      function(self, new_state)
-        self.states[self.position + 1] = new_state
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.formatter.state_keeper.set_state'
-] =
-  function(...)
-    return
-      function(self, new_state)
-        self.states[self.position] = new_state
-      end
   end
 package.preload['workshop.concepts.lua.syntax.expression'] =
   function(...)

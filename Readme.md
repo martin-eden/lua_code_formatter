@@ -57,7 +57,7 @@
 ### Historical note
 
 Initial version was relased in 2018. In 2026 I returned to this project
-and did following chnages:
+and did following changes:
 
   * No comments
 

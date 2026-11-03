@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-01
+  Last mod.: 2026-11-04
 ]]
 
 --[[
@@ -36,15 +36,16 @@ end
 local add_to_textline
 do
   local utf8_len = utf8.len
+  local str_len = string.len
   local max = math.max
-
   add_to_textline =
     function(Me, str)
       if (Me[1] == '') then
         Me[1] = Me[3]:ToString()
       end
       Me[1] = Me[1] .. str
-      Me[4] = max(Me[4], utf8_len(Me[1]))
+      local len = utf8_len(Me[1]) or str_len(Me[1])
+      Me[4] = max(Me[4], len)
     end
 end
 
@@ -203,7 +204,6 @@ return Interface
 --[[
   2017 # # #
   2024 #
-  2026 # #
-  2026-10-22
-  2026-11-01
+  2026 # # # #
+  2026-11-04
 ]]

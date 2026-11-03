@@ -1,11 +1,10 @@
--- List with names of all Lua data types
+-- List with type() names for all Lua data types
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-08-29
+  Last mod.: 2026-11-04
 ]]
 
--- Export:
 return
   {
     'nil',

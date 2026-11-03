@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-20
+  Last mod.: 2026-11-04
 ]]
 
 --[[
@@ -18,8 +18,9 @@ local TypeRank_Map =
   {
     ['string'] = 1,
     ['number'] = 2,
-    other = 3,
   }
+
+local rank_other = 3
 
 local ComparableTypes_Map =
   {
@@ -27,14 +28,13 @@ local ComparableTypes_Map =
     ['number'] = true,
   }
 
--- Export:
 return
   function(a, b)
     local type_a = type(a)
-    local rank_a = TypeRank_Map[type_a] or TypeRank_Map.other
+    local rank_a = TypeRank_Map[type_a] or rank_other
 
     local type_b = type(b)
-    local rank_b = TypeRank_Map[type_b] or TypeRank_Map.other
+    local rank_b = TypeRank_Map[type_b] or rank_other
 
     if (rank_a ~= rank_b) then
       return (rank_a < rank_b)

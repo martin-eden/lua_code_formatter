@@ -1,14 +1,13 @@
--- Return list of numeric type names
+-- List with math.type() names for all numeric types
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-08-28
+  Last mod.: 2026-11-04
 ]]
 
--- Export:
 return { 'integer', 'float' }
 
 --[[
-  2024-03-02
-  2026-06-16
+  2024 #
+  2026 #
 ]]

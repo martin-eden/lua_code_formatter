@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-31
+  Last mod.: 2026-11-03
 ]]
 
 require('workshop.base')
@@ -64,7 +64,7 @@ end
 local file_to_str = request('!.convert.file_to_str')
 local file_from_str = request('!.convert.file_from_str')
 local str_format = string.format
-local reformat = request('!.lua.code.reformat')
+local reformat = request('!.lua.reformat_code')
 
 local default_indent_chunk = '  '
 local default_right_margin = 72

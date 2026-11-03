@@ -46,7 +46,7 @@ Usage:   f_in   f_out
     local file_to_str = request('!.convert.file_to_str')
     local file_from_str = request('!.convert.file_from_str')
     local str_format = string.format
-    local reformat = request('!.lua.code.reformat')
+    local reformat = request('!.lua.reformat_code')
     local default_indent_chunk = '  '
     local default_right_margin = 72
     local Params = get_params()
@@ -3387,60 +3387,63 @@ package.preload['workshop.file_system.file.to_string'] =
         return result
       end
   end
-package.preload['workshop.lua.code.get_ast'] =
+package.preload['workshop.lua.reformat_code'] =
   function(...)
-    local TokensSyntax = request('!.concepts.lua.TokensSyntax')
-    local generic_parse = request('!.mechs.generic_loader')
-    local TokensAccessorClass =
-      request('!.concepts.lua.TokensAccessor')
-    local StructsSyntax = request('!.concepts.lua.syntax')
-    local parse = request('!.mechs.parser.parse')
-    return
-      function(code_str)
-        local ParserAst = { }
-        do
-          local TokensList =
-            generic_parse(code_str, TokensSyntax)
-          local TokensAccessor =
-            TokensAccessorClass.create(TokensList)
-          local is_parsed
-          is_parsed, ParserAst =
-            parse(TokensAccessor, StructsSyntax)
+    local get_ast
+    do
+      local TokensSyntax =
+        request('!.concepts.lua.TokensSyntax')
+      local generic_parse = request('!.mechs.generic_loader')
+      local TokensAccessorClass =
+        request('!.concepts.lua.TokensAccessor')
+      local StructsSyntax = request('!.concepts.lua.syntax')
+      local parse = request('!.mechs.parser.parse')
+      get_ast =
+        function(code_str)
+          local ParserAst = { }
+          do
+            local TokensList =
+              generic_parse(code_str, TokensSyntax)
+            local TokensAccessor =
+              TokensAccessorClass.create(TokensList)
+            local is_parsed
+            is_parsed, ParserAst =
+              parse(TokensAccessor, StructsSyntax)
+          end
+          return ParserAst
         end
-        return ParserAst
-      end
-  end
-package.preload['workshop.lua.code.get_formatter_ast'] =
-  function(...)
-    local get_ast = request('get_ast')
-    local get_formatter_ast =
-      request('!.concepts.lua.transform_ast')
-    return
-      function(lua_code_str)
-        return get_formatter_ast(get_ast(lua_code_str))
-      end
-  end
-package.preload['workshop.lua.code.reformat'] =
-  function(...)
-    local split_shebang =
-      request('!.concepts.shell.split_shebang')
-    local get_formatter_ast = request('get_formatter_ast')
-    local serialize_ast =
-      request('!.concepts.lua.run_formatter')
-    local newline = request('!.concepts.Ascii.Chars').newline
-    return
-      function(shell_code_str, Options)
-        local shebang_str, lua_code_str =
-          split_shebang(shell_code_str)
-        local result_str =
-          serialize_ast(
-            get_formatter_ast(lua_code_str), Options
-          )
-        if shebang_str then
-          result_str = shebang_str .. newline .. result_str
+    end
+    local get_formatter_ast
+    do
+      local transform_ast =
+        request('!.concepts.lua.transform_ast')
+      get_formatter_ast =
+        function(lua_code_str)
+          return transform_ast(get_ast(lua_code_str))
         end
-        return result_str
-      end
+    end
+    local reformat_code
+    do
+      local split_shebang =
+        request('!.concepts.shell.split_shebang')
+      local serialize_ast =
+        request('!.concepts.lua.run_formatter')
+      local newline = request('!.concepts.Ascii.Chars').newline
+      reformat_code =
+        function(shell_code_str, Options)
+          local shebang_str, lua_code_str =
+            split_shebang(shell_code_str)
+          local result_str =
+            serialize_ast(
+              get_formatter_ast(lua_code_str), Options
+            )
+          if shebang_str then
+            result_str = shebang_str .. newline .. result_str
+          end
+          return result_str
+        end
+    end
+    return reformat_code
   end
 package.preload['workshop.lua.regexp.magic_char_pattern'] =
   function(...)

@@ -1,3 +1,10 @@
+-- Customizable DFS algorithm
+
+--[[
+  Author: Martin Eden
+  Last mod.: 2026-11-12
+]]
+
 local empty_func = function() end
 
 return
@@ -10,5 +17,10 @@ return
 
     run = request('dfs'),
 
-    nodes_status = {},
+    nodes_status = { },
   }
+
+--[[
+  2016
+  2018
+]]

@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-08-13
+  Last mod.: 2026-11-09
 ]]
 
 --[[
@@ -19,9 +19,9 @@ local empty = ''
 local single_quote
 local backslash
 do
-  local Ascii = request('!.concepts.Ascii.Chars')
-  single_quote = Ascii.single_quote
-  backslash = Ascii.backslash
+  local ascii_chars = request('!.concepts.ascii.chars')
+  single_quote = ascii_chars.single_quote
+  backslash = ascii_chars.backslash
 end
 
 local list_to_str = request('!.concepts.list.to_string')
@@ -34,13 +34,13 @@ do
   do
     local quote_regexp = request('!.lua.regexp.quote')
     do
-      local SpecialChars = request('quote.SpecialChars')
-      local special_chars_str = list_to_str(SpecialChars)
+      local special_chars = request('quote.special_chars')
+      local special_chars_str = list_to_str(special_chars)
       special_chars_regexp = '[' .. quote_regexp(special_chars_str) .. ']'
     end
     do
-      local SpaceChars = request('quote.SpaceChars')
-      local space_chars_str = list_to_str(SpaceChars)
+      local space_chars = request('quote.space_chars')
+      local space_chars_str = list_to_str(space_chars)
       local space_chars_regexp = '[' .. quote_regexp(space_chars_str) .. ']'
       local comment_char = '#'
       starts_with_comment_regexp = '^' .. space_chars_regexp .. '+' .. comment_char
@@ -91,10 +91,10 @@ quote =
 
     str = str .. single_quote
 
-    local RawItems = split_string(str, single_quote)
-    local Items = { }
+    local raw_items = split_string(str, single_quote)
+    local items = { }
 
-    for _, item in ipairs(RawItems) do
+    for _, item in ipairs(raw_items) do
       local quoted_item
       if (item == empty) then
         -- Empty string is part here. No need to quote it
@@ -103,10 +103,10 @@ quote =
         quoted_item = quote(item)
       end
 
-      add_to_list(Items, quoted_item)
+      add_to_list(items, quoted_item)
     end
 
-    return list_to_str(Items, backslash .. single_quote)
+    return list_to_str(items, backslash .. single_quote)
   end
 
 return quote

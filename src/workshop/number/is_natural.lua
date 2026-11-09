@@ -1,26 +1,21 @@
 -- Return true if argument is natural number
 
 --[[
+  Author: Martin Eden
+  Last mod.: 2026-11-09
+]]
+
+--[[
   Natural numbers sequence starts as 1, 2, 3, ...
   Note that we do not include 0.
   This sequence is also called "counting numbers".
-
-  Zero is neutral element to addition. It's great as
-  initialization value. In multiplication using zero creates
-  more problems than it solves.
 ]]
 
--- Last mod.: 2024-11-03
-
 return
-  function(Number)
-    assert_number(Number)
+  function(number)
+    assert_number(number)
 
-    if not is_integer(Number) then
-      return false
-    end
-
-    if (Number <= 0) then
+    if not (is_integer(number) and (number >= 1)) then
       return false
     end
 
@@ -28,5 +23,5 @@ return
   end
 
 --[[
-  2024-11-03
+  2024 #
 ]]

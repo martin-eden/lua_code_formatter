@@ -2,25 +2,24 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-09-10
+  Last mod.: 2026-11-11
 ]]
 
-local self_dir = request('Syntels').self_dir
+local self_dir = request('syntels').self_dir
 local is_directory = request('is_directory')
 local is_absolute = request('is_absolute')
 local select_seg = request('!.concepts.list.select_seg')
 local add_to_list = request('!.concepts.list.add_item')
 
--- Export:
 return
-  function(Pathname)
-    local HostDir
+  function(pathname)
+    local host_dir
 
     local host_dir_end_idx
-    if is_directory(Pathname) then
-      host_dir_end_idx = #Pathname - 2
+    if is_directory(pathname) then
+      host_dir_end_idx = #pathname - 2
     else
-      host_dir_end_idx = #Pathname - 1
+      host_dir_end_idx = #pathname - 1
     end
 
     if (host_dir_end_idx <= 0) then
@@ -30,18 +29,18 @@ return
         Zen question: what is the name of "parent dir" for ".."?
         That's why we're using name "host", not "parent".
       ]]
-      if is_absolute(Pathname) then
-        HostDir = { '' }
+      if is_absolute(pathname) then
+        host_dir = { '' }
       else
-        HostDir = { self_dir }
+        host_dir = { self_dir }
       end
     else
-      HostDir = select_seg(Pathname, 1, host_dir_end_idx)
+      host_dir = select_seg(pathname, 1, host_dir_end_idx)
     end
 
-    add_to_list(HostDir, '')
+    add_to_list(host_dir, '')
 
-    return HostDir
+    return host_dir
   end
 
 --[[

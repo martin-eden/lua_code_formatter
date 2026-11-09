@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-27
+  Last mod.: 2026-11-12
 ]]
 
 --[[
@@ -16,41 +16,41 @@
 ]]
 
 return
-  function(Node, Input)
+  function(node, input)
     local populate_leaves
     populate_leaves =
-      function(Node)
-        if not is_table(Node) then return end
+      function(node)
+        if not is_table(node) then return end
 
-        if (#Node == 0) then
-          Node[1] = Input:get_segment(Node.start, Node.len)
+        if (#node == 0) then
+          node[1] = input:get_segment(node.start, node.len)
         else
-          for _, Subnode in ipairs(Node) do
-            populate_leaves(Subnode)
+          for _, subnode in ipairs(node) do
+            populate_leaves(subnode)
           end
         end
       end
 
     local strip_segments
     strip_segments =
-      function(Node)
-        if not is_table(Node) then return end
+      function(node)
+        if not is_table(node) then return end
 
-        Node.start = nil
-        Node.len = nil
+        node.start = nil
+        node.len = nil
 
-        for _, Subnode in ipairs(Node) do
-          strip_segments(Subnode)
+        for _, subnode in ipairs(node) do
+          strip_segments(subnode)
         end
       end
 
-    populate_leaves(Node)
-    strip_segments(Node)
+    populate_leaves(node)
+    strip_segments(node)
   end
 
 --[[
   2016 #
   2017 # #
   2018 #
-  2026-10-20
+  2026 #
 ]]

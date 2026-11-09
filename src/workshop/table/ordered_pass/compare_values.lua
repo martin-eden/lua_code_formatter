@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-04
+  Last mod.: 2026-11-10
 ]]
 
 --[[
@@ -14,7 +14,7 @@
       * String and number values are sorted by ascending
 ]]
 
-local TypeRank_Map =
+local type_rank =
   {
     ['string'] = 1,
     ['number'] = 2,
@@ -22,7 +22,7 @@ local TypeRank_Map =
 
 local rank_other = 3
 
-local ComparableTypes_Map =
+local is_comparable_type =
   {
     ['string'] = true,
     ['number'] = true,
@@ -31,16 +31,16 @@ local ComparableTypes_Map =
 return
   function(a, b)
     local type_a = type(a)
-    local rank_a = TypeRank_Map[type_a] or rank_other
+    local rank_a = type_rank[type_a] or rank_other
 
     local type_b = type(b)
-    local rank_b = TypeRank_Map[type_b] or rank_other
+    local rank_b = type_rank[type_b] or rank_other
 
     if (rank_a ~= rank_b) then
       return (rank_a < rank_b)
     end
 
-    if ComparableTypes_Map[type_a] and ComparableTypes_Map[type_b] then
+    if is_comparable_type[type_a] and is_comparable_type[type_b] then
       return (a < b)
     end
 

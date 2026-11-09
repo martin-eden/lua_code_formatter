@@ -2,25 +2,22 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-05-04
+  Last mod.: 2026-11-09
 ]]
 
-local trim_tail =
+local str_sub = string.sub
+local space = request('!.concepts.ascii.chars').space
+
+return
   function(str)
-    assert_string(str)
-
-    local read_pos = string.len(str)
-
-    while (string.sub(str, read_pos, read_pos) == ' ') do
+    local read_pos = #str
+    while (str_sub(str, read_pos, read_pos) == space) do
       read_pos = read_pos - 1
     end
-
-    return string.sub(str, 1, read_pos)
+    return str_sub(str, 1, read_pos)
   end
 
--- Export:
-return trim_tail
-
 --[[
-  2017-01-20
+  2017 #
+  2026-11-09
 ]]

@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-26
+  Last mod.: 2026-11-09
 ]]
 
 --[[
@@ -27,12 +27,12 @@ local cho = handy.cho
 local list = handy.list
 local opt = handy.opt
 
-local KeyVal
+local key_val
 do
   local bracket_expr = request('wrappers.bracket_expr')
   local name = request('words.name')
 
-  KeyVal =
+  key_val =
     {
       name = 'key_val',
       opt(
@@ -46,15 +46,15 @@ do
     }
 end
 
-local RecDelim = { cho(',', ';') }
+local rec_delim = { cho(',', ';') }
 
 return
   {
     name = 'table',
     '{',
     opt(
-      list(KeyVal, RecDelim),
-      opt(RecDelim)
+      list(key_val, rec_delim),
+      opt(rec_delim)
     ),
     '}',
   }

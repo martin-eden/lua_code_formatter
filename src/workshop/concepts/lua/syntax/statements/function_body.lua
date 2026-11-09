@@ -2,25 +2,25 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-28
+  Last mod.: 2026-11-09
 ]]
 
 --[[
                function_params
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ─ ( ─┬───────────────────────────────────┬─ ) ─ statements ─ word(end) ─
-       ├─ NamedVararg ─────────────────────┤
-       └─ NameList ─┬───────────────────┬──┘
-                    └─ , ─ NamedVararg ─┘
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ─ ( ─┬─────────────────────────────────┬─ ) ─ statements ─ word(end) ─
+       ├─ named_vararg ──────────────────┤
+       └─ names ─┬────────────────────┬──┘
+                 └─ , ─ named_vararg ─┘
 ]]
 
 local handy = request('!.mechs.processor.handy')
 local opt = handy.opt
 local cho = handy.cho
 
-local Name = request('^.words.name')
-local NamedVararg = { name = 'named_vararg', '...', opt(Name) }
-local NameList = request('^.wrappers.name_list')
+local name = request('^.words.name')
+local named_vararg = { name = 'named_vararg', '...', opt(name) }
+local names = request('^.wrappers.name_list')
 
 return
   {
@@ -29,8 +29,8 @@ return
       '(',
       opt(
         cho(
-          NamedVararg,
-          { NameList, opt(',', NamedVararg) }
+          named_vararg,
+          { names, opt(',', named_vararg) }
         )
       ),
       ')',

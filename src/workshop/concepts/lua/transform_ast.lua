@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-25
+  Last mod.: 2026-11-11
 ]]
 
 --[[
@@ -25,16 +25,16 @@
 
 local align_nodes = request('ast_transformer.align_nodes')
 local restruc_nodes = request('ast_transformer.restruc_nodes')
-local Handlers = request('ast_transformer.Handlers.Interface')
+local handlers = request('ast_transformer.handlers.interface')
 
 return
-  function(SyntaxTree)
-    for subnode_index in ipairs(SyntaxTree) do
-      align_nodes(SyntaxTree, subnode_index)
+  function(syntax_tree)
+    for subnode_index in ipairs(syntax_tree) do
+      align_nodes(syntax_tree, subnode_index)
     end
-    restruc_nodes(SyntaxTree, Handlers)
+    restruc_nodes(syntax_tree, handlers)
 
-    return SyntaxTree
+    return syntax_tree
   end
 
 --[[

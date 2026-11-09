@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-08-28
+  Last mod.: 2026-11-12
 ]]
 
 --[[
@@ -11,18 +11,14 @@
     { 'A', _ = 'a' } -> { ['A'] = true, ['a'] = true }
 ]]
 
--- Export:
 return
-  function(List)
-    assert_table(List)
-
-    local Result = { }
-
-    for _, value in pairs(List) do
-      Result[value] = true
+  function(table)
+    assert_table(table)
+    local map = { }
+    for _, value in pairs(table) do
+      map[value] = true
     end
-
-    return Result
+    return map
   end
 
 --[[

@@ -2,15 +2,14 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-09-10
+  Last mod.: 2026-11-11
 ]]
 
 local get_cmd_dir_exists = request('!.mechs.cmdline.get_cmd_dir_exists')
 
--- Export:
 return
   function(dir_name)
-    return (get_cmd_dir_exists(dir_name):Execute())
+    return (get_cmd_dir_exists(dir_name):execute())
   end
 
 --[[

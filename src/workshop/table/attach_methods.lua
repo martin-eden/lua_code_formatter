@@ -2,34 +2,29 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-14
+  Last mod.: 2026-11-10
 ]]
 
 --[[
   This module exists to wrap common code:
 
-    local Object = { Data = { } }
-    local Methods = { GetLength = function(Me) return #Me.Data end }
+    local me = { { } }
+    local methods = { get_length = function(me) return #me[1] end }
 
   Instead of
 
-    setmetatable(Object, { __index = Methods })
+    setmetatable(me, { __index = methods })
 
   We call
 
-    attach_methods(Object, Methods)
+    attach_methods(me, methods)
 ]]
 
--- Export:
 return
-  function(Object, Methods)
-    assert_table(Object)
-    assert_table(Methods)
-
-    setmetatable(Object, { __index = Methods })
+  function(me, methods)
+    setmetatable(me, { __index = methods })
   end
 
 --[[
-  2026 # #
-  2026-10-14
+  2026 # # #
 ]]

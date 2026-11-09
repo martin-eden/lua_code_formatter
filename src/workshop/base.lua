@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-09-24
+  Last mod.: 2026-11-12
 ]]
 
 --[[
@@ -73,24 +73,24 @@ do
 
   local stack_get
   do
-    local Names
+    local names
     local depth
 
     stack_init =
       function()
-        Names = { }
+        names = { }
         depth = 1
       end
 
     stack_get =
       function()
-        return Names[depth]
+        return names[depth]
       end
 
     stack_add =
       function(prefix, name)
         depth = depth + 1
-        Names[depth] = { prefix = prefix, name = name }
+        names[depth] = { prefix = prefix, name = name }
       end
 
     stack_remove =
@@ -101,11 +101,9 @@ do
 
   local get_caller_prefix =
     function()
-      local NameRec = stack_get()
-
-      if not NameRec then return empty end
-
-      return NameRec.prefix
+      local name_rec = stack_get()
+      if not name_rec then return empty end
+      return name_rec.prefix
     end
 
   do
@@ -189,11 +187,11 @@ do
 
       stack_add(split_name(require_name))
 
-      local Results = tbl_pack(require(require_name))
+      local results = tbl_pack(require(require_name))
 
       stack_remove()
 
-      return tbl_unpack(Results)
+      return tbl_unpack(results)
     end
 end
 
@@ -204,8 +202,8 @@ do
 
   set_base_prefix(split_name(our_require_name))
 
-  _G.request = request
-  _G.get_base_prefix = get_base_prefix
+  _G['request'] = request
+  _G['get_base_prefix'] = get_base_prefix
 
   -- We can now use request() but need to add our name to call stack
 
@@ -214,7 +212,7 @@ do
 
   request('!.system.install_is_functions')()
   request('!.system.install_assert_functions')()
-  _G.new = request('!.table.new')
+  _G['new'] = request('!.table.new')
 
   stack_remove()
 end

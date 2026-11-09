@@ -2,14 +2,15 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-14
+  Last mod.: 2026-11-05
 ]]
 
-local magic_chars = request('magic_chars')
+local magic_chars = '^$()[]%.?*+-'
 local str_gsub = string.gsub
 
 return '[' .. str_gsub(magic_chars, '.', '%%%0') .. ']'
 
 --[[
   2018 #
+  2026-11-05
 ]]

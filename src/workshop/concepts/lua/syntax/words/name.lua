@@ -2,12 +2,12 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-27
+  Last mod.: 2026-11-09
 ]]
 
-local TokensAccessor = request('!.concepts.lua.TokensAccessor')
+local tokens_accessor = request('!.concepts.lua.tokens_accessor')
 
-return { name = 'name', TokensAccessor.IsName }
+return { name = 'name', tokens_accessor.is_name }
 
 --[[
   2026-10-25

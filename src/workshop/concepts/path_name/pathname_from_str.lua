@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-08-29
+  Last mod.: 2026-11-11
 ]]
 
 --[[
@@ -12,7 +12,7 @@
 
   Output is a list of name segments, built from these rules:
 
-    * Segments equal to "" or "." are dropped, except that a
+    * segments equal to "" or "." are dropped, except that a
       trailing "" is kept when the pathname denotes a directory,
       and a leading "" is kept when the pathname is absolute.
 
@@ -37,15 +37,14 @@ local add_list = request('!.concepts.list.add_list')
 
 local empty = ''
 
-local self_dir
 local sep
+local self_dir
 do
-  local Syntels = request('Syntels')
-  self_dir = Syntels.self_dir
-  sep = Syntels.separator
+  local syntels = request('syntels')
+  sep = syntels.separator
+  self_dir = syntels.self_dir
 end
 
--- Export:
 return
   function(path_name)
     assert_string(path_name)
@@ -56,40 +55,37 @@ return
 
     local is_absolute
     local is_directory
-    local Names = { }
-
+    local names = { }
     do
-      local Segments = split_string(path_name .. sep, sep)
+      local segments = split_string(path_name .. sep, sep)
 
-      is_absolute = check_is_absolute(Segments)
-      is_directory = check_is_directory(Segments)
+      is_absolute = check_is_absolute(segments)
+      is_directory = check_is_directory(segments)
 
-      for _, segment in ipairs(Segments) do
+      for _, segment in ipairs(segments) do
         if (segment ~= empty) and (segment ~= self_dir) then
-          add_to_list(Names, segment)
+          add_to_list(names, segment)
         end
       end
     end
 
-    if (#Names == 0) and not is_absolute then
-      add_to_list(Names, self_dir)
+    if (#names == 0) and not is_absolute then
+      add_to_list(names, self_dir)
     end
 
-    do
-      local Result = { }
+    local result = { }
 
-      if is_absolute then
-        add_to_list(Result, empty)
-      end
-
-      add_list(Result, Names)
-
-      if is_directory then
-        add_to_list(Result, empty)
-      end
-
-      return Result
+    if is_absolute then
+      add_to_list(result, empty)
     end
+
+    add_list(result, names)
+
+    if is_directory then
+      add_to_list(result, empty)
+    end
+
+    return result
   end
 
 --[[

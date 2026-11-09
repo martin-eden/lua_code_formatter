@@ -2,16 +2,15 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-06-17
+  Last mod.: 2026-11-10
 ]]
 
--- Imports:
 local force_merge = request('!.table.merge_and_patch')
-local BaseInterface = new(request('^.interface'))
+local base_interface = request('^.interface')
 
-local original_init = BaseInterface.init
+local original_init = base_interface.init
 
-local Overrides =
+local overrides =
   {
     init = request('init'),
     get_position = request('get_position'),
@@ -27,11 +26,11 @@ local Overrides =
     original_init = original_init,
   }
 
-local Interface = new(BaseInterface)
-force_merge(Interface, Overrides)
+local interface = new(base_interface)
+force_merge(interface, overrides)
 
 -- Export:
-return Interface
+return interface
 
 --[[
   2017-05

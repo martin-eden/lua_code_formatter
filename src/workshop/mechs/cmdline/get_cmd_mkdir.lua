@@ -2,26 +2,17 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-08-12
+  Last mod.: 2026-11-11
 ]]
 
--- Imports:
 local normalize = request('!.concepts.path_name.normalize')
-local ShellCommand = request('!.concepts.ShellCommand')
+local shell_command = request('!.concepts.shell_command')
 
--- Export:
 return
   function(dir_name)
-    local Command =
-      {
-        'mkdir',
-        {
-          '-p',
-          normalize(dir_name)
-        },
-      }
+    local command = { 'mkdir', '-p', normalize(dir_name) }
 
-    return ShellCommand.create(Command)
+    return shell_command.create(command)
   end
 
 --[[

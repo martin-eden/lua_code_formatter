@@ -2,10 +2,10 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-09-08
+  Last mod.: 2026-11-11
 ]]
 
-local sep = request('Syntels').separator
+local sep = request('syntels').separator
 
 local clean_pathname
 do
@@ -24,9 +24,9 @@ do
   end
   local add_to_list = request('!.concepts.list.add_item')
   clean_pathname =
-    function(Pathname)
+    function(pathname)
       local Result = { }
-      for _, name in ipairs(Pathname) do
+      for _, name in ipairs(pathname) do
         add_to_list(Result, clean_name(name))
       end
       return Result
@@ -37,8 +37,8 @@ local list_to_str = request('!.concepts.list.to_string')
 
 -- Export:
 return
-  function(Pathname)
-    return list_to_str(clean_pathname(Pathname), sep)
+  function(pathname)
+    return list_to_str(clean_pathname(pathname), sep)
   end
 
 --[[

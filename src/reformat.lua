@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-03
+  Last mod.: 2026-11-15
 ]]
 
 require('workshop.base')
@@ -21,27 +21,18 @@ Usage:   f_in   f_out
   --indent=<str>        Use given string as indent chunk.
   --right-margin=<int>  Right margin.
 
--- Martin, 2026-10
+-- Martin, 2026-11
 ]]
 
 local get_params
 do
-  --[[
-    Parse command line and return table:
-
-      input_file_name [?s] -- input file name
-      output_file_name [?s] -- output file name
-      indent_chunk [?s] -- indent chunk
-      right_margin [?i] -- right margin
-  ]]
-
-  local CommandlineProcessorClass =
+  local command_line_processor_class =
     request('!.mechs.command_line_processor.interface')
 
   get_params =
     function()
-      CommandlineProcessor = new(CommandlineProcessorClass)
-      CommandlineProcessor.allowed_params =
+      command_line_processor = new(command_line_processor_class)
+      command_line_processor.allowed_params =
         {
           { name = 'input_file_name', type = 'string' },
           { name = 'output_file_name', type = 'string' },
@@ -49,14 +40,14 @@ do
           { name = 'right-margin', type = 'key_int' },
         }
 
-      local Params = CommandlineProcessor:run(_G.arg)
+      local params = command_line_processor:run(_G.arg)
 
       return
         {
-          input_file_name = Params.input_file_name,
-          output_file_name = Params.output_file_name,
-          right_margin = Params['right-margin'],
-          indent_chunk = Params.indent,
+          input_file_name = params.input_file_name,
+          output_file_name = params.output_file_name,
+          right_margin = params['right-margin'],
+          indent_chunk = params.indent,
         }
     end
 end
@@ -69,11 +60,11 @@ local reformat = request('!.lua.reformat_code')
 local default_indent_chunk = '  '
 local default_right_margin = 72
 
-local Params = get_params()
-local input_file_name = Params.input_file_name
-local output_file_name = Params.output_file_name
-local indent_chunk = Params.indent_chunk or default_indent_chunk
-local right_margin = Params.right_margin or default_right_margin
+local params = get_params()
+local input_file_name = params.input_file_name
+local output_file_name = params.output_file_name
+local indent_chunk = params.indent_chunk or default_indent_chunk
+local right_margin = params.right_margin or default_right_margin
 
 if not (input_file_name and output_file_name) then
   print(usage_text)
@@ -84,10 +75,11 @@ print('( Lua code reformatter')
 local input_code_str = file_to_str(input_file_name)
 print(str_format('  Read code from "%s".', input_file_name))
 
-local Options =
+local options =
   { indent_chunk = indent_chunk, right_margin = right_margin }
-file_from_str(output_file_name, reformat(input_code_str, Options))
-print(str_format('  Formatted code to "%s".', output_file_name))
+file_from_str(output_file_name, reformat(input_code_str, options))
+
+print(str_format('  Wrote code to "%s".', output_file_name))
 print(')')
 
 --[[

@@ -2,41 +2,40 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-08-28
+  Last mod.: 2026-11-10
 ]]
 
--- Export:
 return
-  function(Node)
+  function(node)
     local clone
     do
-      local Cloned = { }
+      local cloned = { }
 
       clone =
-        function(Node)
-          if (type(Node) ~= 'table') then
-            return Node
+        function(node)
+          if (type(node) ~= 'table') then
+            return node
           end
 
-          if Cloned[Node] then
-            return Cloned[Node]
+          if cloned[node] then
+            return cloned[node]
           end
 
-          local Result = { }
+          local result = { }
 
-          Cloned[Node] = Result
+          cloned[node] = result
 
-          for key, value in pairs(Node) do
-            Result[clone(key)] = clone(value)
+          for key, value in pairs(node) do
+            result[clone(key)] = clone(value)
           end
 
-          setmetatable(Result, getmetatable(Node))
+          setmetatable(result, getmetatable(node))
 
-          return Result
+          return result
         end
     end
 
-    return clone(Node)
+    return clone(node)
   end
 
 --[[

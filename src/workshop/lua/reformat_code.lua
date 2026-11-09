@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-03
+  Last mod.: 2026-11-19
 ]]
 
 --[[
@@ -10,7 +10,7 @@
 
   Return function to reformat string with Lua code
 
-    [f] -> [s] -- function that returns string with formatted code
+    [..] -> [s] -- function that returns string with formatted code
 
       1 [s] -- string with Lua code
       ? [?] -- options
@@ -18,61 +18,43 @@
 
 local get_ast
 do
-  local TokensSyntax = request('!.concepts.lua.TokensSyntax')
-  local generic_parse = request('!.mechs.generic_loader')
-  local TokensAccessorClass = request('!.concepts.lua.TokensAccessor')
-  local StructsSyntax = request('!.concepts.lua.syntax')
+  local tokens_syntax = request('!.concepts.lua.tokens_syntax')
+  local string_input_stream =
+    request('!.concepts.streams.seekable.input.string')
   local parse = request('!.mechs.parser.parse')
-
+  local tokens_accessor = request('!.concepts.lua.tokens_accessor')
+  local syntax = request('!.concepts.lua.syntax')
+  local transform_ast = request('!.concepts.lua.transform_ast')
   get_ast =
     function(code_str)
-      local ParserAst = { }
-      do
-        local TokensList = generic_parse(code_str, TokensSyntax)
-        local TokensAccessor = TokensAccessorClass.create(TokensList)
-        local is_parsed
-        is_parsed, ParserAst = parse(TokensAccessor, StructsSyntax)
-      end
-      return ParserAst
+      local input_str = string_input_stream.create(code_str)
+      local is_ok, tokens = parse(input_str, tokens_syntax)
+      local input_tokens = tokens_accessor.create(tokens)
+      local is_ok, syntax_ast = parse(input_tokens, syntax)
+      return transform_ast(syntax_ast)
     end
 end
 
-local get_formatter_ast
-do
-  local transform_ast = request('!.concepts.lua.transform_ast')
-
-  get_formatter_ast =
-    function(lua_code_str)
-      return transform_ast(get_ast(lua_code_str))
-    end
-end
-
-local reformat_code
-do
-  local split_shebang = request('!.concepts.shell.split_shebang')
-  local serialize_ast = request('!.concepts.lua.run_formatter')
-  local newline = request('!.concepts.Ascii.Chars').newline
-
-  reformat_code =
-    function(shell_code_str, Options)
-      local shebang_str, lua_code_str = split_shebang(shell_code_str)
-
-      local result_str =
-        serialize_ast(get_formatter_ast(lua_code_str), Options)
-
-      if shebang_str then
-        result_str = shebang_str .. newline .. result_str
-      end
-
-      return result_str
-    end
-end
+local split_shebang = request('!.concepts.shell.split_shebang')
+local serialize_ast = request('!.concepts.lua.run_formatter')
+local newline = request('!.concepts.ascii.chars').newline
 
 -- Export:
-return reformat_code
+return
+  function(shell_code_str, options)
+    local shebang_str, lua_code_str = split_shebang(shell_code_str)
+
+    local result_str =
+      serialize_ast(get_ast(lua_code_str), options)
+
+    if shebang_str then
+      result_str = shebang_str .. newline .. result_str
+    end
+
+    return result_str
+  end
 
 --[[
   2018 #
-  2026 # # # # #
-  2026-11-03
+  2026 # # # # # #
 ]]

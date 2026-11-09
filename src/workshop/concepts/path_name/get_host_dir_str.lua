@@ -2,14 +2,13 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-09-10
+  Last mod.: 2026-11-11
 ]]
 
 local pathname_from_str = request('pathname_from_str')
 local pathname_to_str = request('pathname_to_str')
 local get_host_dir = request('get_host_dir')
 
--- Export:
 return
   function(pathname)
     return pathname_to_str(get_host_dir(pathname_from_str(pathname)))

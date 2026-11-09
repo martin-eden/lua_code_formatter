@@ -151,23 +151,24 @@ return array
 
 So string "[null,[true],[[false,false]]" is legal.
 
-This is the pars where lua tables rocks!
+This is the part where Lua tables rock!
 
-As you know lua table may natively store other tables inside. Even
-self table. But we can't simply write something like
+As you know Lua table may natively store links to other tables.
+Even link to itself. But we can't simply write something like
 
-local array
-array = {array}
+  local array
+  array = { array }
 
 as "{array}" will be filled with previous value (which is nil).
 
 But
 
-local array = {}
-array[1] = array
+  local array = { }
+  array[1] = array
 
-Will do the job and "array" will store table with link to itself,
-"{[1] = array}"
+Will do the job and "array" will store table with link to itself
+at slot 1.
+
 
 To keep things simple
 
@@ -180,39 +181,36 @@ To link to it use ">" .. (and inner name).
 )
 
 So our array example may be defined as
-array = {inner_name = 'array', '>array'}
+
+  array = { inner_name = 'array', '>array' }
 
 Parser module [link] will do linking before actually parsing.
 
 
 Other notes
 
-
 There is also module [optimize]. It's intention is to simplify given
 (badly-written) grammar to eliminate extreme cases like
 
-"cho('a')" ( == 'a')
+  "cho('a')" ( == 'a')
 
 or
 
-"seq(seq('a', 'b', 'c'), 'd', 'e')" ( == seq('a', 'b', 'c', 'd', 'e'))
+  "seq(seq('a', 'b', 'c'), 'd', 'e')" ( == seq('a', 'b', 'c', 'd', 'e'))
 
 or
 
-"is_not(is_not('a'))" ( == 'a')
+  "is_not(is_not('a'))" ( == 'a')
 
 It is not complete, not trivial and my measurements for my (well-written)
 grammars shows it makes changes very seldom and changes have
 negligible performance effect. So I'm not developing it at this point.
 
 
-There is also grammars like [==[ ]==] lua "long" quotes that
-cannot be natively parsed at the moment. (In [lua_code_formatter]
-they are matched by specific function which is ok as long as
+There is also grammars Lua "long" quotes like ([==[ ]==]) that
+cannot be natively parsed at the moment. (In the Lua code formatter
+they are matched by specific function. That's okay as long as
 text in quotes does not contain another subgrammar to parse.)
-
-I'm planning to implement ability to access currently parsed
-part in functions.
 
 --
 2017-02-07

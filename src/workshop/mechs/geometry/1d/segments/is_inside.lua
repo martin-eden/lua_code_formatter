@@ -1,8 +1,18 @@
+-- Check that one segment is inside the other segment
+
+--[[
+  Author: Martin Eden
+  Last mod.: 2026-11-19
+]]
+
 return
   function(seg_outer, seg_inner)
-    local seg_inner_finish = seg_inner.start + seg_inner.len
-    local seg_outer_finish = seg_outer.start + seg_outer.len
     return
-      (seg_inner.start >= seg_outer.start) and
-      (seg_inner_finish <= seg_outer_finish)
+      (seg_inner[1] >= seg_outer[1]) and
+      (seg_inner[1] + seg_inner[2] <= seg_outer[1] + seg_outer[2])
   end
+
+--[[
+  2017
+  2026-11-19
+]]

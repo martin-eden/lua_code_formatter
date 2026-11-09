@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-09-14
+  Last mod.: 2026-11-16
 ]]
 
 --[[
@@ -56,7 +56,7 @@ return
 
     local _, result_type_code, result_code = os_execute(shell_command)
 
-    local Result =
+    local result =
       {
         result_code = result_code,
         is_aborted = get_is_aborted(result_type_code),
@@ -67,7 +67,7 @@ return
     os_remove(output_filename)
     os_remove(error_filename)
 
-    return (Result.result_code == 0), Result
+    return (result.result_code == 0), result
   end
 
 --[[

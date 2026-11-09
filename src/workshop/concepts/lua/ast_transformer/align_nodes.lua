@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-31
+  Last mod.: 2026-11-09
 ]]
 
 --[[
@@ -15,42 +15,42 @@
 
 local align_nodes
 align_nodes =
-  function(Parent, index)
-    local Node = Parent[index]
+  function(parent, index)
+    local node = parent[index]
 
-    if not is_table(Node) then return end
+    if not is_table(node) then return end
 
-    for subnode_index in ipairs(Node) do
-      align_nodes(Node, subnode_index)
+    for subnode_index in ipairs(node) do
+      align_nodes(node, subnode_index)
     end
 
-    if (#Node == 1) and is_string(Node[1]) then
-      Node.value = Node[1]
-      Node[1] = nil
+    if (#node == 1) and is_string(node[1]) then
+      node.value = node[1]
+      node[1] = nil
     end
 
-    if (Node.type == 'assign_or_call') then
-      if (Node[1].type == 'function_call') then
-        Node = Node[1]
+    if (node.type == 'assign_or_call') then
+      if (node[1].type == 'function_call') then
+        node = node[1]
       else
-        Node.type = 'assignment'
+        node.type = 'assignment'
       end
-    elseif (Node.type == 'var_or_call') then
-      if (Node[#Node].type == 'func_args') then
-        Node.type = 'function_call'
+    elseif (node.type == 'var_or_call') then
+      if (node[#node].type == 'func_args') then
+        node.type = 'function_call'
       else
-        Node.type = 'var_ref'
+        node.type = 'var_ref'
       end
-    elseif (Node.type == 'local_statement') then
-      if (Node[1].type == 'named_function') then
-        Node[1].type = 'local_named_function'
+    elseif (node.type == 'local_statement') then
+      if (node[1].type == 'named_function') then
+        node[1].type = 'local_named_function'
       else
-        Node[1].type = 'local_assignment'
+        node[1].type = 'local_assignment'
       end
-      Node = Node[1]
+      node = node[1]
     end
 
-    Parent[index] = Node
+    parent[index] = node
   end
 
 -- Export:

@@ -2,15 +2,15 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-09-14
+  Last mod.: 2026-11-14
 ]]
 
+local space = request('!.concepts.ascii.chars').space
 local list_to_string = request('!.concepts.list.to_string')
 
--- Export:
 return
-  function(Words)
-    return list_to_string(Words, ' ')
+  function(words)
+    return list_to_string(words, space)
   end
 
 --[[

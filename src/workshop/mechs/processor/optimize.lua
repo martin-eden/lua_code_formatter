@@ -7,14 +7,9 @@
 
 --[[
   We're inlining lone children into parents trying to get
-  "saturated" record with following structure:
-
-    --+---------+--+---------+--+----------+--
-      +-| opt |-+  `-| rep |-'  `-| name |-'
-      `-| neg |-'
+  "saturated" record.
 ]]
 
--- local to_str = request('!.convert.table_to_str')
 local assembly_order = request('!.mechs.graph.assembly_order')
 
 local get_num_refs =
@@ -50,24 +45,25 @@ local modes_are_compatible =
     return (not mode_a and not mode_b) or (mode_a == mode_b)
   end
 
+local tbl_remove = table.remove
+local tbl_insert = table.insert
+
 return
   function(grammar)
-    -- print('Source grammar:')
-    -- print(to_str(grammar))
-
     local embed =
       function(parent, child_key, node)
         parent.name = parent.name or node.name
         parent.op = parent.op or node.op
         parent.f_rep = parent.f_rep or node.f_rep
-        table.remove(parent, child_key)
+        tbl_remove(parent, child_key)
         for j = #node, 1, -1 do
-          table.insert(parent, child_key, node[j])
+          tbl_insert(parent, child_key, node[j])
         end
       end
 
     :: restart ::
-    local node_recs, node_order = assembly_order(grammar, {table_iterator = pairs})
+    local node_recs, node_order =
+      assembly_order(grammar, { table_iterator = pairs })
     for i = 1, #node_order do
       local node = node_order[i]
       -- If is rule node:
@@ -100,9 +96,6 @@ return
         end
       end
     end
-
-    -- print('Optimized grammar:')
-    -- print(to_str(grammar))
   end
 
 --[[

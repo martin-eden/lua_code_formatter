@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-09-14
+  Last mod.: 2026-11-09
 ]]
 
 --[[
@@ -26,7 +26,6 @@ local quote_regexp = request('!.lua.regexp.quote')
 local str_find = string.find
 local add_to_list = request('!.concepts.list.add_item')
 
--- Export:
 return
   function(str, delimiter)
     assert_string(str)
@@ -42,28 +41,21 @@ return
       str = str .. delimiter
     end
 
-    local Result = { }
-
     local item_capture = '(.-)' .. quote_regexp(delimiter) .. '()'
-
-    local start_pos
+    local start_pos = 1
     local end_pos
     local item_str
-
-    start_pos = 1
+    local result = { }
 
     while true do
       start_pos, end_pos, item_str =
         str_find(str, item_capture, start_pos)
-
       if not start_pos then break end
-
-      add_to_list(Result, item_str)
-
+      add_to_list(result, item_str)
       start_pos = end_pos + 1
     end
 
-    return Result
+    return result
   end
 
 --[[

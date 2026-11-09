@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-09-14
+  Last mod.: 2026-11-09
 ]]
 
 --[[
@@ -12,8 +12,8 @@
 
   Output
 
-    1 [?s] -- Shebang line (nil if not present)
-    2 [s] -- String without shebang line
+    1 [?s] -- shebang line (nil if not present)
+    2 [s] -- string without shebang line
 ]]
 
 --[[
@@ -24,13 +24,12 @@
 ]]
 
 local shebang_prefix = '#!'
-local newline = request('!.concepts.Ascii.Chars').newline
+local newline = request('!.concepts.ascii.chars').newline
 
 local starts_with = request('!.string.starts_with')
 local str_find = string.find
 local str_sub = string.sub
 
--- Export:
 return
   function(str)
     assert_string(str)

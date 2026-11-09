@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-08-28
+  Last mod.: 2026-11-09
 ]]
 
 --[[
@@ -38,17 +38,17 @@ do
     end
 end
 
-local TypeNames = request('!.concepts.lua.TypeNames')
-local NumberTypeNames = request('!.concepts.lua.NumberTypeNames')
+local type_names = request('!.concepts.lua.type_names')
+local number_type_names = request('!.concepts.lua.number_type_names')
 
 -- Export:
 return
   function()
-    for _, type_name in ipairs(TypeNames) do
+    for _, type_name in ipairs(type_names) do
       _G['is_' .. type_name] = type_is(type_name)
     end
 
-    for _, number_type_name in ipairs(NumberTypeNames) do
+    for _, number_type_name in ipairs(number_type_names) do
       _G['is_' .. number_type_name] = number_is(number_type_name)
     end
   end

@@ -1,6 +1,11 @@
 -- Generate final structure for parser
 
 --[[
+  Author: Martin Eden
+  Last mod.: 2026-11-12
+]]
+
+--[[
   This module takes almost-ready structure and finalizes it
   by resolving links.
 ]]
@@ -9,7 +14,7 @@ local pass_graph = request('!.mechs.graph.dfs')
 
 local is_producer =
   function(node)
-    return node.inner_name
+    return is_string(node.inner_name)
   end
 
 local ref_pattern = '^%>(%a[%a%d_]*)$' -- Sample: >dig_base_10
@@ -68,37 +73,28 @@ local resolve_links =
 
 return
   function(node, producers, consumers)
-    local producers = producers or {}
-    local consumers = consumers or {}
-    pass_graph(
-      node,
-      {
-        handle_discovery =
-          function(node, node_rec, deep)
-            if is_producer(node) then
-              add_producer(node, producers)
-            end
-            if is_consumer(node) then
-              add_consumer(node, consumers)
-            end
-          end,
-      }
-    )
+    local producers = producers or { }
+    local consumers = consumers or { }
+    local handle_discovery =
+      function(node, node_rec, deep)
+        if is_producer(node) then
+          add_producer(node, producers)
+        end
+        if is_consumer(node) then
+          add_consumer(node, consumers)
+        end
+      end
+    local handle_leave =
+      function(node, node_rec, deep)
+        if node.inner_name then
+          node.inner_name = nil
+        end
+      end
+    pass_graph(node, { handle_discovery = handle_discovery })
     for k, v in pairs(consumers) do
       if resolve_links(v, producers) then
         consumers[k] = nil
       end
     end
-
-    pass_graph(
-      node,
-      {
-        handle_leave =
-          function(node, node_rec, deep)
-            if node.inner_name then
-              node.inner_name = nil
-            end
-          end,
-      }
-    )
+    pass_graph(node, { handle_leave = handle_leave })
   end

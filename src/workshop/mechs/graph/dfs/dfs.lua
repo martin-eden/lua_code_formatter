@@ -1,19 +1,22 @@
 -- DFS-pass of given graph
 
--- Last mod.: 2024-11-24
+--[[
+  Author: Martin Eden
+  Last mod.: 2026-11-12
+]]
 
 return
-  function(self, graph)
-    self.nodes_status = {}
+  function(me, graph)
+    me.nodes_status = { }
 
-    local handle_discovery = self.handle_discovery
-    local handle_leave = self.handle_leave
-    local nodes_status = self.nodes_status
-    local get_children = self.get_children
+    local handle_discovery = me.handle_discovery
+    local handle_leave = me.handle_leave
+    local nodes_status = me.nodes_status
+    local get_children = me.get_children
 
     local init_node_rec =
       function(node)
-        nodes_status[node] = nodes_status[node] or {node = node}
+        nodes_status[node] = nodes_status[node] or { node = node }
       end
 
     local time = 0
@@ -24,8 +27,8 @@ return
       function(parent, parent_key, node, depth)
         init_node_rec(node)
         local node_rec = nodes_status[node]
-        node_rec.refs = node_rec.refs or {}
-        node_rec.refs[parent] = node_rec.refs[parent] or {}
+        node_rec.refs = node_rec.refs or { }
+        node_rec.refs[parent] = node_rec.refs[parent] or { }
         node_rec.refs[parent][parent_key] = true
         if not node_rec.color then
           node_rec.parent = parent
@@ -44,7 +47,7 @@ return
         node_rec.discovery_time = time
         node_rec.color = 'gray'
         handle_discovery(node, node_rec, depth)
-        for _, child in ipairs(self:get_children(node)) do
+        for _, child in ipairs(me:get_children(node)) do
           process(node, child.key, child.value, depth)
         end
         time = time + 1

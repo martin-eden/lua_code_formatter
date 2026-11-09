@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-27
+  Last mod.: 2026-11-09
 ]]
 
 --[[
@@ -40,18 +40,18 @@ local cho = handy.cho
 local opt = handy.opt
 local opt_rep = handy.opt_rep
 
-local Name = request('^.words.name')
-local BracketExpr = request('^.wrappers.bracket_expr')
-local DotName = { name = 'dot_name', '.', Name }
-local ColonName = request('^.wrappers.colon_name')
+local name = request('^.words.name')
+local bracket_expr = request('^.wrappers.bracket_expr')
+local dot_name = { name = 'dot_name', '.', name }
+local colon_name = request('^.wrappers.colon_name')
 
-local FuncArgs
+local func_args
 do
   local expr_list = request('^.wrappers.expr_list')
   local type_string = request('^.type_string')
   local type_table = request('^.type_table')
 
-  FuncArgs =
+  func_args =
     {
       name = 'func_args',
       cho(
@@ -65,14 +65,14 @@ end
 return
   {
     name = 'var_or_call',
-    cho(Name, { name = 'par_expr', '(', '>expression', ')' }),
+    cho(name, { name = 'par_expr', '(', '>expression', ')' }),
     opt_rep(
       cho(
-        BracketExpr,
-        DotName,
+        bracket_expr,
+        dot_name,
         {
-          opt(ColonName),
-          FuncArgs,
+          opt(colon_name),
+          func_args,
         }
       )
     ),

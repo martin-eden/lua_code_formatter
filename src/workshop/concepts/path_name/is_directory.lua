@@ -2,21 +2,20 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-08-29
+  Last mod.: 2026-11-11
 ]]
 
 local self_dir
 local upper_dir
 do
-  local Syntels = request('Syntels')
-  self_dir = Syntels.self_dir
-  upper_dir = Syntels.upper_dir
+  local syntels = request('syntels')
+  self_dir = syntels.self_dir
+  upper_dir = syntels.upper_dir
 end
 
--- Export:
 return
-  function(Pathname)
-    local last_node = Pathname[#Pathname]
+  function(pathname)
+    local last_node = pathname[#pathname]
 
     return
       (last_node == '') or

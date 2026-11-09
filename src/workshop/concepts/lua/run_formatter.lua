@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-31
+  Last mod.: 2026-11-12
 ]]
 
 --[[
@@ -10,13 +10,13 @@
   formatted code.
 ]]
 
-local FormatterClass = request('Formatter.Interface')
+local formatter_class = request('formatter.interface')
 
 return
-  function(Ast, Options)
-    local Formatter = FormatterClass.create(Options)
-    Formatter:ProcessNode(Ast)
-    return Formatter[2]:GetText()
+  function(ast, options)
+    local formatter = formatter_class.create(options)
+    formatter:process_node(ast)
+    return formatter[1]:get_text()
   end
 
 --[[

@@ -1,8 +1,8 @@
--- Apply values from another table to our table
+-- Apply values to table A from table B following list of rules
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-08-28
+  Last mod.: 2026-11-10
 ]]
 
 --[[
@@ -11,106 +11,84 @@
     List of records with following structure
 
     {
-      has_a [b] -- value A is present
-      has_b [b] -- value B is present
-      action [s] -- action to apply for item in A
-        keep -- keep value in A
+      1 [b] -- value A is present
+      2 [b] -- value B is present
+      3 [s] -- action to apply for item in A
         replace -- replace value in A
         remove -- remove value in A
     }
 ]]
 
-local keep_str = 'keep'
 local replace_str = 'replace'
 local remove_str = 'remove'
 
---[[
-  Return action name considering given inputs and set of rules
+local assert_rule =
+  function(rule)
+    local action = rule[3]
 
-  If there is no rule for given condition then keep current value.
---]]
-local get_action =
-  function(has_a, has_b, Rules)
-    for _, Rule in ipairs(Rules) do
-      if (Rule.has_a == has_a) and (Rule.has_b == has_b) then
-        return Rule.action
-      end
+    if
+      is_boolean(rule[1]) and
+      is_boolean(rule[2]) and
+      (
+        (action == replace_str) or
+        (action == remove_str)
+      )
+    then
+      return
     end
 
-    return keep_str
+    error('Unsupported rule.')
   end
 
--- Apply values to table A from table B following list of rules
 local apply_table
 apply_table =
-  function(A, B, Rules)
-    local Keys = { }
+  function(a, b, rule)
+    local keys = { }
     do
-      for a_key in pairs(A) do
-        Keys[a_key] = true
+      for a_key in pairs(a) do
+        keys[a_key] = true
       end
-
-      for b_key in pairs(B) do
-        Keys[b_key] = true
+      for b_key in pairs(b) do
+        keys[b_key] = true
       end
     end
 
-    for key in pairs(Keys) do
-      local a_key = A[key]
-      local b_key = B[key]
+    for key in pairs(keys) do
+      local a_key = a[key]
+      local b_key = b[key]
 
       if is_table(a_key) and is_table(b_key) then
-        apply_table(a_key, b_key, Rules)
+        apply_table(a_key, b_key, rule)
       else
         local has_a = not is_nil(a_key)
         local has_b = not is_nil(b_key)
 
-        local action = get_action(has_a, has_b, Rules)
+        local action
+        if (rule[1] == has_a) and (rule[2] == has_b) then
+          action = rule[3]
+        end
 
-        if (action == keep_str) then
-          ;
-        elseif (action == replace_str) then
-          A[key] = B[key]
+        if (action == replace_str) then
+          a[key] = b[key]
         elseif (action == remove_str) then
-          A[key] = nil
+          a[key] = nil
         end
       end
     end
   end
 
-local check_rule =
-  function(Rule)
-    local has_a = is_boolean(Rule.has_a)
-    local has_b = is_boolean(Rule.has_b)
-
-    local action = Rule.action
-    local is_known_action =
-      (action == keep_str) or
-      (action == replace_str) or
-      (action == remove_str)
-
-    return has_a and has_b and is_known_action
-  end
-
 -- Export:
 return
-  function(A, B, Rules)
-    assert_table(A)
-    assert_table(B)
-    assert_table(Rules)
+  function(a, b, rule)
+    assert_table(a)
+    assert_table(b)
+    assert_table(rule)
+    assert_rule(rule)
 
-    assert(A ~= B)
-
-    -- Assert rules
-    for index, Rule in ipairs(Rules) do
-      if not check_rule(Rule) then
-        error('Unsupported rule.')
-      end
-    end
-
-    apply_table(A, B, Rules)
+    apply_table(a, b, rule)
   end
 
 --[[
   2026 # # #
+  2026-11-10
 ]]

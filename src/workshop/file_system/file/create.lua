@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-02
+  Last mod.: 2026-11-16
 ]]
 
 local get_dir_name = request('!.concepts.path_name.get_host_dir_str')
@@ -10,7 +10,6 @@ local mkdir = request('!.file_system.directory.create')
 local open_file = request('open')
 local close_file = request('close')
 
--- Export:
 return
   function(pathname, contents)
     assert_string(pathname)
@@ -18,9 +17,9 @@ return
 
     mkdir(get_dir_name(pathname))
 
-    local File = open_file(pathname, 'wb')
-    File:write(contents)
-    close_file(File)
+    local file = open_file(pathname, 'wb')
+    file:write(contents)
+    close_file(file)
   end
 
 --[[

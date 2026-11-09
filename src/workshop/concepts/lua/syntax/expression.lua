@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-27
+  Last mod.: 2026-11-09
 ]]
 
 --[[
@@ -22,19 +22,19 @@ local handy = request('!.mechs.processor.handy')
 local opt_rep = handy.opt_rep
 local cho = handy.cho
 
-local Vararg = request('words.vararg')
-local Type_Table = request('type_table')
-local Type_Function
+local vararg = request('words.vararg')
+local type_table = request('type_table')
+local type_function
 do
   local function_body = request('statements.function_body')
-  Type_Function = { name = 'type_function', 'function', function_body }
+  type_function = { name = 'type_function', 'function', function_body }
 end
-local RefOrCall = request('qualifiers.var_or_call')
+local ref_or_call = request('qualifiers.var_or_call')
 
-local UnaryOperator =
+local unary_operator =
   { name = 'un_op', cho('-', '#', '~', 'not') }
 
-local BinaryOperator =
+local binary_operator =
   {
     name = 'bin_op',
     cho(
@@ -62,29 +62,29 @@ local BinaryOperator =
     ),
   }
 
-local TokensAccessor = request('!.concepts.lua.TokensAccessor')
+local tokens_accessor = request('!.concepts.lua.tokens_accessor')
 
-local Type_Nil = { name = 'nil', 'nil' }
-local Type_Boolean = { name = 'boolean', cho('false', 'true') }
-local Type_Number = { name = 'number', TokensAccessor.IsNumber }
-local Type_String = request('type_string')
+local type_nil = { name = 'nil', 'nil' }
+local type_boolean = { name = 'boolean', cho('false', 'true') }
+local type_number = { name = 'number', tokens_accessor.is_number }
+local type_string = request('type_string')
 
 return
   {
     name = 'expression',
     inner_name = 'expression',
-    opt_rep(UnaryOperator),
+    opt_rep(unary_operator),
     cho(
-      RefOrCall,
-      Vararg,
-      Type_Nil,
-      Type_Boolean,
-      Type_Number,
-      Type_String,
-      Type_Table,
-      Type_Function
+      ref_or_call,
+      vararg,
+      type_nil,
+      type_boolean,
+      type_number,
+      type_string,
+      type_table,
+      type_function
     ),
-    opt_rep(BinaryOperator, '>expression')
+    opt_rep(binary_operator, '>expression')
   }
 
 --[[

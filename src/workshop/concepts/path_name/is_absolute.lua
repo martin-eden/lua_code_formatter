@@ -2,12 +2,12 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-08-29
+  Last mod.: 2026-11-11
 ]]
 
 return
-  function(Pathname)
-    return (Pathname[1] == '')
+  function(pathname)
+    return (pathname[1] == '')
   end
 
 --[[

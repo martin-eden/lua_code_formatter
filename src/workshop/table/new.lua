@@ -2,24 +2,23 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-08-28
+  Last mod.: 2026-11-10
 ]]
 
 local clone = request('clone')
 local patch = request('patch')
 
--- Export:
 return
-  function(Base, Overrides)
-    assert_table(Base)
+  function(base, overrides)
+    assert_table(base)
 
-    local Result = clone(Base)
+    local result = clone(base)
 
-    if is_table(Overrides) then
-      patch(Result, Overrides)
+    if overrides then
+      patch(result, overrides)
     end
 
-    return Result
+    return result
   end
 
 --[[

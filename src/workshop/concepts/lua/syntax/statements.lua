@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-30
+  Last mod.: 2026-11-09
 ]]
 
 --[[
@@ -33,40 +33,40 @@ local opt = handy.opt
 local opt_rep = handy.opt_rep
 local cho = handy.cho
 
-local AssignOrCall
+local assign_or_call
 do
-  local RefOrCall = request('qualifiers.var_or_call')
+  local ref_or_call = request('qualifiers.var_or_call')
   local expr_list = request('wrappers.expr_list')
 
-  AssignOrCall =
+  assign_or_call =
     {
       name = 'assign_or_call',
-      RefOrCall,
+      ref_or_call,
       opt(
-        opt_rep(',', RefOrCall),
+        opt_rep(',', ref_or_call),
         '=',
         expr_list
       ),
     }
 end
 
-local NamedFunction = request('statements.named_function')
+local named_function = request('statements.named_function')
 
-local Name = request('words.name')
+local name = request('words.name')
 
-local EmptyStatement = { name = 'empty_statement', ';' }
-local LabelStatement = { name = 'label_statement', '::', Name, '::' }
-local GotoStatement = { name = 'goto_statement', 'goto', Name }
-local BreakStatement = { name = 'break_statement', 'break' }
+local empty_statement = { name = 'empty_statement', ';' }
+local label_statement = { name = 'label_statement', '::', name, '::' }
+local goto_statement = { name = 'goto_statement', 'goto', name }
+local break_statement = { name = 'break_statement', 'break' }
 
 local name_list = request('wrappers.name_list')
 local expr_list = request('wrappers.expr_list')
 
-local attribute = { name = 'attribute', '<', Name, '>' }
+local attribute = { name = 'attribute', '<', name, '>' }
 
 local attr_name_list
 do
-  local attr_name = { name = 'attr_name', Name, opt(attribute) }
+  local attr_name = { name = 'attr_name', name, opt(attribute) }
   local list = request('!.mechs.processor.handy').list
 
   attr_name_list =
@@ -77,30 +77,30 @@ do
     }
 end
 
-local LocalStatement =
+local local_statement =
   {
     name = 'local_statement',
     'local',
     cho(
       { name = 'local_assignment', attr_name_list, opt('=', expr_list) },
-      NamedFunction
+      named_function
     ),
   }
 
-local GlobalStatement =
+local global_statement =
   {
     name = 'global_statement',
     'global',
     cho(
       { attr_name_list, opt('=', expr_list) },
-      NamedFunction,
+      named_function,
       { name = 'global_all', opt(attribute), '*' }
     ),
   }
 
-local DoBlock = { name = 'do_block', 'do', '>statements', 'end' }
+local do_block = { name = 'do_block', 'do', '>statements', 'end' }
 
-local IfBlock =
+local if_block =
   {
     name = 'if_block',
     { name = 'if_part', 'if', '>expression', 'then', '>statements' },
@@ -114,29 +114,29 @@ local IfBlock =
     'end',
   }
 
-local WhileBlock =
+local while_block =
   {
     name = 'while_block',
     'while', '>expression', 'do', '>statements', 'end'
   }
 
-local RepeatBlock =
+local repeat_block =
   {
     name = 'repeat_block',
     'repeat', '>statements', 'until', '>expression'
   }
 
-local GenericForBlock =
+local generic_for_block =
   {
     name = 'generic_for_block',
     'for', name_list, 'in', expr_list, 'do', '>statements', 'end'
   }
 
-local NumericForBlock =
+local numeric_for_block =
   {
     name = 'numeric_for_block',
     'for',
-    Name,
+    name,
     '=',
     '>expression',
     ',',
@@ -147,10 +147,10 @@ local NumericForBlock =
     'end',
   }
 
-local ReturnStatement =
+local return_statement =
   {
     name = 'return_statement',
-    'return', opt(expr_list), opt(EmptyStatement)
+    'return', opt(expr_list), opt(empty_statement)
   }
 
 return
@@ -159,26 +159,26 @@ return
     inner_name = 'statements',
     opt_rep(
       cho(
-        AssignOrCall,
-        NamedFunction,
+        assign_or_call,
+        named_function,
 
-        EmptyStatement,
-        LabelStatement,
-        GotoStatement,
-        BreakStatement,
+        empty_statement,
+        label_statement,
+        goto_statement,
+        break_statement,
 
-        LocalStatement,
-        GlobalStatement,
+        local_statement,
+        global_statement,
 
-        DoBlock,
-        IfBlock,
-        WhileBlock,
-        RepeatBlock,
-        GenericForBlock,
-        NumericForBlock
+        do_block,
+        if_block,
+        while_block,
+        repeat_block,
+        generic_for_block,
+        numeric_for_block
       )
     ),
-    opt(ReturnStatement),
+    opt(return_statement),
   }
 
 --[[

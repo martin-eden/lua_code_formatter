@@ -100,7 +100,7 @@ Repository contains
 #### From command-line
 
 ```
-$ lua reformat.lua
+$ reformat_lua
 Reformat Lua 5.5 code.
 
 Usage:   f_in   f_out
@@ -126,7 +126,7 @@ do
   local lua_code_str = 'do return end' -- < fill it
 
   require('workshop.base')
-  local reformat = request('!.lua.code.reformat')
+  local reformat = request('!.lua.reformat_code')
 
   return reformat(lua_code_str)
 end

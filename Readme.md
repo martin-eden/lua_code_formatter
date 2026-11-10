@@ -9,7 +9,7 @@
       <table>
         <tr>
           <th>Updated</th>
-          <td>2026-11-01</td>
+          <td>2026-11-15</td>
         </tr>
         <tr>
           <th>Created</th>
@@ -57,7 +57,7 @@
 ### Historical note
 
 Initial version was relased in 2018. In 2026 I returned to this project
-and did following chnages:
+and did following changes:
 
   * No comments
 
@@ -71,13 +71,11 @@ and did following chnages:
 
     Tool is positioned as machine-level code viewer.
 
-    So no matter how bad and dirty is source code, it will reduce
-    it to some canonic form.
-
-    Back side is that it will make code that you like look worse.
+    Same code with good and with bad formatting will converge to one
+    result.
 
 Feel free to tweak formatting routines to your taste but keep in mind
-that visual niceness is not in flight plan.
+that visual niceness is not in the flight plan.
 
 
 ## Shipment
@@ -100,7 +98,7 @@ Repository contains
 #### From command-line
 
 ```
-$ lua reformat.lua
+$ reformat_lua
 Reformat Lua 5.5 code.
 
 Usage:   f_in   f_out
@@ -113,7 +111,7 @@ Usage:   f_in   f_out
   --indent=<str>        Use given string as indent chunk.
   --right-margin=<int>  Right margin.
 
--- Martin, 2026-10
+-- Martin, 2026-11
 ```
 
 #### From Lua interpreter
@@ -126,7 +124,7 @@ do
   local lua_code_str = 'do return end' -- < fill it
 
   require('workshop.base')
-  local reformat = request('!.lua.code.reformat')
+  local reformat = request('!.lua.reformat_code')
 
   return reformat(lua_code_str)
 end
@@ -147,10 +145,10 @@ reformat(
 )
 ```
 
-| Parameter      | Default | Description                          |
-| -------------- | :-----: | ------------------------------------ |
-| `indent_chunk` | ` ` ` ` | String used for building one indent. |
-| `right_margin` | 72      | Maximum line length with indent.     |
+| Parameter      | Description                          |
+| -------------- | ------------------------------------ |
+| `indent_chunk` | String used for building one indent. |
+| `right_margin` | Maximum line length with indent.     |
 
 
 ### Changing formatting logic

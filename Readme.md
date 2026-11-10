@@ -71,13 +71,11 @@ and did following changes:
 
     Tool is positioned as machine-level code viewer.
 
-    So no matter how bad and dirty is source code, it will reduce
-    it to some canonic form.
-
-    Back side is that it will make code that you like look worse.
+    Same code with good and with bad formatting will converge to one
+    result.
 
 Feel free to tweak formatting routines to your taste but keep in mind
-that visual niceness is not in flight plan.
+that visual niceness is not in the flight plan.
 
 
 ## Shipment

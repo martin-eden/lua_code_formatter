@@ -4,7 +4,7 @@
 
 #
 # Author: Martin Eden
-# Last mod.: 2026-10-31
+# Last mod.: 2026-11-16
 #
 
 #
@@ -39,13 +39,13 @@ rm -r deploy/
 cd ../builder
 
 # Combine all Lua code
-./meld ../src/ reformat > ../deploy/reformat_lua.melded.lua
+./meld ../src/ reformat ../deploy/reformat_lua.melded.lua
 
 # Using that half-baked program to reformat and strip comments from itself
 lua ../deploy/reformat_lua.melded.lua \
   ../deploy/reformat_lua.melded.lua \
   ../deploy/reformat_lua.melded.stripped.lua \
-  --right-margin=64
+  --right-margin=68
 rm ../deploy/reformat_lua.melded.lua
 
 # Add shebang

@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-15
+  Last mod.: 2026-11-16
 ]]
 
 require('workshop.base')
@@ -24,52 +24,36 @@ Usage:   f_in   f_out
 -- Martin, 2026-11
 ]]
 
-local get_params
+local input_file_name
+local output_file_name
+local indent_chunk
+local right_margin
 do
-  local command_line_processor_class =
-    request('!.mechs.command_line_processor.interface')
-
-  get_params =
-    function()
-      command_line_processor = new(command_line_processor_class)
-      command_line_processor.allowed_params =
-        {
-          { name = 'input_file_name', type = 'string' },
-          { name = 'output_file_name', type = 'string' },
-          { name = 'indent', type = 'key_str' },
-          { name = 'right-margin', type = 'key_int' },
-        }
-
-      local params = command_line_processor:run(_G.arg)
-
-      return
-        {
-          input_file_name = params.input_file_name,
-          output_file_name = params.output_file_name,
-          right_margin = params['right-margin'],
-          indent_chunk = params.indent,
-        }
-    end
+  local parse_command_line = request('!.mechs.parse_command_line')
+  local default_indent_chunk = '  '
+  local default_right_margin = 72
+  local args = parse_command_line(_G.arg)
+  input_file_name = args[1]
+  output_file_name = args[2]
+  indent_chunk = args['indent'] or default_indent_chunk
+  right_margin = tonumber(args['right-margin']) or default_right_margin
+  if
+    not (
+      input_file_name and
+      output_file_name and
+      indent_chunk and
+      right_margin
+    )
+  then
+    print(usage_text)
+    return
+  end
 end
 
 local file_to_str = request('!.convert.file_to_str')
-local file_from_str = request('!.convert.file_from_str')
 local str_format = string.format
 local reformat = request('!.lua.reformat_code')
-
-local default_indent_chunk = '  '
-local default_right_margin = 72
-
-local params = get_params()
-local input_file_name = params.input_file_name
-local output_file_name = params.output_file_name
-local indent_chunk = params.indent_chunk or default_indent_chunk
-local right_margin = params.right_margin or default_right_margin
-
-if not (input_file_name and output_file_name) then
-  print(usage_text)
-  return
-end
+local file_from_str = request('!.convert.file_from_str')
 
 print('( Lua code reformatter')
 local input_code_str = file_to_str(input_file_name)

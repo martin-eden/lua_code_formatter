@@ -9,7 +9,7 @@
       <table>
         <tr>
           <th>Updated</th>
-          <td>2026-11-15</td>
+          <td>2026-11-19</td>
         </tr>
         <tr>
           <th>Created</th>
@@ -21,7 +21,7 @@
         </tr>
         <tr>
           <th>Code size</th>
-          <td>&lt; 150 K</td>
+          <td>&lt; 140 K</td>
         </tr>
         <tr>
           <th>💾</th>
@@ -156,16 +156,19 @@ reformat(
 First, general workflow of this formatter:
 
 1. Load `.lua` file as string.
-2. Parse that string to tree in table.
-3. Change nodes of that tree to make it easier to handle in formatting
-  routines.
-4. Run formatting routines for all nodes in tree. Formatting routines
-  output to virtual printer.
+2. Parse that string to tree.
+3. Change nodes of that tree to make it easier to handle
+  in formatting routines.
+4. Run formatting routines for all nodes in the tree.
+  Formatting routines write to virtual printer.
 5. Write contents of virtual printer to file.
 
 We are at point `4`. Start tinkering from something simple but usable
 as "repeat" block handling:
 `workshop/concepts/lua/formatter/handlers/statements/blocks/repeat_block.lua`
+
+I've tried my best (again) to make code clear. Parsing, processing and
+serializing source code of programming language is not trivial.
 
 
 ### See also

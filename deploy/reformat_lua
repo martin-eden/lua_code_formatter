@@ -794,47 +794,8 @@ package.preload[
           add_to_list(dest_list, node[i])
         end
         local result =
-          {
-            type = 'assignment',
-            dest_list = dest_list,
-            val_list = node[#node],
-          }
+          { type = 'assignment', dest_list, node[#node] }
         replace(node, result)
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.ast_transformer.handlers.attr_name_list'
-] =
-  function(...)
-    local tbl_remove = table.remove
-    return
-      function(node)
-        if (node[1].type == 'attribute') then
-          node.list_attr = node[1]
-          tbl_remove(node, 1)
-        end
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.ast_transformer.handlers.else_part'
-] =
-  function(...)
-    return
-      function(node)
-        node.body = node[1]
-        node[1] = nil
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.ast_transformer.handlers.elseif_part'
-] =
-  function(...)
-    return
-      function(node)
-        node.condition = node[1]
-        node[1] = nil
-        node.body = node[2]
-        node[2] = nil
       end
   end
 package.preload[
@@ -849,19 +810,17 @@ package.preload[
         local i = 1
         local num_items = #node
         local term = { }
-        if (node[i].type == 'un_op') then
-          local un_ops = { }
-          while (node[i].type == 'un_op') and (i <= num_items) do
-            add_to_list(un_ops, node[i].value)
-            i = i + 1
-          end
-          term.un_ops = un_ops
+        local un_ops = { }
+        while (i <= num_items) and (node[i].type == 'un_op') do
+          add_to_list(un_ops, node[i].value)
+          i = i + 1
         end
-        term.operand = node[i]
+        term[1] = un_ops
+        term[2] = node[i]
         node[i] = nil
         i = i + 1
         if (i < num_items) and (node[i].type == 'bin_op') then
-          term.bin_op = node[i].value
+          term[3] = node[i].value
           i = i + 1
         end
         add_to_list(result, term)
@@ -901,93 +860,9 @@ package.preload[
             seek_pos = seek_pos + 1
           end
           result =
-            {
-              type = 'function_call',
-              name_part = name_part,
-              args = node[seek_pos],
-            }
+            { type = 'function_call', name_part, node[seek_pos] }
         end
         replace(node, result)
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.ast_transformer.handlers.function_params'
-] =
-  function(...)
-    local add_to_list = request('!.concepts.list.add_item')
-    local replace = request('!.table.replace')
-    return
-      function(node)
-        local result = { type = node.type }
-        if node[1] then
-          if (node[1].type == 'name_list') then
-            for _, name_rec in ipairs(node[1]) do
-              add_to_list(result, name_rec)
-            end
-          else
-            add_to_list(result, node[1])
-          end
-        end
-        if node[2] then
-          add_to_list(result, node[2])
-        end
-        result = new(result)
-        replace(node, result)
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.ast_transformer.handlers.generic_for_block'
-] =
-  function(...)
-    return
-      function(node)
-        node.names = node[1]
-        node[1] = nil
-        node.expr_list = node[2]
-        node[2] = nil
-        node.body = node[3]
-        node[3] = nil
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.ast_transformer.handlers.if_block'
-] =
-  function(...)
-    return
-      function(node)
-        node.if_part = node[1]
-        node[1] = nil
-        local seek_pos = 2
-        local elseif_parts = { }
-        while
-          node[seek_pos] and (node[seek_pos].type == 'elseif_part')
-        do
-          elseif_parts[#elseif_parts + 1] = node[seek_pos]
-          node[seek_pos] = nil
-          seek_pos = seek_pos + 1
-        end
-        if next(elseif_parts) then
-          node.elseif_parts = elseif_parts
-        end
-        if
-          node[seek_pos] and (node[seek_pos].type == 'else_part')
-        then
-          node.else_part = node[seek_pos]
-          node[seek_pos] = nil
-          seek_pos = seek_pos + 1
-        end
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.ast_transformer.handlers.if_part'
-] =
-  function(...)
-    return
-      function(node)
-        node.condition = node[1]
-        node[1] = nil
-        node.body = node[2]
-        node[2] = nil
       end
   end
 package.preload[
@@ -996,137 +871,11 @@ package.preload[
   function(...)
     return
       {
-        ['attr_name_list'] = request('attr_name_list'),
         ['assignment'] = request('assignment'),
-        ['else_part'] = request('else_part'),
-        ['elseif_part'] = request('elseif_part'),
         ['expression'] = request('expression'),
         ['function_call'] = request('function_call'),
-        ['function_params'] = request('function_params'),
-        ['generic_for_block'] = request('generic_for_block'),
-        ['if_block'] = request('if_block'),
-        ['if_part'] = request('if_part'),
-        ['key_val'] = request('key_val'),
-        ['local_assignment'] = request('local_assignment'),
-        ['local_named_function'] = request('local_named_function'),
-        ['named_function'] = request('named_function'),
-        ['numeric_for_block'] = request('numeric_for_block'),
-        ['repeat_block'] = request('repeat_block'),
-        ['type_function'] = request('type_function'),
         ['var_ref'] = request('var_ref'),
-        ['while_block'] = request('while_block'),
       }
-  end
-package.preload[
-  'workshop.concepts.lua.ast_transformer.handlers.key_val'
-] =
-  function(...)
-    return
-      function(node)
-        if (#node == 2) then
-          node.key = node[1]
-          node.value = node[2]
-          node[2] = nil
-        else
-          node.value = node[1]
-        end
-        node[1] = nil
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.ast_transformer.handlers.local_assignment'
-] =
-  function(...)
-    return
-      function(node)
-        node.name_list = node[1]
-        node[1] = nil
-        node.val_list = node[2]
-        node[2] = nil
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.ast_transformer.handlers.local_named_function'
-] =
-  function(...)
-    return
-      function(node)
-        node.dotted_name = node[1]
-        node[1] = nil
-        node.params = node[2]
-        node[2] = nil
-        node.body = node[3]
-        node[3] = nil
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.ast_transformer.handlers.named_function'
-] =
-  function(...)
-    return
-      function(node)
-        node.dotted_name = node[1]
-        node[1] = nil
-        local seek_pos = 2
-        if (node[seek_pos].type == 'colon_name') then
-          node.colon_name = node[seek_pos]
-          node[seek_pos] = nil
-          seek_pos = seek_pos + 1
-        end
-        node.params = node[seek_pos]
-        node[seek_pos] = nil
-        seek_pos = seek_pos + 1
-        node.body = node[seek_pos]
-        node[seek_pos] = nil
-        seek_pos = seek_pos + 1
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.ast_transformer.handlers.numeric_for_block'
-] =
-  function(...)
-    return
-      function(node)
-        node.index = node[1]
-        node[1] = nil
-        node.start_val = node[2]
-        node[2] = nil
-        node.end_val = node[3]
-        node[3] = nil
-        local seek_pos = 4
-        if (node[seek_pos].type == 'expression') then
-          node.increment = node[seek_pos]
-          node[seek_pos] = nil
-          seek_pos = seek_pos + 1
-        end
-        node.body = node[seek_pos]
-        node[seek_pos] = nil
-        seek_pos = seek_pos + 1
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.ast_transformer.handlers.repeat_block'
-] =
-  function(...)
-    return
-      function(node)
-        node.body = node[1]
-        node[1] = nil
-        node.condition = node[2]
-        node[2] = nil
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.ast_transformer.handlers.type_function'
-] =
-  function(...)
-    return
-      function(node)
-        node.params = node[1]
-        node[1] = nil
-        node.body = node[2]
-        node[2] = nil
-      end
   end
 package.preload[
   'workshop.concepts.lua.ast_transformer.handlers.var_ref'
@@ -1137,11 +886,11 @@ package.preload[
     return
       function(node)
         local result
-        local name_part
+        local name_parts
         local seek_pos = 0
         while true do
           if (seek_pos < #node) then
-            name_part = { result }
+            name_parts = { result }
             seek_pos = seek_pos + 1
           else
             break
@@ -1150,15 +899,12 @@ package.preload[
             (seek_pos <= #node) and
             (node[seek_pos].type ~= 'func_args')
           do
-            add_to_list(name_part, node[seek_pos])
+            add_to_list(name_parts, node[seek_pos])
             seek_pos = seek_pos + 1
           end
-          name_part.type = 'name_parts'
-          local args
-          if node[seek_pos] then
-            args = node[seek_pos]
-          end
-          result = { name_part = name_part, args = args }
+          name_parts.type = 'name_parts'
+          local args = node[seek_pos]
+          result = { name_parts, args }
           if args then
             result.type = 'function_call'
           else
@@ -1166,18 +912,6 @@ package.preload[
           end
         end
         replace(node, result)
-      end
-  end
-package.preload[
-  'workshop.concepts.lua.ast_transformer.handlers.while_block'
-] =
-  function(...)
-    return
-      function(node)
-        node.condition = node[1]
-        node[1] = nil
-        node.body = node[2]
-        node[2] = nil
       end
   end
 package.preload['workshop.concepts.lua.formatter.interface'] =
@@ -1467,24 +1201,22 @@ package.preload[
     local represent_operand_oneline =
       function(me, node)
         local printer = me[1]
-        if node.un_ops then
-          local cur_un_op, prev_un_op
-          for _, cur_un_op in ipairs(node.un_ops) do
-            if (prev_un_op == '-') and (cur_un_op == '-') then
-              printer:add_to_curline(' -')
-            elseif (cur_un_op == 'not') then
-              printer:add_to_curline('not ')
-            else
-              printer:add_to_curline(cur_un_op)
-            end
-            prev_un_op = cur_un_op
+        local cur_un_op, prev_un_op
+        for _, cur_un_op in ipairs(node[1]) do
+          if (prev_un_op == '-') and (cur_un_op == '-') then
+            printer:add_to_curline(' -')
+          elseif (cur_un_op == 'not') then
+            printer:add_to_curline('not ')
+          else
+            printer:add_to_curline(cur_un_op)
           end
+          prev_un_op = cur_un_op
         end
-        if not me:process_node(node.operand) then
+        if not me:process_node(node[2]) then
           return
         end
-        if node.bin_op then
-          printer:add_to_curline(' ' .. node.bin_op .. ' ')
+        if node[3] then
+          printer:add_to_curline(' ' .. node[3] .. ' ')
         end
         return true
       end
@@ -1512,7 +1244,7 @@ package.preload[
           if not represent_operand_oneline(me, node) then
             return
           end
-          if line_wrap_op[node.bin_op] then
+          if line_wrap_op[node[3]] then
             me[1]:request_clean_line()
           end
           return true
@@ -1569,6 +1301,7 @@ package.preload[
         ['repeat_block'] = request('statements.blocks.repeat_block'),
         ['while_block'] = request('statements.blocks.while_block'),
         ['attr_name'] = request('wrappers.attr_name'),
+        ['attr_names'] = request('wrappers.expr_list'),
         ['attr_name_list'] = request('wrappers.attr_name_list'),
         ['attribute'] = request('wrappers.attribute'),
         ['bracket_expr'] = request('wrappers.bracket_expr'),
@@ -1613,9 +1346,7 @@ package.preload[
   function(...)
     return
       function(me, node)
-        return
-          me:process_node(node.name_part) and
-          me:process_node(node.args)
+        return me:process_node(node[1]) and me:process_node(node[2])
       end
   end
 package.preload[
@@ -1643,60 +1374,68 @@ package.preload[
   'workshop.concepts.lua.formatter.handlers.expressions.table'
 ] =
   function(...)
-    local oneliner =
-      function(me, node)
-        local printer = me[1]
-        printer:add_to_curline('{ ')
-        for idx, key_val in ipairs(node) do
-          if (idx > 1) then
-            printer:add_to_curline(', ')
-          end
-          local key = key_val.key
-          if key then
-            if not me:process_node(key) then
-              return
-            end
-            printer:add_to_curline(' = ')
-          end
-          if not me:process_node(key_val.value) then
-            return
-          end
+    local get_key_val =
+      function(rec)
+        if (#rec == 2) then
+          return rec[1], rec[2]
+        elseif (#rec == 1) then
+          return nil, rec[1]
         end
-        printer:add_to_curline(' }')
-        return true
-      end
-    local multiliner =
-      function(me, node)
-        local printer = me[1]
-        printer:request_clean_line()
-        printer:add_to_curline('{')
-        printer:inc_indent()
-        for _, key_val in ipairs(node) do
-          printer:request_clean_line()
-          local key, value = key_val.key, key_val.value
-          if key then
-            if not me:process_node(key) then
-              return
-            end
-            printer:add_to_curline(' = ')
-            if not me:process_block(value) then
-              return
-            end
-            printer:add_to_textline(',')
-          else
-            if not me:process_node(value) then
-              return
-            end
-            printer:add_to_textline(',')
-          end
-        end
-        printer:dec_indent()
-        printer:request_clean_line()
-        printer:add_to_curline('}')
-        return true
       end
     return
       function(me, node)
+        local oneliner =
+          function(me, node)
+            local printer = me[1]
+            printer:add_to_curline('{ ')
+            for idx, key_val in ipairs(node) do
+              local key, value = get_key_val(key_val)
+              if (idx > 1) then
+                printer:add_to_curline(', ')
+              end
+              if key then
+                if not me:process_node(key) then
+                  return
+                end
+                printer:add_to_curline(' = ')
+              end
+              if not me:process_node(value) then
+                return
+              end
+            end
+            printer:add_to_curline(' }')
+            return true
+          end
+        local multiliner =
+          function(me, node)
+            local printer = me[1]
+            printer:request_clean_line()
+            printer:add_to_curline('{')
+            printer:inc_indent()
+            for _, key_val in ipairs(node) do
+              local key, value = get_key_val(key_val)
+              printer:request_clean_line()
+              if key then
+                if not me:process_node(key) then
+                  return
+                end
+                printer:add_to_curline(' = ')
+                if not me:process_block(value) then
+                  return
+                end
+                printer:add_to_textline(',')
+              else
+                if not me:process_node(value) then
+                  return
+                end
+                printer:add_to_textline(',')
+              end
+            end
+            printer:dec_indent()
+            printer:request_clean_line()
+            printer:add_to_curline('}')
+            return true
+          end
         if (#node == 0) then
           me[1]:add_to_curline('{ }')
           return true
@@ -1711,13 +1450,15 @@ package.preload[
   function(...)
     local multiliner =
       function(me, node)
+        local params = node[1]
+        local body = node[2]
         me[1]:request_clean_line()
         me[1]:add_to_curline('function')
-        if not me:process_node(node.params) then
+        if not me:process_node(params) then
           return
         end
         me[1]:request_clean_line()
-        return me:process_block_multiline(nil, node.body, 'end')
+        return me:process_block_multiline(nil, body, 'end')
       end
     return
       function(me, node)
@@ -1730,7 +1471,7 @@ package.preload[
   function(...)
     return
       function(me, node)
-        return me:process_node(node.name_part)
+        return me:process_node(node[1])
       end
   end
 package.preload[
@@ -1739,14 +1480,11 @@ package.preload[
   function(...)
     return
       function(me, node)
-        if not me:process_node(node.dest_list) then
+        if not me:process_node(node[1]) then
           return
         end
-        if node.val_list then
-          me[1]:add_to_textline(' = ')
-          return me:process_block(node.val_list)
-        end
-        return true
+        me[1]:add_to_textline(' = ')
+        return me:process_block(node[2])
       end
   end
 package.preload[
@@ -1809,13 +1547,15 @@ package.preload[
   function(...)
     return
       function(me, node)
+        local name_list = node[1]
+        local val_list = node[2]
         me[1]:add_to_curline('local ')
-        if not me:process_block(node.name_list) then
+        if not me:process_block(name_list) then
           return
         end
-        if node.val_list then
+        if val_list then
           me[1]:add_to_textline(' = ')
-          return me:process_block(node.val_list)
+          return me:process_block(val_list)
         end
         return true
       end
@@ -1860,11 +1600,11 @@ package.preload[
     local header_oneline =
       function(me, node)
         me[1]:add_to_curline('for ')
-        if not me:process_node(node.names) then
+        if not me:process_node(node[1]) then
           return
         end
         me[1]:add_to_curline(' in ')
-        if not me:process_node(node.expr_list) then
+        if not me:process_node(node[2]) then
           return
         end
         me[1]:add_to_curline(' do')
@@ -1873,13 +1613,13 @@ package.preload[
     local in_part_oneline =
       function(me, node)
         me[1]:add_to_curline(' in ')
-        return me:process_node(node.expr_list)
+        return me:process_node(node[2])
       end
     local in_part_multiline =
       function(me, node)
         me[1]:add_to_textline(' in')
         me[1]:request_clean_line()
-        return me:process_block(node.expr_list)
+        return me:process_block(node[2])
       end
     local header_multiline =
       function(me, node)
@@ -1887,7 +1627,7 @@ package.preload[
         printer:add_to_curline('for')
         printer:request_clean_line()
         printer:inc_indent()
-        if not me:process_node(node.names) then
+        if not me:process_node(node[1]) then
           return
         end
         if
@@ -1909,7 +1649,7 @@ package.preload[
           return
         end
         me[1]:request_clean_line()
-        if not me:process_block(node.body) then
+        if not me:process_block(node[3]) then
           return
         end
         me[1]:request_clean_line()
@@ -1944,44 +1684,31 @@ package.preload[
     return
       function(me, node)
         local printer = me[1]
-        printer:request_clean_line()
-        if
-          not me:variate(
-            node.if_part.condition, oneline_if, multiline_if
-          )
-        then
-          return
-        end
-        printer:request_clean_line()
-        if not me:process_block(node.if_part.body) then
-          return
-        end
-        if node.elseif_parts then
-          for _, elseif_part in ipairs(node.elseif_parts) do
-            printer:request_clean_line()
+        for i, clause in ipairs(node) do
+          printer:request_clean_line()
+          if (clause.type == 'else_part') then
             if
-              not me:variate(
-                elseif_part.condition,
-                oneline_elseif,
-                multiline_elseif
-              )
+              not me:process_block_multiline('else', clause[1])
             then
               return
             end
-            printer:request_clean_line()
-            if not me:process_block(elseif_part.body) then
+          else
+            local oneliner
+            local multiliner
+            if (i == 1) then
+              oneliner = oneline_if
+              multiliner = multiline_if
+            else
+              oneliner = oneline_elseif
+              multiliner = multiline_elseif
+            end
+            if not me:variate(clause[1], oneliner, multiliner) then
               return
             end
-          end
-        end
-        if node.else_part then
-          printer:request_clean_line()
-          if
-            not me:process_block_multiline(
-              'else', node.else_part.body
-            )
-          then
-            return
+            printer:request_clean_line()
+            if not me:process_block(clause[2]) then
+              return
+            end
           end
         end
         printer:request_clean_line()
@@ -1996,18 +1723,19 @@ package.preload[
     return
       function(me, node)
         local printer = me[1]
+        local dotted_name = node[1]
+        local params = node[2]
+        local body = node[3]
         printer:request_clean_line()
         printer:add_to_curline('local function ')
-        if not me:process_node(node.dotted_name) then
+        if not me:process_node(dotted_name) then
           return
         end
-        if not me:process_node(node.params) then
+        if not me:process_node(params) then
           return
         end
         printer:request_clean_line()
-        if
-          not me:process_block_multiline(nil, node.body, 'end')
-        then
+        if not me:process_block_multiline(nil, body, 'end') then
           return
         end
         printer:request_clean_line()
@@ -2021,23 +1749,35 @@ package.preload[
     return
       function(me, node)
         local printer = me[1]
+        local dotted_name = node[1]
+        local colon_name
+        local params
+        local body
+        do
+          local seek_pos = 2
+          if (node[seek_pos].type == 'colon_name') then
+            colon_name = node[seek_pos]
+            seek_pos = seek_pos + 1
+          end
+          params = node[seek_pos]
+          seek_pos = seek_pos + 1
+          body = node[seek_pos]
+        end
         printer:request_clean_line()
         printer:add_to_curline('function ')
-        if not me:process_node(node.dotted_name) then
+        if not me:process_node(dotted_name) then
           return
         end
-        if node.colon_name then
-          if not me:process_node(node.colon_name) then
+        if colon_name then
+          if not me:process_node(colon_name) then
             return
           end
         end
-        if not me:process_node(node.params) then
+        if not me:process_node(params) then
           return
         end
         printer:request_clean_line()
-        if
-          not me:process_block_multiline(nil, node.body, 'end')
-        then
+        if not me:process_block_multiline(nil, body, 'end') then
           return
         end
         printer:request_clean_line()
@@ -2051,26 +1791,36 @@ package.preload[
     return
       function(me, node)
         local printer = me[1]
+        local has_increment
+        local body
+        do
+          local seek_pos = 4
+          if (node[seek_pos].type == 'expression') then
+            has_increment = true
+            seek_pos = seek_pos + 1
+          end
+          body = node[seek_pos]
+        end
         printer:add_to_curline('for ')
-        if not me:process_node(node.index) then
+        if not me:process_node(node[1]) then
           return
         end
         printer:add_to_curline(' = ')
-        if not me:process_node(node.start_val) then
+        if not me:process_node(node[2]) then
           return
         end
         printer:add_to_curline(', ')
-        if not me:process_node(node.end_val) then
+        if not me:process_node(node[3]) then
           return
         end
-        if node.increment then
+        if has_increment then
           printer:add_to_curline(', ')
-          if not me:process_node(node.increment) then
+          if not me:process_node(node[4]) then
             return
           end
         end
         printer:add_to_curline(' ')
-        return me:process_block_multiline('do', node.body, 'end')
+        return me:process_block_multiline('do', body, 'end')
       end
   end
 package.preload[
@@ -2087,14 +1837,14 @@ package.preload[
       end
     return
       function(me, node)
+        local body = node[1]
+        local condition = node[2]
         if
-          not me:process_block_multiline(
-            'repeat', node.body, 'until'
-          )
+          not me:process_block_multiline('repeat', body, 'until')
         then
           return
         end
-        if not me:variate(node.condition, oneliner, multiliner) then
+        if not me:variate(condition, oneliner, multiliner) then
           return
         end
         return true
@@ -2114,9 +1864,11 @@ package.preload[
       end
     return
       function(me, node)
+        local condition = node[1]
+        local body = node[2]
         return
-          me:variate(node.condition, oneliner, multiliner) and
-          me:process_block_multiline(nil, node.body, 'end')
+          me:variate(condition, oneliner, multiliner) and
+          me:process_block_multiline(nil, body, 'end')
       end
   end
 package.preload[
@@ -2140,11 +1892,17 @@ package.preload[
     local process_expr_list = request('expr_list')
     return
       function(me, node)
-        if node.list_attr then
-          me:process_node(node.list_attr)
+        local names
+        if (node[1].type == 'list_attr') then
+          if not me:process_node(node[1][1]) then
+            return
+          end
           me[1]:add_to_curline(' ')
+          names = node[2]
+        else
+          names = node[1]
         end
-        return process_expr_list(me, node)
+        return process_expr_list(me, names)
       end
   end
 package.preload[
@@ -2467,8 +2225,8 @@ package.preload['workshop.concepts.lua.syntax.statements'] =
       attr_name_list =
         {
           name = 'attr_name_list',
-          opt(attribute),
-          list(attr_name, ','),
+          { name = 'list_attr', opt(attribute) },
+          { name = 'attr_names', list(attr_name, ',') },
         }
     end
     local local_statement =
@@ -2665,15 +2423,20 @@ package.preload[
     local handy = request('!.mechs.processor.handy')
     local opt = handy.opt
     local cho = handy.cho
+    local list = handy.list
     local name = request('^.words.name')
     local named_vararg = { name = 'named_vararg', '...', opt(name) }
-    local names = request('^.wrappers.name_list')
     return
       {
         {
           name = 'function_params',
           '(',
-          opt(cho(named_vararg, { names, opt(',', named_vararg) })),
+          opt(
+            cho(
+              { list(name, ','), opt(',', named_vararg) },
+              named_vararg
+            )
+          ),
           ')',
         },
         '>statements',
@@ -4567,15 +4330,6 @@ package.preload['workshop.table.get_key_vals'] =
         return key_vals
       end
   end
-package.preload['workshop.table.intersect'] =
-  function(...)
-    local rule = { true, false, 'remove' }
-    local apply_table = request('apply_table')
-    return
-      function(a, b)
-        apply_table(a, b, rule)
-      end
-  end
 package.preload['workshop.table.map_values'] =
   function(...)
     return
@@ -4647,14 +4401,14 @@ package.preload['workshop.table.patch'] =
   end
 package.preload['workshop.table.replace'] =
   function(...)
-    local patch = request('patch')
-    local intersect = request('intersect')
-    local merge = request('merge')
     return
       function(origin, replacement)
-        intersect(origin, replacement)
-        patch(origin, replacement)
-        merge(origin, replacement)
+        for k in pairs(origin) do
+          origin[k] = nil
+        end
+        for k, v in pairs(replacement) do
+          origin[k] = v
+        end
       end
   end
 package.preload['workshop.table.ordered_pass.compare_keys'] =

@@ -2,25 +2,26 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-09
+  Last mod.: 2026-11-24
 ]]
 
 --[[
                function_params
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ─ ( ─┬─────────────────────────────────┬─ ) ─ statements ─ word(end) ─
-       ├─ named_vararg ──────────────────┤
-       └─ names ─┬────────────────────┬──┘
-                 └─ , ─ named_vararg ─┘
+       ├─┬─ name ─┬─┬────────────────────┤
+       │ ▲        │ └─ , ─ named_vararg ─┤
+       │ └─ , ────┘                      │
+       └─ named_vararg ──────────────────┘
 ]]
 
 local handy = request('!.mechs.processor.handy')
 local opt = handy.opt
 local cho = handy.cho
+local list = handy.list
 
 local name = request('^.words.name')
 local named_vararg = { name = 'named_vararg', '...', opt(name) }
-local names = request('^.wrappers.name_list')
 
 return
   {
@@ -29,8 +30,8 @@ return
       '(',
       opt(
         cho(
-          named_vararg,
-          { names, opt(',', named_vararg) }
+          { list(name, ','), opt(',', named_vararg) },
+          named_vararg
         )
       ),
       ')',
@@ -42,6 +43,6 @@ return
 --[[
   2016 # #
   2018 #
-  2026 #
-  2026-10-28
+  2026 # #
+  2026-11-24
 ]]

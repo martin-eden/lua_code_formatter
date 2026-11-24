@@ -2,31 +2,38 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-12
+  Last mod.: 2026-11-24
+]]
+
+--[[
+  Node structure
+
+    1+ [t] -- term
+      1 [t] -- unary operators list, may be empty
+      2 [t] -- operand
+      3 [?s] -- binary operator
 ]]
 
 local represent_operand_oneline =
   function(me, node)
     local printer = me[1]
-    if node.un_ops then
-      local cur_un_op, prev_un_op
-      for _, cur_un_op in ipairs(node.un_ops) do
-        if (prev_un_op == '-') and (cur_un_op == '-') then
-          -- Avoiding "-" "-" clash to comment "--"
-          printer:add_to_curline(' -')
-        elseif (cur_un_op == 'not') then
-          printer:add_to_curline('not ')
-        else
-          printer:add_to_curline(cur_un_op)
-        end
-        prev_un_op = cur_un_op
+    local cur_un_op, prev_un_op
+    for _, cur_un_op in ipairs(node[1]) do
+      if (prev_un_op == '-') and (cur_un_op == '-') then
+        -- Avoiding "-" "-" clash to comment "--"
+        printer:add_to_curline(' -')
+      elseif (cur_un_op == 'not') then
+        printer:add_to_curline('not ')
+      else
+        printer:add_to_curline(cur_un_op)
       end
+      prev_un_op = cur_un_op
     end
-    if not me:process_node(node.operand) then
+    if not me:process_node(node[2]) then
       return
     end
-    if node.bin_op then
-      printer:add_to_curline(' ' .. node.bin_op .. ' ')
+    if node[3] then
+      printer:add_to_curline(' ' .. node[3] .. ' ')
     end
     return true
   end
@@ -54,7 +61,7 @@ do
       if not represent_operand_oneline(me, node) then
         return
       end
-      if line_wrap_op[node.bin_op] then
+      if line_wrap_op[node[3]] then
         me[1]:request_clean_line()
       end
       return true

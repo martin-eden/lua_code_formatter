@@ -6,9 +6,11 @@
 ]]
 
 --[[
-  rep <var_ref>
+  Node structure
 
-      <expr_list>
+    1 [t] -- var_ref
+    ?1+ [t] -- var_ref
+    n [t] -- expr_list
 ]]
 
 local add_to_list = request('!.concepts.list.add_item')
@@ -20,18 +22,12 @@ return
     for i = 1, (#node - 1) do
       add_to_list(dest_list, node[i])
     end
-
-    local result =
-      {
-        type = 'assignment',
-        dest_list = dest_list,
-        val_list = node[#node],
-      }
-
+    local result = { type = 'assignment', dest_list, node[#node] }
     replace(node, result)
   end
 
 --[[
   2018 #
-  2026-10-31
+  2026 #
+  2026-11-24
 ]]

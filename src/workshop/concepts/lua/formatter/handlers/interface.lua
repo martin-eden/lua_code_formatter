@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-12
+  Last mod.: 2026-11-24
 ]]
 
 -- Interface is a map of node type to function
@@ -38,6 +38,7 @@ return
     ['while_block'] = request('statements.blocks.while_block'),
 
     ['attr_name'] = request('wrappers.attr_name'),
+    ['attr_names'] = request('wrappers.expr_list'),
     ['attr_name_list'] = request('wrappers.attr_name_list'),
     ['attribute'] = request('wrappers.attribute'),
     ['bracket_expr'] = request('wrappers.bracket_expr'),

@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-12
+  Last mod.: 2026-11-24
 ]]
 
 --[[
@@ -24,15 +24,8 @@
 
     {
       type = 'expression',
-      {
-        operand = { type = 'number', value = '42' },
-        bin_op = '+',
-        un_ops = { '-' },
-      },
-      {
-        operand = { type = 'number', value = '42' },
-        un_ops = { '-' },
-      },
+      { { '-' }, { type = 'number', value = '42' }, '+' },
+      { { '-' }, { type = 'number', value = '42' } },
     }
 
 ]]
@@ -50,21 +43,19 @@ return
 
     local term = { }
 
-    if (node[i].type == 'un_op') then
-      local un_ops = { }
-      while (node[i].type == 'un_op') and (i <= num_items) do
-        add_to_list(un_ops, node[i].value)
-        i = i + 1
-      end
-      term.un_ops = un_ops
+    local un_ops = { }
+    while (i <= num_items) and (node[i].type == 'un_op') do
+      add_to_list(un_ops, node[i].value)
+      i = i + 1
     end
+    term[1] = un_ops
 
-    term.operand = node[i]
+    term[2] = node[i]
     node[i] = nil
     i = i + 1
 
     if (i < num_items) and (node[i].type == 'bin_op') then
-      term.bin_op = node[i].value
+      term[3] = node[i].value
       i = i + 1
     end
 
@@ -87,5 +78,6 @@ return
 
 --[[
   2018 # #
-  2026-10-23
+  2026 #
+  2026-11-24
 ]]

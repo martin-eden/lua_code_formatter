@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-09
+  Last mod.: 2026-11-24
 ]]
 
 --[[
@@ -19,7 +19,7 @@
   end in <func_args>. We wrap subparts with <func_args> as <function_call>
   and fold them.
 
-  In my opinion, this is the most complex code in preprocessor facility.
+  In my opinion, this is the most complex code in preformatter facility.
 
   result:
 
@@ -41,12 +41,12 @@ local replace = request('!.table.replace')
 return
   function(node)
     local result
-    local name_part
+    local name_parts
     local seek_pos = 0
 
     while true do
       if (seek_pos < #node) then
-        name_part = { result }
+        name_parts = { result }
         seek_pos = seek_pos + 1
       else
         break
@@ -56,20 +56,13 @@ return
         (seek_pos <= #node) and
         (node[seek_pos].type ~= 'func_args')
       do
-        add_to_list(name_part, node[seek_pos])
+        add_to_list(name_parts, node[seek_pos])
         seek_pos = seek_pos + 1
       end
-      name_part.type = 'name_parts'
+      name_parts.type = 'name_parts'
 
-      local args
-      if node[seek_pos] then
-        args = node[seek_pos]
-      end
-      result =
-        {
-          name_part = name_part,
-          args = args,
-        }
+      local args = node[seek_pos]
+      result = { name_parts, args }
       if args then
         result.type = 'function_call'
       else

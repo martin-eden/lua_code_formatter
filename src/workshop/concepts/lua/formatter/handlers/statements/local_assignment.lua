@@ -2,18 +2,20 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-12
+  Last mod.: 2026-11-24
 ]]
 
 return
   function(me, node)
+    local name_list = node[1]
+    local val_list = node[2]
     me[1]:add_to_curline('local ')
-    if not me:process_block(node.name_list) then
+    if not me:process_block(name_list) then
       return
     end
-    if node.val_list then
+    if val_list then
       me[1]:add_to_textline(' = ')
-      return me:process_block(node.val_list)
+      return me:process_block(val_list)
     end
     return true
   end

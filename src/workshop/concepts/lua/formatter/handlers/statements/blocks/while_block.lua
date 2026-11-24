@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-16
+  Last mod.: 2026-11-24
 ]]
 
 local oneliner =
@@ -17,9 +17,11 @@ local multiliner =
 
 return
   function(me, node)
+    local condition = node[1]
+    local body = node[2]
     return
-      me:variate(node.condition, oneliner, multiliner) and
-      me:process_block_multiline(nil, node.body, 'end')
+      me:variate(condition, oneliner, multiliner) and
+      me:process_block_multiline(nil, body, 'end')
   end
 
 --[[

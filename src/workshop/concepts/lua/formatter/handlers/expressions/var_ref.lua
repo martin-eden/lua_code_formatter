@@ -2,12 +2,12 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-09
+  Last mod.: 2026-11-24
 ]]
 
 return
   function(me, node)
-    return me:process_node(node.name_part)
+    return me:process_node(node[1])
   end
 
 --[[

@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-10-31
+  Last mod.: 2026-11-24
 ]]
 
 --[[
@@ -54,12 +54,7 @@ return
         seek_pos = seek_pos + 1
       end
 
-      result =
-        {
-          type = 'function_call',
-          name_part = name_part,
-          args = node[seek_pos],
-        }
+      result = { type = 'function_call', name_part, node[seek_pos] }
     end
 
     replace(node, result)

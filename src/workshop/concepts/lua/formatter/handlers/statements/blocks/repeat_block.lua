@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-11
+  Last mod.: 2026-11-24
 ]]
 
 local oneliner =
@@ -17,11 +17,14 @@ local multiliner =
 
 return
   function(me, node)
-    if not me:process_block_multiline('repeat', node.body, 'until') then
+    local body = node[1]
+    local condition = node[2]
+
+    if not me:process_block_multiline('repeat', body, 'until') then
       return
     end
 
-    if not me:variate(node.condition, oneliner, multiliner) then
+    if not me:variate(condition, oneliner, multiliner) then
       return
     end
 

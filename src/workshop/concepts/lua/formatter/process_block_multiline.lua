@@ -2,7 +2,7 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-12
+  Last mod.: 2026-11-21
 ]]
 
 return
@@ -14,9 +14,11 @@ return
     end
 
     printer:request_clean_line()
+
     local result = me:process_block(node, opt_handler)
 
     printer:request_clean_line()
+
     if postfix then
       printer:add_to_curline(postfix)
     end

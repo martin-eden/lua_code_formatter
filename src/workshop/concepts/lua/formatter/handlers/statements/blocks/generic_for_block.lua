@@ -2,60 +2,45 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-12
+  Last mod.: 2026-11-24
 ]]
 
 --[[
-  Layout:
+  Node structure
 
-    for <names> in <expr_list> do
+    1 [t] -- name_list
+    2 [t] -- expr_list
+    3 [t] -- statements
 ]]
+
 local header_oneline =
   function(me, node)
     me[1]:add_to_curline('for ')
-    if not me:process_node(node.names) then
+    if not me:process_node(node[1]) then
       return
     end
     me[1]:add_to_curline(' in ')
-    if not me:process_node(node.expr_list) then
+    if not me:process_node(node[2]) then
       return
     end
     me[1]:add_to_curline(' do')
     return true
   end
 
---[[
-  Layout:
-
-    [...] in <expr_list>
-]]
 local in_part_oneline =
   function(me, node)
     me[1]:add_to_curline(' in ')
-    return me:process_node(node.expr_list)
+    return me:process_node(node[2])
   end
 
---[[
-  Layout:
-
-    [...] in
-      <expr_list>
-]]
 local in_part_multiline =
   function(me, node)
     me[1]:add_to_textline(' in')
     me[1]:request_clean_line()
 
-    return me:process_block(node.expr_list)
+    return me:process_block(node[2])
   end
 
---[[
-  Layout:
-
-    for
-      <names><[in_part_oneline() | in_part_multiline()]>
-    do
-]]
 local header_multiline =
   function(me, node)
     local printer = me[1]
@@ -63,7 +48,7 @@ local header_multiline =
 
     printer:request_clean_line()
     printer:inc_indent()
-    if not me:process_node(node.names) then
+    if not me:process_node(node[1]) then
       return
     end
     if not me:variate(node, in_part_oneline, in_part_multiline) then
@@ -77,13 +62,6 @@ local header_multiline =
     return true
   end
 
---[[
-  Layout:
-
-    <[header_oneline() | header_multiline()]>
-      <body>
-    end
-]]
 local multiliner =
   function(me, node)
     me[1]:request_clean_line()
@@ -92,7 +70,7 @@ local multiliner =
     end
 
     me[1]:request_clean_line()
-    if not me:process_block(node.body) then
+    if not me:process_block(node[3]) then
       return
     end
 

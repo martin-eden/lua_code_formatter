@@ -72,8 +72,8 @@ do
   attr_name_list =
     {
       name = 'attr_name_list',
-      opt(attribute),
-      list(attr_name, ','),
+      { name = 'list_attr', opt(attribute) },
+      { name = 'attr_names', list(attr_name, ',') },
     }
 end
 

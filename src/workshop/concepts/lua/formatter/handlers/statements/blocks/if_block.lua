@@ -2,7 +2,19 @@
 
 --[[
   Author: Martin Eden
-  Last mod.: 2026-11-12
+  Last mod.: 2026-11-24
+]]
+
+--[[
+  Node structure
+
+    1+ [t] -- clause
+      type [s] -- one of ( if_part elseif_part else_part)
+      // when not "else_part"
+      1 [t] -- condition (expression)
+      2 [t] -- statements
+      // when "else_part"
+      1 [t] -- statements
 ]]
 
 local oneline_if =
@@ -29,40 +41,32 @@ return
   function(me, node)
     local printer = me[1]
 
-    printer:request_clean_line()
-    if not me:variate(node.if_part.condition, oneline_if, multiline_if) then
-      return
-    end
-
-    printer:request_clean_line()
-    if not me:process_block(node.if_part.body) then
-      return
-    end
-
-    if node.elseif_parts then
-      for _, elseif_part in ipairs(node.elseif_parts) do
-        printer:request_clean_line()
-        if
-          not me:variate(
-            elseif_part.condition,
-            oneline_elseif,
-            multiline_elseif
-          )
-        then
-          return
-        end
-
-        printer:request_clean_line()
-        if not me:process_block(elseif_part.body) then
-          return
-        end
-      end
-    end
-
-    if node.else_part then
+    for i, clause in ipairs(node) do
       printer:request_clean_line()
-      if not me:process_block_multiline('else', node.else_part.body) then
-        return
+
+      if (clause.type == 'else_part') then
+        if not me:process_block_multiline('else', clause[1]) then
+          return
+        end
+      else
+        local oneliner
+        local multiliner
+        if (i == 1) then
+          oneliner = oneline_if
+          multiliner = multiline_if
+        else
+          oneliner = oneline_elseif
+          multiliner = multiline_elseif
+        end
+
+        if not me:variate(clause[1], oneliner, multiliner) then
+          return
+        end
+
+        printer:request_clean_line()
+        if not me:process_block(clause[2]) then
+          return
+        end
       end
     end
 
@@ -75,5 +79,6 @@ return
 --[[
   2016 #
   2017 # # #
-  2026-10-23
+  2026 #
+  2026-11-24
 ]]
